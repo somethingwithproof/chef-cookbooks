@@ -20,14 +20,14 @@ describe file('/vagrant/web/index.html') do
 end
 
 # Verify services
-%w{httpd}.each do |svc|
+%w(httpd).each do |svc|
   describe service(svc) do
     it { should be_running }
   end
 end
 
 # Verify ports
-%w{80 8080}.each do |ports|
+%w(80 8080).each do |ports|
   describe port(ports) do
     it { should be_listening }
   end
