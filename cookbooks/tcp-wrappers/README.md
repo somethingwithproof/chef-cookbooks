@@ -1,6 +1,6 @@
 # tcp_wrappers cookbook - WIP - Supermarket by Feb. 1, 2017
 
-[![Build Status](https://travis-ci.org/thomasvincent/tcp_wrappers-cookbook.svg?branch=master)](http://travis-ci.org/thomasvincent/tcp_wrappers-cookbook) [![Chef cookbook](https://img.shields.io/cookbook/v/chef-sugar.svg)](https://github.com/thomasvincent/tcp_wrappers-cookbook)
+[![Build Status](https://travis-ci.org/thomasvincent/tcp_wrappers-cookbook.svg?branch=master)](http://travis-ci.org/thomasvincent/tcp_wrappers-cookbook) [![Chef cookbook](https://img.shields.io/badge/Cookbook%20Version-0.0.1-blue.svg)](https://github.com/thomasvincent/tcp_wrappers-cookbook)
 
 ### TODO
 
