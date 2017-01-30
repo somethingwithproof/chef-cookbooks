@@ -1,6 +1,6 @@
 # tcp_wrappers cookbook - WIP - Supermarket by Feb. 1, 2017
 
-[![Build Status](https://travis-ci.org/thomasvincent/tcp_wrappers-cookbook.svg?branch=master)](http://travis-ci.org/thomasvincent/tcp_wrappers-cookbook) [![Cookbook Version](https://img.shields.io/cookbook/v/tcp_wrappers-cookbook.svg)](https://github.com/thomasvincent/tcp_wrappers-cookbook)
+[![Build Status](https://travis-ci.org/thomasvincent/tcp_wrappers-cookbook.svg?branch=master)](http://travis-ci.org/thomasvincent/tcp_wrappers-cookbook) [![Chef cookbook](https://img.shields.io/cookbook/v/chef-sugar.svg)](https://github.com/thomasvincent/tcp_wrappers-cookbook)
 
 ### TODO
 
@@ -32,9 +32,9 @@ It also exposes an LWRP for adding and managing tcp_wrappers.
 - None
 
 ## Attributes
-- `node['authorization']['tcp_wrappers']['hosts']` - hosts to enable tcp_wrappers access (default: `[]`)
-- `node['authorization']['tcp_wrappers']['daemons']` - daemons to control via tcp_wrappers by default (default: `[]`)
-- `node['authorization']['tcp_wrappers']['options']` - default options to pass via tcp_wrappers by default (default: `[]`)
+- `node['tcp_wrappers']['hosts']` - hosts to enable tcp_wrappers access (default: `[]`)
+- `node['tcp_wrappers']['daemons']` - daemons to control via tcp_wrappers by default (default: `[]`)
+- `node['tcp_wrappers']['options']` - default options to pass via tcp_wrappers by default (default: `[]`)
 
 ## Usage
 ### Attributes
@@ -60,25 +60,25 @@ Configure a node attribute, `node['tcp_wrappers']['hosts_allow_defaults']` as an
 _Debian_
 
 ```ruby
-node.default['authorization']['tcp_wrappers']['hosts_allow_defaults'] = ['allow_options']
+node.default['tcp_wrappers']['hosts_allow_defaults'] = ['allow_options']
 ```
 
 _Ubuntu 10.04_
 
 ```ruby
-node.default['authorization']['tcp_wrappers']['hosts_allow_defaults'] = ['allow_options']
+node.default['tcp_wrappers']['hosts_allow_defaults'] = ['allow_options']
 ```
 
 _Ubuntu 12.04_
 
 ```ruby
-node.default['authorization']['tcp_wrappers']['hosts_allow_defaults'] = []
+node.default['tcp_wrappers']['hosts_allow_defaults'] = []
 ```
 
 _FreeBSD_
 
 ```ruby
-node.default['authorization']['tcp_wrappers']['hosts_allow_defaults'] = []
+node.default['tcp_wrappers']['hosts_allow_defaults'] = []
 ```
 
 ### LWRP
