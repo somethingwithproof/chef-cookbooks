@@ -1,0 +1,27 @@
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_zero
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: centos-6.8
+  - name: centos-7.3
+  - name: debian-7.11
+  - name: debian-8.6
+  - name: fedora-25
+  - name: opensuse-13.2
+  - name: opensuse-leap-42.2
+  - name: ubuntu-14.04
+  - name: ubuntu-16.04
+
+suites:
+  - name: default
+    run_list: test::default
+  - name: create
+    run_list: test::create
+  - name: remove
+    run_list: test::remove
