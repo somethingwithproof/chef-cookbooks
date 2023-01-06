@@ -1,17 +1,23 @@
-name: Test with Vagrant
-
-on: [push]
-
+name: kitchen
+on: [pull_request]
 jobs:
-  kitchen:
-    runs-on: ubuntu-latest
+  macos:
+    needs: [mdl, yamllint, delivery]
+    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential ruby-dev liblzma-dev
-          gem install bundler
-          bundle install
-      - name: Run Test Kitchen
-        run: KITCHEN_YAML=.kitchen.vagrant.yml kitchen test
+      - name: Check out code
+        uses: actions/checkout@master
+      - name: Install Chef
+        uses: actionshub/chef-install@master
+      - name: Kitchen Converge
+        uses: actionshub/test-kitchen@master
+        env:
+          CHEF_LICENSE: accept-no-persist
+          KITCHEN_LOCAL_YAML: kitchen.yml
+          TERM: xterm-256color
+      - name: Kitchen Verify
+        uses: actionshub/test-kitchen@master
+        env:
+          CHEF_LICENSE: accept-no-persist
+          KITCHEN_LOCAL_YAML: kitchen.yml
+          TERM: xterm-256color
