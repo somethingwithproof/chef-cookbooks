@@ -4,7 +4,7 @@ driver:
   provider: hyperv
 
 provisioner:
-  name: chef_solo
+  name: chef_infra
 
 platforms:
   - name: windows-2019
