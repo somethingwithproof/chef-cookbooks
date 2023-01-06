@@ -1,8 +1,8 @@
-#
 # Cookbook Name:: snmp
 # Attributes:: default
 #
 # Copyright 2010, Eric G. Wolfe
+# Copyright 2023, Thomas Vincent
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
+# Set the SNMP packages to install based on the platform family
 case node['platform_family']
 when 'rhel'
   default['snmp']['packages'] = %w(net-snmp net-snmp-utils)
@@ -28,40 +28,16 @@ else
   default['snmp']['packages'] = %w(net-snmp net-snmp-utils)
 end
 
-# Same on supported platforms:
-# redhat, centos, fedora, scientific, debian, ubuntu
+# Set the SNMP service name to the same value on all supported platforms
 default['snmp']['service'] = 'snmpd'
 
+# Default SNMP community and security names
 default['snmp']['community'] = 'public'
 default['snmp']['sec_name'] = { 'notConfigUser' => %w(default) }
 default['snmp']['sec_name6'] = { 'notConfigUser' => %w(default) }
+
+# Default SNMP groups for v1 and v2c
 default['snmp']['groups']['v1'] = { 'notConfigGroup' => %w(notConfigUser) }
 default['snmp']['groups']['v2c'] = { 'notConfigGroup' => %w(notConfigUser) }
-default['snmp']['syslocationVirtual'] = 'Virtual Server'
-default['snmp']['syslocationPhysical'] = 'Server Room'
-default['snmp']['syscontact'] = 'Root <root@localhost>'
-default['snmp']['full_systemview'] = false
-default['snmp']['trapcommunity'] = 'public'
-default['snmp']['trapsinks'] = []
-default['snmp']['process_monitoring']['proc'] = []
-default['snmp']['process_monitoring']['procfix'] = []
-default['snmp']['disman_events']['enable'] = false
-default['snmp']['disman_events']['user'] = 'disman_events'
-default['snmp']['disman_events']['password'] = 'disman_password'
-default['snmp']['disman_events']['linkUpDownNotifications'] = 'yes'
-default['snmp']['disman_events']['defaultMonitors'] = 'yes'
-default['snmp']['disman_events']['monitors'] = []
-default['snmp']['include_all_disks'] = false
-default['snmp']['all_disk_min'] = 100    # 100K
-default['snmp']['disks'] = []
-default['snmp']['load_average'] = []
-default['snmp']['extend_scripts'] = {}
 
-# Debian default file options
-default['snmp']['snmpd']['mibdirs'] = '/usr/share/snmp/mibs'
-default['snmp']['snmpd']['mibs'] = nil
-default['snmp']['snmpd']['snmpd_run'] = 'yes'
-default['snmp']['snmpd']['snmpd_opts'] = '-Lsd -Lf /dev/null -u snmp -g snmp -I -smux -p /var/run/snmpd.pid'
-default['snmp']['snmpd']['trapd_run'] = 'no'
-default['snmp']['snmpd']['trapd_opts'] = '-Lsd -p /var/run/snmptrapd.pid'
-default['snmp']['snmpd']['snmpd_compat'] = 'yes'
+# Default

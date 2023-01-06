@@ -1,8 +1,8 @@
-#
 # Cookbook Name:: snmp
 # Attributes:: snmptrapd
 #
 # Copyright 2013, Eric G. Wolfe
+# Copyright 2023, Thomas Vincent
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,15 +15,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 # snmptrapd options
 case node['platform_family']
 when 'rhel'
-  default['snmp']['snmptrapd']['service'] = 'snmptrapd'
+  default['snmp']['snmptrapd']['service_name'] = 'snmptrapd'
 else
-  default['snmp']['snmptrapd']['service'] = node['snmp']['service']
+  default['snmp']['snmptrapd']['service_name'] = node['snmp']['service_name']
 end
 default['snmp']['snmptrapd']['traphandle'] = 'default /usr/sbin/snmptthandler'
-default['snmp']['snmptrapd']['disableAuthorization'] = 'yes'
-default['snmp']['snmptrapd']['donotlogtraps'] = 'yes'
+default['snmp']['snmptrapd']['disable_authorization'] = 'yes'
+default['snmp']['snmptrapd']['do_not_log_traps'] = 'yes'

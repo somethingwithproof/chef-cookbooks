@@ -18,3 +18,30 @@
 
 # IDE
 \.idea
+
+# log files
+*.log
+
+# temporary files
+*~
+*.tmp
+
+# test files
+spec/*
+test/*
+features/*
+
+# chef-vault files
+encrypted_data_bag_secret
+
+# kitchen config
+.kitchen
+
+# bundler
+Gemfile.lock
+
+# dotenv
+\.env
+
+# github
+.github

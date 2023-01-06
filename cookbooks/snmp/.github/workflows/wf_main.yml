@@ -1,0 +1,17 @@
+name: Test with Vagrant
+
+on: [push]
+
+jobs:
+  kitchen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential ruby-dev liblzma-dev
+          gem install bundler
+          bundle install
+      - name: Run Test Kitchen
+        run: KITCHEN_YAML=.kitchen.vagrant.yml kitchen test

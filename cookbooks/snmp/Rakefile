@@ -1,40 +1,49 @@
 #!/usr/bin/env rake
 
-# chefspec task against spec/*_spec.rb
-require 'rspec/core/rake_task'
-RSpec::Core::RakeTask.new(:chefspec)
+# Load the necessary gems
+begin
+  require 'chefspec'
+  require 'foodcritic'
+  require 'rubocop'
+  require 'kitchen'
+rescue LoadError
+  puts '>>>>> One or more required gems are missing, please run `bundle install` to install them.'
+end
 
-# foodcritic rake task
-desc 'Foodcritic linter'
+# chefspec task against spec/*_spec.rb
+RSpec::Core::RakeTask.new(:chefspec) do |t|
+  t.pattern = 'spec/**/*_spec.rb'
+end
+
+# foodcritic linter task
+desc 'Run Foodcritic linter'
 task :foodcritic do
   sh 'foodcritic -f correctness .'
 end
 
-# rubocop rake task
-desc 'Ruby style guide linter'
+# rubocop linter task
+desc 'Run RuboCop linter'
 task :rubocop do
   sh 'rubocop --fail-level W'
 end
 
 # test-kitchen task
-begin
-  require 'kitchen/rake_tasks'
-  Kitchen::RakeTasks.new
-rescue LoadError
-  puts '>>>>> Kitchen gem not loaded, omitting tasks' unless ENV['CI']
+desc 'Run Test Kitchen'
+task :test do
+  sh 'kitchen test'
 end
 
 # Deploy task
-desc 'Deploy to chef server and pin to environment'
+desc 'Deploy to the Chef Server and pin to the environment'
 task :deploy do
   sh 'berks upload'
   sh 'berks apply ci'
 end
 
-desc 'erubis format check'
+# erubis syntax check task
+desc 'Check Erubis syntax'
 task :erbcheck do
   sh "erubis -x -T '-' templates/default/*.erb | ruby -c"
 end
 
-# default tasks are quick, commit tests
-task default: %w(foodcritic rubocop chefspec erbcheck)
+#

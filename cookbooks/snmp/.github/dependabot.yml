@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package_manager: bundler
+    directory: '/'
+    schedule:
+      interval: daily
+    open_pull_requests_limit: 50
+    automerge: true
+    allow_major_updates: true
+    allow_rebase: true
+    allow_rebase_on_stable_branch: true
+    allow_rebase_on_tags: true
+    labels:
+      - dependabot
+    ignore:
+      - version: '*'
+        package: 'berkshelf'
+      - version: '*'
+        package: 'chefspec'
+      - version: '*'
+        package: 'foodcritic'

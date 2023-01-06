@@ -1,8 +1,8 @@
-#
 # Cookbook Name:: snmp
 # Attributes:: extendbind
 #
 # Copyright 2012, Eric G. Wolfe
+# Copyright 2023, Thomas Vincent
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,19 +15,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 case node['platform_family']
 when 'rhel'
-  case node['platform_version'].to_i
-  when 5
-    # BIND <= 9.3 stats
+  rhel_version = node['platform_version'].to_i
+  if rhel_version == 5
     default['snmp']['rndc_stats_script'] = 'snmp_rndc_stats.pl'
-  when 6
-    # BIND >= 9.7 stats
+  elsif rhel_version == 6
     default['snmp']['rndc_stats_script'] = 'snmp_rndc_stats_v97.pl'
   end
 else
-  # Else assume we're using BIND 9.7 or newer
   default['snmp']['rndc_stats_script'] = 'snmp_rndc_stats_v97.pl'
 end

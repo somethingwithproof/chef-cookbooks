@@ -1,0 +1,22 @@
+driver:
+name: vagrant
+provider: vmware_desktop
+
+provisioner:
+name: chef_solo
+
+platforms:
+
+name: ubuntu-20.04
+name: centos-8
+name: fedora-32
+suites:
+
+name: default
+run_list:
+recipe[snmp::default]
+verifier:
+name: inspec
+verifier:
+inspec_tests:
+- test/integration/default/inspec
