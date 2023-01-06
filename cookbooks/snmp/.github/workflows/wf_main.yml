@@ -1,14 +1,13 @@
 name: kitchen
-on: [pull_request]
+on: [push, pull_request]
 jobs:
-  macos:
-    needs: [mdl, yamllint, delivery]
-    runs-on: macos-latest
+  kitchen:
+    runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@master
       - name: Install Chef
-        uses: actionshub/chef-install@master
+        uses: actionshub/chef-install@main
       - name: Kitchen Converge
         uses: actionshub/test-kitchen@master
         env:
