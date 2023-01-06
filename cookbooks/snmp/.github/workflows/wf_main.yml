@@ -12,19 +12,13 @@ jobs:
           sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
           sudo apt update && sudo apt install -y vagrant
           vagrant autocomplete install
-      - name: Cache vagrant
-        uses: actions/cache
+      - name: Cache Vagrant boxes
+        uses: actions/cache@v2
         with:
-          path: /usr/bin/vagrant
-          key: virtualbox-install
-      - name: Install VirtualBox
-        run: |
-          sudo apt-get install virtualbox
-      - name: Cache vboxmanage
-        uses: actions/cache
-        with:
-          path: /usr/bin/vboxmanage
-          key: virtualbox-install
+          path: ~/.vagrant.d/boxes
+          key: ${{ runner.os }}-vagrant-${{ hashFiles('Vagrantfile') }}
+          restore-keys: |
+            ${{ runner.os }}-vagrant-
       - name: Install Chef
         uses: actionshub/chef-install@main
       - name: Kitchen Converge
