@@ -15,7 +15,6 @@ jobs:
       - name: Install VirtualBox
         run: |
           sudo apt-get install virtualbox
-          sudo apt-get install virtualbox—ext–pack
       - name: Install Chef
         uses: actionshub/chef-install@main
       - name: Kitchen Converge
