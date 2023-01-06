@@ -15,6 +15,23 @@ jobs:
       - name: Install VirtualBox
         run: |
           sudo apt-get install virtualbox
+      - name: Install Vagrant
+        run: | 
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+          sudo apt update && sudo apt install -y vagrant
+          vagrant autocomplete install
+        cache:
+          key: vagrant-install
+          paths:
+            - /usr/bin/vagrant
+      - name: Install VirtualBox
+        run: |
+          sudo apt-get install virtualbox
+        cache:
+          key: virtualbox-install
+          paths:
+            - /usr/bin/vboxmanage
       - name: Install Chef
         uses: actionshub/chef-install@main
       - name: Kitchen Converge
