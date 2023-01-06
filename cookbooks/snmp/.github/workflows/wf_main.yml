@@ -9,13 +9,13 @@ jobs:
       - name: Install Chef
         uses: actionshub/chef-install@main
       - name: Kitchen Converge
-        uses: actionshub/test-kitchen@master
+        uses: actionshub/test-kitchen@1.0.2
         env:
           CHEF_LICENSE: accept-no-persist
           KITCHEN_LOCAL_YAML: kitchen.yml
           TERM: xterm-256color
       - name: Kitchen Verify
-        uses: actionshub/test-kitchen@master
+        uses: actionshub/test-kitchen@1.0.2
         env:
           CHEF_LICENSE: accept-no-persist
           KITCHEN_LOCAL_YAML: kitchen.yml
