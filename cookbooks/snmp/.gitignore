@@ -9,3 +9,6 @@ Vagrantfile
 
 #IDE
 .idea
+
+.history
+.vscode

@@ -2,6 +2,7 @@
 # Recipe:: default
 #
 # Copyright 2010, Eric G. Wolfe
+# Copyright 2023, Thomas Vincent
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,22 +17,11 @@
 # limitations under the License.
 
 # Install required packages
-node['snmp']['packages'].each do |snmppkg|
-  package snmppkg
-end
-
-# Configure SNMPD
-template '/etc/snmp/snmpd.conf' do
-  mode 00600
-  owner 'root'
-  group 'root'
-  variables(groups: node['snmp']['groups'].keys.uniq)
-  notifies :restart, "service[#{node['snmp']['service']}]"
-end
+package node['snmp']['packages']
 
 # Configure SNMPD service
 template '/etc/default/snmpd' do
-  mode 0644
+  mode '0644'
   owner 'root'
   group 'root'
   only_if { node['platform_family'] == 'debian' }
@@ -39,4 +29,13 @@ end
 
 service node['snmp']['service'] do
   action [:start, :enable]
+end
+
+# Configure SNMPD
+template '/etc/snmp/snmpd.conf' do
+  mode '0600'
+  owner 'root'
+  group 'root'
+  variables(groups: node['snmp']['groups'].keys.uniq)
+  notifies :restart, "service[#{node['snmp']['service']}]"
 end

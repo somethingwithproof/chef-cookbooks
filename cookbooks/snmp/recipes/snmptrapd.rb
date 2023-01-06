@@ -1,8 +1,8 @@
-#
 # Cookbook Name:: snmp
 # Recipe:: snmptrapd
 #
 # Copyright 2013, Eric G. Wolfe
+# Copyright 2023, Thomas Vincent
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,16 +15,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
+# Configure SNMPD to run snmptrapd
 node.set['snmp']['snmpd']['trapd_run'] = 'yes'
 
+# Install SNMPD
 include_recipe 'snmp'
 
+# Configure and enable snmptrapd
 service node['snmp']['snmptrapd']['service'] do
   action [:enable, :start]
 end
 
+# Configure snmptrapd
 template '/etc/snmp/snmptrapd.conf' do
   mode 0644
   owner 'root'
