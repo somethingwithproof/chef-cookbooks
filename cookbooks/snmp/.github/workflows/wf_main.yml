@@ -6,6 +6,10 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@master
+      - name: Install Vagrant
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y vagrant
       - name: Install Chef
         uses: actionshub/chef-install@main
       - name: Kitchen Converge
