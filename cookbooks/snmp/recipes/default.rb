@@ -17,7 +17,18 @@
 # limitations under the License.
 
 # Install required packages
-package node['snmp']['packages']
+case node['platform']
+when 'redhat', 'centos', 'fedora', 'amazon'
+  package 'net-snmp'
+when 'debian', 'ubuntu'
+  package 'snmpd'
+when 'solaris2'
+  package 'SUNWucsnmp'
+when 'aix'
+  package 'net-snmp'
+when 'mac_os_x'
+  package 'net-snmp'
+end
 
 # Configure SNMPD service
 template '/etc/default/snmpd' do
@@ -27,15 +38,41 @@ template '/etc/default/snmpd' do
   only_if { node['platform_family'] == 'debian' }
 end
 
-service node['snmp']['service'] do
+case node['platform']
+when 'redhat', 'centos', 'fedora', 'amazon'
+  service_name = 'snmpd'
+when 'debian', 'ubuntu'
+  service_name = 'snmpd'
+when 'solaris2'
+  service_name = 'svc:/network/snmp/dmi:default'
+when 'aix'
+  service_name = 'snmpd'
+when 'mac_os_x'
+  service_name = 'org.net-snmp.snmpd'
+end
+
+service service_name do
   action [:start, :enable]
 end
 
 # Configure SNMPD
-template '/etc/snmp/snmpd.conf' do
+case node['platform']
+when 'redhat', 'centos', 'fedora', 'amazon'
+  conf_file = '/etc/snmp/snmpd.conf'
+when 'debian', 'ubuntu'
+  conf_file = '/etc/snmp/snmpd.conf'
+when 'solaris2'
+  conf_file = '/etc/sma/snmp/snmpd.conf'
+when 'aix'
+  conf_file = '/etc/snmpd.conf'
+when 'mac_os_x'
+  conf_file = '/usr/local/etc/snmp/snmpd.conf'
+end
+
+template conf_file do
   mode '0600'
   owner 'root'
   group 'root'
   variables(groups: node['snmp']['groups'].keys.uniq)
-  notifies :restart, "service[#{node['snmp']['service']}]"
+  notifies :restart, "service[#{service_name}]"
 end
