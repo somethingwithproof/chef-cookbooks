@@ -9,7 +9,6 @@ platforms:
   - name: ubuntu-20.04
   - name: centos-8
   - name: centos-7
-  - name: windows-2019
 
 suites:
   - name: default
