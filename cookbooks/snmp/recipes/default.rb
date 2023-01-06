@@ -1,4 +1,3 @@
-#
 # Cookbook Name:: snmp
 # Recipe:: default
 #
@@ -15,12 +14,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
+# Install required packages
 node['snmp']['packages'].each do |snmppkg|
   package snmppkg
 end
 
+# Configure SNMPD
+template '/etc/snmp/snmpd.conf' do
+  mode 00600
+  owner 'root'
+  group 'root'
+  variables(groups: node['snmp']['groups'].keys.uniq)
+  notifies :restart, "service[#{node['snmp']['service']}]"
+end
+
+# Configure SNMPD service
 template '/etc/default/snmpd' do
   mode 0644
   owner 'root'
@@ -30,17 +39,4 @@ end
 
 service node['snmp']['service'] do
   action [:start, :enable]
-end
-
-groupnames = []
-node['snmp']['groups']['v1'].each_key { |key| groupnames << key }
-node['snmp']['groups']['v2c'].each_key { |key| groupnames << key }
-groupnames = groupnames.uniq
-
-template '/etc/snmp/snmpd.conf' do
-  mode 00600
-  owner 'root'
-  group 'root'
-  variables(groups: groupnames)
-  notifies :restart, "service[#{node['snmp']['service']}]"
 end
