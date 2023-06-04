@@ -16,21 +16,59 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Install required packages
-case node['platform']
-when 'redhat', 'centos', 'fedora', 'amazon'
-  package 'net-snmp'
-when 'debian', 'ubuntu'
-  package 'snmpd'
-when 'solaris2'
-  package 'SUNWucsnmp'
-when 'aix'
-  package 'net-snmp'
-when 'mac_os_x'
-  package 'net-snmp'
-end
+package_mappings = {
+  redhat: {
+    package: 'net-snmp',
+    service: 'snmpd',
+    conf_file: '/etc/snmp/snmpd.conf'
+  },
+  centos: {
+    package: 'net-snmp',
+    service: 'snmpd',
+    conf_file: '/etc/snmp/snmpd.conf'
+  },
+  fedora: {
+    package: 'net-snmp',
+    service: 'snmpd',
+    conf_file: '/etc/snmp/snmpd.conf'
+  },
+  amazon: {
+    package: 'net-snmp',
+    service: 'snmpd',
+    conf_file: '/etc/snmp/snmpd.conf'
+  },
+  debian: {
+    package: 'snmpd',
+    service: 'snmpd',
+    conf_file: '/etc/snmp/snmpd.conf'
+  },
+  ubuntu: {
+    package: 'snmpd',
+    service: 'snmpd',
+    conf_file: '/etc/snmp/snmpd.conf'
+  },
+  solaris2: {
+    package: 'SUNWucsnmp',
+    service: 'svc:/network/snmp/dmi:default',
+    conf_file: '/etc/sma/snmp/snmpd.conf'
+  },
+  aix: {
+    package: 'net-snmp',
+    service: 'snmpd',
+    conf_file: '/etc/snmpd.conf'
+  },
+  mac_os_x: {
+    package: 'net-snmp',
+    service: 'org.net-snmp.snmpd',
+    conf_file: '/usr/local/etc/snmp/snmpd.conf'
+  }
+}
 
-# Configure SNMPD service
+platform = node['platform'].to_sym
+package_info = package_mappings[platform]
+
+package package_info[:package]
+
 template '/etc/default/snmpd' do
   mode '0644'
   owner 'root'
@@ -38,41 +76,14 @@ template '/etc/default/snmpd' do
   only_if { node['platform_family'] == 'debian' }
 end
 
-case node['platform']
-when 'redhat', 'centos', 'fedora', 'amazon'
-  service_name = 'snmpd'
-when 'debian', 'ubuntu'
-  service_name = 'snmpd'
-when 'solaris2'
-  service_name = 'svc:/network/snmp/dmi:default'
-when 'aix'
-  service_name = 'snmpd'
-when 'mac_os_x'
-  service_name = 'org.net-snmp.snmpd'
-end
-
-service service_name do
+service package_info[:service] do
   action [:start, :enable]
 end
 
-# Configure SNMPD
-case node['platform']
-when 'redhat', 'centos', 'fedora', 'amazon'
-  conf_file = '/etc/snmp/snmpd.conf'
-when 'debian', 'ubuntu'
-  conf_file = '/etc/snmp/snmpd.conf'
-when 'solaris2'
-  conf_file = '/etc/sma/snmp/snmpd.conf'
-when 'aix'
-  conf_file = '/etc/snmpd.conf'
-when 'mac_os_x'
-  conf_file = '/usr/local/etc/snmp/snmpd.conf'
-end
-
-template conf_file do
+template package_info[:conf_file] do
   mode '0600'
   owner 'root'
   group 'root'
   variables(groups: node['snmp']['groups'].keys.uniq)
-  notifies :restart, "service[#{service_name}]"
+  notifies :restart, "service[#{package_info[:service]}]"
 end
