@@ -16,28 +16,43 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Set the SNMP packages to install based on the platform family
-case node['platform_family']
-when 'rhel'
-  default['snmp']['packages'] = %w(net-snmp net-snmp-utils)
-when 'debian'
-  default['snmp']['packages'] = %w(snmp snmpd)
-when 'suse'
-  default['snmp']['packages'] = %w(net-snmp)
-else
-  default['snmp']['packages'] = %w(net-snmp net-snmp-utils)
-end
+default['snmp']['packages'] =
+  case node['platform_family']
+  when 'rhel', 'fedora', 'amazon'
+    %w(net-snmp net-snmp-utils)
+  when 'debian', 'ubuntu'
+    %w(snmp snmpd)
+  when 'suse', 'opensuse'
+    %w(net-snmp)
+  when 'freebsd'
+    %w(net-snmp)
+  when 'mac_os_x', 'mac_os_x_server'
+    %w(net-snmp)
+  when 'solaris2'
+    %w(SUNWucsnmp)
+  when 'aix'
+    %w(net-snmp)
+  else
+    %w(net-snmp net-snmp-utils)
+  end
 
-# Set the SNMP service name to the same value on all supported platforms
-default['snmp']['service'] = 'snmpd'
+default['snmp']['service'] =
+  case node['platform_family']
+  when 'rhel', 'fedora', 'amazon', 'debian', 'ubuntu', 'suse', 'opensuse', 'freebsd', 'mac_os_x', 'mac_os_x_server', 'aix'
+    'snmpd'
+  when 'solaris2'
+    'svc:/network/snmp/dmi:default'
+  end
 
-# Default SNMP community and security names
 default['snmp']['community'] = 'public'
 default['snmp']['sec_name'] = { 'notConfigUser' => %w(default) }
 default['snmp']['sec_name6'] = { 'notConfigUser' => %w(default) }
 
-# Default SNMP groups for v1 and v2c
-default['snmp']['groups']['v1'] = { 'notConfigGroup' => %w(notConfigUser) }
-default['snmp']['groups']['v2c'] = { 'notConfigGroup' => %w(notConfigUser) }
+default['snmp']['groups'] = {
+  'v1' => { 'notConfigGroup' => %w(notConfigUser) },
+  'v2c' => { 'notConfigGroup' => %w(notConfigUser) }
+}
 
-# Default
+default['snmp']['trap']['community'] = 'public'
+default['snmp']['trap']['addresses'] = []
+default['snmp']['trap']['port'] = 162
