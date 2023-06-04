@@ -17,10 +17,10 @@
 # limitations under the License.
 
 # Configure SNMPD to run snmptrapd
-node.set['snmp']['snmpd']['trapd_run'] = 'yes'
+node.default['snmp']['snmpd']['trapd_run'] = 'yes'
 
 # Install SNMPD
-include_recipe 'snmp'
+include_recipe 'snmp::default'
 
 # Configure and enable snmptrapd
 service node['snmp']['snmptrapd']['service'] do
@@ -29,7 +29,7 @@ end
 
 # Configure snmptrapd
 template '/etc/snmp/snmptrapd.conf' do
-  mode 0644
+  mode '0644'
   owner 'root'
   group 'root'
   notifies :restart, "service[#{node['snmp']['snmptrapd']['service']}]"
