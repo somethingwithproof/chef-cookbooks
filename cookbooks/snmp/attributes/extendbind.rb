@@ -16,14 +16,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-case node['platform_family']
-when 'rhel'
-  rhel_version = node['platform_version'].to_i
-  if rhel_version == 5
-    default['snmp']['rndc_stats_script'] = 'snmp_rndc_stats.pl'
-  elsif rhel_version == 6
-    default['snmp']['rndc_stats_script'] = 'snmp_rndc_stats_v97.pl'
-  end
-else
-  default['snmp']['rndc_stats_script'] = 'snmp_rndc_stats_v97.pl'
-end
+# SNMP Cookbook Attributes - extendbind
+# Configures SNMP extended bind statistics script based on RHEL version
+
+# Default script for non-RHEL platforms and RHEL 6 or newer
+default['snmp']['rndc_stats_script'] = 'snmp_rndc_stats_v97.pl'
+
+# Specific script for RHEL 5
+default['snmp']['rndc_stats_script'] = 'snmp_rndc_stats.pl' if node['platform_family'] == 'rhel' && node['platform_version'].to_i == 5
