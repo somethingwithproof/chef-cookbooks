@@ -16,70 +16,64 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# SNMP Cookbook - Default Recipe
+# Installs and configures SNMP service based on platform
+
+# Simplified package mappings using platform_family for broader categorization
 package_mappings = {
-  redhat: {
+  'rhel' => {
     package: 'net-snmp',
     service: 'snmpd',
     conf_file: '/etc/snmp/snmpd.conf'
   },
-  centos: {
-    package: 'net-snmp',
-    service: 'snmpd',
-    conf_file: '/etc/snmp/snmpd.conf'
-  },
-  fedora: {
-    package: 'net-snmp',
-    service: 'snmpd',
-    conf_file: '/etc/snmp/snmpd.conf'
-  },
-  amazon: {
-    package: 'net-snmp',
-    service: 'snmpd',
-    conf_file: '/etc/snmp/snmpd.conf'
-  },
-  debian: {
+  'debian' => {
     package: 'snmpd',
     service: 'snmpd',
     conf_file: '/etc/snmp/snmpd.conf'
   },
-  ubuntu: {
-    package: 'snmpd',
+  'suse' => {
+    package: 'net-snmp',
     service: 'snmpd',
     conf_file: '/etc/snmp/snmpd.conf'
   },
-  solaris2: {
+  'solaris2' => {
     package: 'SUNWucsnmp',
     service: 'svc:/network/snmp/dmi:default',
     conf_file: '/etc/sma/snmp/snmpd.conf'
   },
-  aix: {
+  'aix' => {
     package: 'net-snmp',
     service: 'snmpd',
     conf_file: '/etc/snmpd.conf'
   },
-  mac_os_x: {
+  'mac_os_x' => {
     package: 'net-snmp',
     service: 'org.net-snmp.snmpd',
     conf_file: '/usr/local/etc/snmp/snmpd.conf'
   }
 }
 
-platform = node['platform'].to_sym
-package_info = package_mappings[platform]
+# Retrieve package info based on platform_family
+platform_family = node['platform_family']
+package_info = package_mappings[platform_family]
 
+# Install SNMP package
 package package_info[:package]
 
+# Configure Debian-specific default file
 template '/etc/default/snmpd' do
   mode '0644'
   owner 'root'
   group 'root'
-  only_if { node['platform_family'] == 'debian' }
+  only_if { platform_family == 'debian' }
 end
 
+# Enable and start SNMP service
 service package_info[:service] do
   action [:start, :enable]
 end
 
+# Configure SNMP with platform-specific configuration file
 template package_info[:conf_file] do
   mode '0600'
   owner 'root'
