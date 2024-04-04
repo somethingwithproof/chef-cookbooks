@@ -16,13 +16,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# snmptrapd options
-case node['platform_family']
-when 'rhel'
-  default['snmp']['snmptrapd']['service_name'] = 'snmptrapd'
-else
-  default['snmp']['snmptrapd']['service_name'] = node['snmp']['service_name']
-end
+# Default snmptrapd service name setup
+default['snmp']['snmptrapd']['service_name'] = if node['platform_family'] == 'rhel'
+                                                 'snmptrapd'
+                                               else
+                                                 node['snmp']['service_name']
+                                               end
+
+# Common snmptrapd options
 default['snmp']['snmptrapd']['traphandle'] = 'default /usr/sbin/snmptthandler'
 default['snmp']['snmptrapd']['disable_authorization'] = 'yes'
 default['snmp']['snmptrapd']['do_not_log_traps'] = 'yes'
