@@ -1,43 +1,46 @@
+# Refactored apache2 default.rb with Chef best practices
 # Cookbook:: apache2
 # Recipe:: default
 
-# Install apache2 package
-package node['apache']['package'] do
+# Determine platform-specific defaults
+package_name = node['apache']['package'] || value_for_platform_family(
+  'debian' => 'apache2',
+  'rhel' => 'httpd'
+)
+
+service_name = value_for_platform_family(
+  'debian' => 'apache2',
+  'rhel' => 'httpd'
+)
+
+web_user = value_for_platform_family('debian' => 'www-data', 'rhel' => 'apache')
+index_path = value_for_platform_family(
+  'debian' => '/var/www/html/index.html',
+  'rhel' => '/var/www/html/index.html'
+)
+
+# Install apache2/httpd package
+package package_name do
   default_release node['apache']['default_release'] if node['apache']['default_release']
 end
 
-# Create required Apache configuration directories
-%w[
-  sites-available
-  sites-enabled
-  mods-available
-  mods-enabled
-  conf-available
-  conf-enabled
-].each do |dir|
-  directory ::File.join(node['apache']['dir'], dir) do
-    mode '0755'
-    recursive true
-    action :create
-  end
-end
-
-# Ensure apache2 service is enabled and started
-service 'apache2' do
+# Ensure apache2/httpd service is enabled and started
+service service_name do
   supports status: true, restart: true, reload: true
   action [:enable, :start]
 end
 
-# Place default welcome/index page
-cookbook_file '/var/www/html/index.html' do
+# Place default welcome/index page if not already present
+cookbook_file index_path do
   source 'index.html'
   mode '0644'
-  owner 'www-data'
-  group 'www-data'
+  owner web_user
+  group web_user
   action :create
+  only_if { ::Dir.exist?(::File.dirname(index_path)) }
 end
 
 # Log the successful setup
-log 'Apache2 installation and setup completed.' do
+log 'Apache installation and configuration complete.' do
   level :info
 end
