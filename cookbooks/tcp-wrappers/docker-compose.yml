@@ -1,0 +1,35 @@
+version: '3'
+services:
+  chef-testing:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/cookbook
+      - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: /cookbook
+    environment:
+      - CHEF_LICENSE=accept-no-persist
+      - KITCHEN_LOCAL_YAML=kitchen.yml
+    privileged: true
+    command: bash
+  
+  test-ubuntu-2204:
+    extends: chef-testing
+    command: kitchen test default-ubuntu-2204
+  
+  test-almalinux-9:
+    extends: chef-testing
+    command: kitchen test default-almalinux-9
+  
+  test-all:
+    extends: chef-testing
+    command: kitchen test
+  
+  lint:
+    extends: chef-testing
+    command: cookstyle
+  
+  unit:
+    extends: chef-testing
+    command: chef exec rspec

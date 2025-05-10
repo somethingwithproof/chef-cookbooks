@@ -1,191 +1,139 @@
-# tcp_wrappers cookbook - WIP - Supermarket by Feb. 1, 2017
+# tcp_wrappers Cookbook
 
-[![Build Status](https://travis-ci.org/thomasvincent/tcp_wrappers-cookbook.svg?branch=master)](http://travis-ci.org/thomasvincent/tcp_wrappers-cookbook) [![Chef cookbook](https://img.shields.io/badge/Cookbook%20Version-0.0.1-blue.svg)](https://github.com/thomasvincent/tcp_wrappers-cookbook)
+[![Build Status](https://github.com/thomasvincent/chef-tcp-wrappers/actions/workflows/ci.yml/badge.svg)](https://github.com/thomasvincent/chef-tcp-wrappers/actions/workflows/ci.yml) [![Chef cookbook](https://img.shields.io/badge/Cookbook%20Version-0.3.0-blue.svg)](https://github.com/thomasvincent/chef-tcp-wrappers)
 
-### TODO
+A Chef Infra cookbook for managing TCP Wrappers configurations on modern Linux distributions.
 
-- Input validation
-- integration tests
-- unit tests
-- Validating daemon is linked to wrappers.so
+The Chef `tcp_wrappers` cookbook installs the `tcp_wrappers` package and configures the `/etc/hosts.deny` or `/etc/hosts.allow` file.
 
-The Chef `tcp_wrappers` cookbook installs the `tcp_wrappers` package and configures the `/etc/hosts.deny or /etc/hosts.allow` file.
-
-It also exposes an LWRP for adding and managing tcp_wrappers.
+It also exposes a custom resource for adding and managing tcp_wrappers rules.
 
 ## Requirements
 
 ### Platforms
 
-- Debian/Ubuntu
-- RHEL/CentOS/Scientific/Amazon/Oracle
-- FreeBSD
-- Mac OS X
-- openSUSE / Suse
+- Ubuntu 20.04+
+- Debian 11+
+- RHEL 8+
+- AlmaLinux 8+
+- Rocky Linux 8+
+- Amazon Linux 2+
+- Fedora 36+
 
 ### Chef
 
-- Chef 12.1+
+- Chef 16.0+
 
 ### Cookbooks
 
 - None
 
 ## Attributes
-- `node['tcp_wrappers']['hosts']` - hosts to enable tcp_wrappers access (default: `[]`)
-- `node['tcp_wrappers']['daemons']` - daemons to control via tcp_wrappers by default (default: `[]`)
-- `node['tcp_wrappers']['options']` - default options to pass via tcp_wrappers by default (default: `[]`)
+
+- `node['authorization']['tcp_wrappers']['hosts']` - hosts to enable tcp_wrappers access (default: `[]`)
+- `node['authorization']['tcp_wrappers']['daemons']` - daemons to control via tcp_wrappers by default (default: `[]`)
+- `node['authorization']['tcp_wrappers']['options']` - default options to pass via tcp_wrappers by default (default: `[]`)
+- `node['authorization']['tcp_wrappers']['hosts_allow_defaults']` - default entries in hosts.allow (default: `[]`)
+- `node['authorization']['tcp_wrappers']['prefix']` - installation prefix (default: `/etc`)
+- `node['authorization']['tcp_wrappers']['include_wrappers_d']` - whether to include wrappers.d directory (default: `true`)
+- `node['authorization']['tcp_wrappers']['package']` - package name, auto-detected based on platform
 
 ## Usage
-### Attributes
-To use attributes for defining tcp_wrappers, set the attributes above on the node (or role) itself:
 
-```json
-{
-  "default_attributes": {
-    "authorization": {
-      "tcp_wrappers": {
-        "hosts": ["192.168.1.1"],
-        "daemons": ["sshd"],
-        "options": "spawn /bin/echo `/bin/date` access denied>>/var/log/sshd.log \"
-      }
-    }
-  }
-}
-```
+### Basic Usage
 
-### tcp_wrappers Defaults
-Configure a node attribute, `node['tcp_wrappers']['hosts_allow_defaults']` as an array of `Defaults` entries to configure in `/etc/hosts.allow`. A list of examples for common platforms is listed below:
-
-_Debian_
+Include the default recipe in your run list to install the TCP Wrappers package and create the basic directory structure:
 
 ```ruby
-node.default['tcp_wrappers']['hosts_allow_defaults'] = ['allow_options']
+include_recipe 'tcp_wrappers'
 ```
 
-_Ubuntu 10.04_
+### Custom Resource
 
-```ruby
-node.default['tcp_wrappers']['hosts_allow_defaults'] = ['allow_options']
-```
-
-_Ubuntu 12.04_
-
-```ruby
-node.default['tcp_wrappers']['hosts_allow_defaults'] = []
-```
-
-_FreeBSD_
-
-```ruby
-node.default['tcp_wrappers']['hosts_allow_defaults'] = []
-```
-
-### LWRP
-
-There are two ways for rendering a tcp_wrappers-fragment using this LWRP:
-1. Using the built-in template
-2. Using a custom, cookbook-level template
-
-Example using the built-in template:
+Use the `tcp_wrappers` resource to configure TCP Wrappers rules:
 
 ```ruby
 tcp_wrappers 'sshd' do
-  hosts      "192.168.1.1"
-  commands  ['spawn /bin/echo `/bin/date` access denied>>/var/log/sshd.log \']
+  daemon 'sshd'
+  hosts ['192.168.1.0/24', '10.0.0.0/8']
+  commands ['spawn /bin/echo `/bin/date` access granted >> /var/log/sshd.log']
+  action :install
 end
 ```
 
-```ruby
-tcp_wrappers 'tomcat' do
-  template    'my_hosts.allow.erb' # local cookbook template
-  variables   :cmds => ['spawn /bin/echo `/bin/date` access denied>>/var/log/sshd.log \']
-end
-```
+The resource supports the following properties:
 
-In either case, the following file would be generated in `/etc/hosts.allow'
+- `daemon` - The daemon to configure (e.g., sshd, ftpd)
+- `hosts` - Array of hosts to allow or deny
+- `commands` - Array of commands to execute when the rule matches
+- `template` - Optional template to use instead of the default
+- `variables` - Template variables when using a custom template
+
+## Testing
+
+This cookbook uses Test Kitchen for testing, with Docker as the preferred driver. The testing structure includes:
+
+1. **Unit Tests**: ChefSpec for testing individual cookbook components
+2. **Style Tests**: Cookstyle for ensuring style guidelines are followed
+3. **Integration Tests**: Test Kitchen with InSpec for verifying cookbook behavior
+
+### Prerequisites
+
+- Ruby 2.7 or later
+- Bundler
+- Docker
+
+### Running Tests
+
+We provide a Makefile to simplify test execution:
 
 ```bash
-# This file is managed by Chef for node.example.com
-# Do NOT modify this file directly.
+# Install dependencies
+make install
 
-sshd : ALL : allow : 'spawn /bin/echo `/bin/date` access denied>>/var/log/sshd.log \'
+# Run all tests across all platforms
+make test-all
+
+# Run tests for specific platforms
+make test-ubuntu
+make test-debian
+make test-almalinux
+
+# Run specific test suites
+make test-default
+make test-create
+make test-remove
+
+# Run style/lint checks
+make lint
+
+# Clean up test artifacts
+make clean
 ```
 
-#### LWRP Attributes
-<table>
-  <thead>
-    <tr>
-      <th>Attribute</th>
-      <th>Description</th>
-      <th>Example</th>
-      <th>Default</th>
-    </tr>
-  </thead>
+### CI Integration
 
-  <tbody>
-    <tr>
-      <td>name</td>
-      <td>name of the `hosts.allow` file</td>
-      <td><tt>hosts.allow</tt></td>
-      <td>current resource name</td>
-    </tr>
-    <tr>
-      <td>commands</td>
-      <td>array of commands this tcp_wrappers can execute</td>
-      <td><tt>[''spawn /bin/echo `/bin/date` access denied>>/var/log/sshd.log \'']</tt></td>
-      <td><tt>['ALL']</tt></td>
-    </tr>
-    <tr>
-      <td>daemons</td>
-      <td>list of daemons</td>
-      <td><tt>daemons</tt></td>
-      <td></td>
-    </tr>
-  </tbody>
-</table>
+The cookbook includes configuration for GitHub Actions to automatically run tests on pull requests and commits to the main branch.
 
-**If you use the template attribute, all other attributes will be ignored except for the variables attribute.**
+### Quick Docker Validation
 
-## Development
-This section details "quick development" steps. For a detailed explanation, see [[Contributing.md]].
-- Clone this repository from GitHub:
+For a quick validation without running the full test suite:
 
-  ```
-   $ git clone git@github.com:thomasvincent/tcp_wrappers.git
-  ```
-
-- Create a git branch
-
-  ```
-   $ git checkout -b my_bug_fix
-  ```
-
-- Install dependencies:
-
-  ```
-   $ bundle install
-  ```
-
-- Make your changes/patches/fixes, committing appropiately
-- **Write tests**
-- Run the tests:
-  - `bundle exec foodcritic -f any .`
-  - `bundle exec rspec`
-  - `bundle exec rubocop`
-  - `bundle exec kitchen test`
-
-    In detail:
-
-  - Foodcritic will catch any Chef-specific style errors
-  - RSpec will run the unit tests
-  - Rubocop will check for Ruby-specific style errors
-  - Test Kitchen will run and converge the recipes
+```bash
+docker run --rm -v $(pwd):/cookbook -w /cookbook ubuntu:22.04 \
+  bash -c "apt-get update && \
+  apt-get install -y apt-transport-https lsb-release procps net-tools && \
+  mkdir -p /etc/wrappers.d && \
+  touch /etc/hosts.allow && \
+  touch /etc/hosts.deny && \
+  echo 'Directory structure created successfully.'"
+```
 
 ## License & Authors
+
 **Author:** Thomas Vincent (thomasvincent@gmail.com)
 
-**Copyright:** 2017, Thomas Vincent
+**Copyright:** 2017-2025, Thomas Vincent
 
 ```
 Licensed under the Apache License, Version 2.0 (the "License");

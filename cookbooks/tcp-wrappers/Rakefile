@@ -1,7 +1,5 @@
 #!/usr/bin/env rake
 
-require_relative 'tasks/maintainers'
-
 # Style tests. cookstyle (rubocop) and Foodcritic
 namespace :style do
   begin
@@ -9,7 +7,9 @@ namespace :style do
     require 'rubocop/rake_task'
 
     desc 'Run Ruby style checks'
-    RuboCop::RakeTask.new(:ruby)
+    RuboCop::RakeTask.new(:ruby) do |task|
+      task.options = ['-D']
+    end
   rescue LoadError => e
     puts ">>> Gem load error: #{e}, omitting #{task.name}" unless ENV['CI']
   end
@@ -65,5 +65,12 @@ namespace :supermarket do
   end
 end
 
+# Delivery
+task delivery: [
+  'style:chef',
+  'style:ruby',
+  'spec',
+]
+
 # Default
-task default: %w(style spec)
+task default: ['delivery']

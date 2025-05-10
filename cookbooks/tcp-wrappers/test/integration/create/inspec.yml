@@ -1,0 +1,8 @@
+name: create
+title: TCP Wrappers Creation Tests
+maintainer: Thomas Vincent
+license: Apache-2.0
+summary: InSpec profile for testing tcp_wrappers resource creation
+version: 0.1.0
+supports:
+  - os-family: linux

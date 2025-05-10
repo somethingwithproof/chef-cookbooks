@@ -1,0 +1,8 @@
+name: remove
+title: TCP Wrappers Removal Tests
+maintainer: Thomas Vincent
+license: Apache-2.0
+summary: InSpec profile for testing tcp_wrappers resource removal
+version: 0.1.0
+supports:
+  - os-family: linux

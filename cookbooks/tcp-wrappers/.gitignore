@@ -1,19 +1,32 @@
-*.rbc
-*.sassc
-.sass-cache
-capybara-*.html
-.rspec
-.rvmrc
-/.bundle
-/vendor/bundle
-/log/*
-/tmp/*
-/db/*.sqlite3
-/public/system/*
-/coverage/
-/spec/tmp/*
-**.orig
-rerun.txt
-pickle-email-*.html
-.project
-config/initializers/secret_token.rb
+.vagrant
+*~
+*#
+.#*
+\#*#
+.*.sw[a-z]
+*.un~
+
+# Bundler
+Gemfile.lock
+bin/*
+.bundle/*
+
+# test kitchen
+.kitchen/
+.kitchen.local.yml
+nodes/
+kitchen.local.yml
+
+# Chef
+Berksfile.lock
+.zero-knife.rb
+Policyfile.lock.json
+
+# Coverage
+coverage/
+
+# Build directories
+.tmp
+.delivery
+coverage
+.DS_Store

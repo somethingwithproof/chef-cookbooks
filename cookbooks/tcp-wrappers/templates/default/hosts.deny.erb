@@ -1,0 +1,8 @@
+# This file is managed by Chef for <%= node['fqdn'] %>
+# Do NOT modify this file directly.
+
+<% if @daemon -%>
+<%= @daemon %> : <%= @hosts_allow %> : <%= @commands.join(' ') %>
+<% else -%>
+# No daemon specified
+<% end -%>

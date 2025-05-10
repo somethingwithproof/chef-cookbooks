@@ -1,0 +1,50 @@
+AllCops:
+  Exclude:
+    - 'vendor/**/*'
+    - 'spec/fixtures/**/*'
+    - 'tmp/**/*'
+  NewCops: enable
+  TargetRubyVersion: 2.7
+
+Layout/LineLength:
+  Max: 120
+  
+Lint/EmptyFile:
+  Exclude:
+    - 'attributes/**/*'
+    
+Metrics/AbcSize:
+  Max: 100
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+
+Metrics/ClassLength:
+  Max: 200
+
+Metrics/CyclomaticComplexity:
+  Max: 20
+
+Metrics/MethodLength:
+  Max: 50
+
+Metrics/ModuleLength:
+  Max: 200
+
+Metrics/PerceivedComplexity:
+  Max: 20
+
+Style/Documentation:
+  Exclude:
+    - 'spec/**/*'
+
+Style/MixinUsage:
+  Exclude:
+    - 'test/fixtures/cookbooks/test/**/*'
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+Style/PercentLiteralDelimiters:
+  Enabled: false

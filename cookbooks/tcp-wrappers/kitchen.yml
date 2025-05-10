@@ -1,0 +1,93 @@
+---
+driver:
+  name: docker
+  use_sudo: false
+  privileged: true
+  provision_command:
+    - apt-get update
+    - apt-get install -y apt-transport-https lsb-release procps net-tools
+
+provisioner:
+  name: chef_zero
+  product_name: chef
+  product_version: <%= ENV['CHEF_VERSION'] || '17' %>
+  chef_license: accept-no-persist
+  enforce_idempotency: true
+  multiple_converge: 2
+  deprecations_as_errors: true
+  retry_on_exit_code:
+    - 213
+  max_retries: 1
+  wait_for_retry: 10
+
+verifier:
+  name: inspec
+  sudo: true
+
+platforms:
+  - name: ubuntu-20.04
+    driver_config:
+      image: ubuntu:20.04
+      platform: ubuntu
+      run_command: /sbin/init
+      provision_command:
+        - apt-get update
+        - apt-get install -y apt-transport-https lsb-release procps net-tools systemd
+
+  - name: ubuntu-22.04
+    driver_config:
+      image: ubuntu:22.04
+      platform: ubuntu
+      run_command: /sbin/init
+      provision_command:
+        - apt-get update
+        - apt-get install -y apt-transport-https lsb-release procps net-tools systemd
+
+  - name: debian-11
+    driver_config:
+      image: debian:11
+      platform: debian
+      run_command: /sbin/init
+      provision_command:
+        - apt-get update
+        - apt-get install -y apt-transport-https lsb-release procps net-tools systemd
+
+  - name: almalinux-9
+    driver_config:
+      image: almalinux:9
+      platform: rhel
+      run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - yum -y install which initscripts wget net-tools systemd
+        - yum -y update
+
+suites:
+  - name: default
+    run_list:
+      - recipe[tcp_wrappers::default]
+    verifier:
+      inspec_tests:
+        - test/integration/default
+    attributes:
+      tcp_wrappers:
+        hosts: ['localhost']
+
+  - name: create
+    run_list:
+      - recipe[test::create]
+    verifier:
+      inspec_tests:
+        - test/integration/create
+    attributes:
+      tcp_wrappers:
+        hosts: ['localhost']
+
+  - name: remove
+    run_list:
+      - recipe[test::remove]
+    verifier:
+      inspec_tests:
+        - test/integration/remove
+    attributes:
+      tcp_wrappers:
+        hosts: ['localhost']

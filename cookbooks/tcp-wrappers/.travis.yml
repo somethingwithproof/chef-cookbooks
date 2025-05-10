@@ -1,55 +1,41 @@
-sudo: required
-dist: trusty
+language: ruby
+cache: bundler
+dist: bionic
 
-# install the pre-release chef-dk.  Use chef-stable-trusty to install the stable release
 addons:
   apt:
     sources:
-      - chef-stable-trusty
+      - chef-current-focal
     packages:
-      - chefdk
+      - chef-workstation
 
-# Don't `bundle install` which takes about 1.5 mins
-install: echo "skip bundle install"
-
-branches:
-  only:
-    - master
+env:
+  global:
+    - CHEF_LICENSE=accept-no-persist
 
 services: docker
 
 env:
   matrix:
-  - INSTANCE=default-centos-6
-  - INSTANCE=default-centos-7
-  - INSTANCE=default-debian-7
-  - INSTANCE=default-debian-8
-  - INSTANCE=default-fedora-latest
-  - INSTANCE=default-opensuse-132
-  - INSTANCE=default-opensuse-leap
-  - INSTANCE=default-ubuntu-1404
-  - INSTANCE=default-ubuntu-1604
-  - INSTANCE=create-centos-6
-  - INSTANCE=create-centos-7
-  - INSTANCE=create-debian-7
-  - INSTANCE=create-debian-8
-  - INSTANCE=create-fedora-latest
-  - INSTANCE=create-opensuse-132
-  - INSTANCE=create-opensuse-leap
-  - INSTANCE=create-ubuntu-1404
-  - INSTANCE=create-ubuntu-1604
+    - CHEF_VERSION=16 INSTANCE=default-ubuntu-2004
+    - CHEF_VERSION=16 INSTANCE=default-centos-8
+    - CHEF_VERSION=16 INSTANCE=create-ubuntu-2004
+    - CHEF_VERSION=16 INSTANCE=create-centos-8
+    - CHEF_VERSION=16 INSTANCE=remove-ubuntu-2004
 
 before_script:
-  - sudo iptables -L DOCKER || ( echo "DOCKER iptables chain missing" ; sudo iptables -N DOCKER )
-  - eval "$(/opt/chefdk/bin/chef shell-init bash)"
-  - /opt/chefdk/embedded/bin/chef --version
-  - /opt/chefdk/embedded/bin/cookstyle --version
-  - /opt/chefdk/embedded/bin/foodcritic --version
+  - sudo systemctl start docker
+  - eval "$(chef shell-init bash)"
+  - chef --version
+  - cookstyle --version
+  - chef gem install kitchen-dokken
 
-script: KITCHEN_LOCAL_YAML=.kitchen.docker.yml /opt/chefdk/embedded/bin/kitchen verify ${INSTANCE}
+script:
+  - chef exec delivery local all
+  - kitchen verify ${INSTANCE}
 
 matrix:
   include:
     - script:
-      - /opt/chefdk/bin/chef exec rake
+        - chef exec delivery local all
       env: UNIT_AND_LINT=1

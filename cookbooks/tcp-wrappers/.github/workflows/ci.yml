@@ -1,0 +1,90 @@
+---
+name: Cookbook CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+      
+      - name: Install dependencies
+        run: bundle install
+      
+      - name: Run cookstyle
+        run: bundle exec cookstyle
+
+  unit-test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+      
+      - name: Install dependencies
+        run: bundle install
+      
+      - name: Run ChefSpec tests
+        run: bundle exec rspec
+
+  integration-test:
+    runs-on: ubuntu-latest
+    needs: unit-test
+    strategy:
+      matrix:
+        include:
+          # Prioritize default suite tests across all platforms
+          - os: 'ubuntu-2204'
+            suite: 'default'
+          - os: 'debian-11'
+            suite: 'default'
+          - os: 'almalinux-9'
+            suite: 'default'
+          # Run create and remove tests on a subset to save time
+          - os: 'ubuntu-2204'
+            suite: 'create'
+          - os: 'ubuntu-2204'
+            suite: 'remove'
+      fail-fast: false
+      max-parallel: 3
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+      
+      - name: Install dependencies
+        run: bundle install
+      
+      - name: Start Docker service
+        run: sudo systemctl start docker
+      
+      - name: Run Test Kitchen
+        run: |
+          bundle exec kitchen test ${{ matrix.suite }}-${{ matrix.os }} || bundle exec kitchen verify ${{ matrix.suite }}-${{ matrix.os }}
+        env:
+          CHEF_LICENSE: accept-no-persist
+          KITCHEN_YAML: kitchen.yml

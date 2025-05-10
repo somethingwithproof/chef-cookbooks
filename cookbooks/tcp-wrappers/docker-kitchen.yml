@@ -1,0 +1,38 @@
+---
+driver:
+  name: docker
+  use_sudo: false
+  privileged: true
+  provision_command:
+    - apt-get update
+    - apt-get install -y apt-transport-https lsb-release procps net-tools
+
+provisioner:
+  name: chef_zero
+  product_name: chef
+  product_version: 16
+  chef_license: accept-no-persist
+  deprecations_as_errors: true
+  enforce_idempotency: true
+  multiple_converge: 2
+
+platforms:
+  - name: ubuntu-20.04
+    driver_config:
+      platform: ubuntu
+      image: ubuntu:20.04
+  - name: ubuntu-22.04
+    driver_config:
+      platform: ubuntu
+      image: ubuntu:22.04
+      provision_command:
+        - apt-get update
+        - apt-get install -y apt-transport-https lsb-release procps net-tools
+
+suites:
+  - name: default
+    run_list:
+      - recipe[tcp_wrappers::default]
+    verifier:
+      inspec_tests:
+        - test/integration/default
