@@ -1,0 +1,44 @@
+name: Auto-Merge Dependabot PRs
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+  workflow_run:
+    workflows: ["Cookbook CI"]
+    types: [completed]
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]' || github.event_name == 'workflow_run'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Auto-merge Dependabot PRs
+        if: ${{ github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]' }}
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          echo "Setting auto-merge for Dependabot PR #$PR_NUMBER"
+          gh pr merge $PR_NUMBER --auto --squash --delete-branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Process successful workflow runs
+        if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' }}
+        run: |
+          echo "Processing successful workflow run for ${{ github.event.workflow_run.head_branch }}"
+          
+          # Check if this is a Dependabot PR branch
+          if [[ "${{ github.event.workflow_run.head_branch }}" == dependabot/* ]]; then
+            PR_NUMBER=$(gh pr list --head "${{ github.event.workflow_run.head_branch }}" --json number --jq '.[0].number')
+            
+            if [ ! -z "$PR_NUMBER" ]; then
+              echo "All checks passed for Dependabot PR #$PR_NUMBER. Merging..."
+              gh pr merge $PR_NUMBER --squash --delete-branch
+            fi
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
