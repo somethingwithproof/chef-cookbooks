@@ -1,0 +1,21 @@
+name 'r-language'
+maintainer 'Thomas Vincent'
+maintainer_email 'thomasvincent@github.com'
+license 'MIT'
+description 'Installs/Configures R programming language'
+version '0.2.0'
+chef_version '>= 15.0'
+
+depends 'apt', '>= 7.0'
+depends 'yum', '>= 5.0'
+depends 'build-essential', '>= 8.0'
+
+supports 'ubuntu', '>= 18.04'
+supports 'debian', '>= 10.0'
+supports 'centos', '>= 7.0'
+supports 'redhat', '>= 7.0'
+supports 'amazon', '>= 2.0'
+supports 'fedora', '>= 30.0'
+
+source_url 'https://github.com/thomasvincent/chef-r-language-cookbook'
+issues_url 'https://github.com/thomasvincent/chef-r-language-cookbook/issues'

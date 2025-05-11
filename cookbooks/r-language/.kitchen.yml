@@ -1,0 +1,62 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_zero
+  product_name: chef
+  product_version: 18
+  multiple_converge: 2
+  enforce_idempotency: true
+  deprecations_as_errors: true
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: ubuntu-20.04
+  - name: ubuntu-22.04
+  - name: centos-7
+  - name: centos-stream-8
+  - name: debian-11
+
+suites:
+  - name: default
+    run_list:
+      - recipe[r-language::default]
+    attributes:
+      r-language:
+        install_method: package
+        install_dev: true
+        packages: []
+    verifier:
+      inspec_tests:
+        - test/integration/default
+        - test/integration/package
+
+  - name: source
+    run_list:
+      - recipe[r-language::default]
+    attributes:
+      r-language:
+        install_method: source
+        version: '4.3.1'
+    verifier:
+      inspec_tests:
+        - test/integration/default
+        - test/integration/source
+
+  - name: packages
+    run_list:
+      - recipe[r-language::default]
+    attributes:
+      r-language:
+        install_method: package
+        packages:
+          - dplyr
+          - ggplot2
+    verifier:
+      inspec_tests:
+        - test/integration/default
+        - test/integration/package
+        - test/integration/packages
