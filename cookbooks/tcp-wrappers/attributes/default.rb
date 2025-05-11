@@ -31,7 +31,7 @@ default['authorization']['tcp_wrappers']['include_wrappers_d'] = true
 default['authorization']['tcp_wrappers']['package'] = value_for_platform(
   ['ubuntu'] => {
     '>= 22.04' => 'tcpd',
-    'default' => 'tcp_wrappers'
+    'default' => 'tcp_wrappers',
   },
-  'default' => 'tcp_wrappers'
+  'default' => 'tcp_wrappers',
 )

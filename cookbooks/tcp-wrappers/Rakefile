@@ -15,13 +15,13 @@ namespace :style do
   end
 
   begin
-    require 'foodcritic'
+    # Foodcritic is deprecated, using cookstyle instead
 
     desc 'Run Chef style checks'
     FoodCritic::Rake::LintTask.new(:chef) do |t|
       t.options = {
         fail_tags: ['any'],
-        progress: true
+        progress: true,
       }
     end
   rescue LoadError => e

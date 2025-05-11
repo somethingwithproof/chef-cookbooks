@@ -10,5 +10,5 @@ end
 
 group :integration do
   gem 'inspec'
-  gem 'kitchen-docker'
+  # kitchen-docker is already specified above
 end

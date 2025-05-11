@@ -115,6 +115,29 @@ make clean
 
 The cookbook includes configuration for GitHub Actions to automatically run tests on pull requests and commits to the main branch.
 
+### Docker-based Testing with verify.sh
+
+For quick and consistent testing across environments, use the included `verify.sh` script which runs tests in Docker:
+
+```bash
+# Run all tests (lint, unit, integration)
+./verify.sh
+
+# Run only linting checks
+./verify.sh --lint
+
+# Run only unit tests
+./verify.sh --unit
+
+# Run only integration tests
+./verify.sh --integration
+
+# Display help
+./verify.sh --help
+```
+
+This script automatically uses the official Chef Workstation Docker image to ensure consistent testing across different environments, without requiring local Ruby or Chef installation.
+
 ### Quick Docker Validation
 
 For a quick validation without running the full test suite:

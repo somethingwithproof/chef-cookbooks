@@ -24,7 +24,7 @@ include_recipe 'tcp_wrappers::default'
 
 # Create multiple tcp_wrappers entries
 tcp_wrappers 'sshd' do
-  daemon 'sshd' 
+  daemon 'sshd'
   hosts ['192.168.1.0/24']
   commands ['spawn /bin/echo `/bin/date` access granted>>/var/log/sshd.log']
   action :install
