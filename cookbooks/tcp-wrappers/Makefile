@@ -8,33 +8,29 @@ install:
 test-all: install
 	bundle exec kitchen test
 
-# Run tests for Ubuntu 22.04
+# Test specific platforms
 test-ubuntu: install
 	bundle exec kitchen test default-ubuntu-2204
 
-# Run tests for Debian 11
 test-debian: install
 	bundle exec kitchen test default-debian-11
 
-# Run tests for AlmaLinux 9
 test-almalinux: install
 	bundle exec kitchen test default-almalinux-9
 
-# Run default suite tests
+# Test specific suites
 test-default: install
 	bundle exec kitchen test default
 
-# Run create suite tests
 test-create: install
 	bundle exec kitchen test create
 
-# Run remove suite tests
 test-remove: install
 	bundle exec kitchen test remove
 
-# Run cookstyle linting
+# Run cookstyle linting for Chef 18+ compatibility
 lint: install
-	bundle exec cookstyle
+	bundle exec cookstyle --chef-version 18.0
 
 # Clean up
 clean:
@@ -42,8 +38,14 @@ clean:
 	rm -rf .kitchen
 	rm -rf Gemfile.lock
 
+# Docker testing
+docker-test:
+	docker run --rm -v "$(PWD):/cookbook" -w /cookbook chef/chefworkstation:latest bash -c "CHEF_LICENSE=accept-no-persist kitchen test default-ubuntu-2204"
+
 # Help
 help:
+	@echo "Chef 18+ TCP Wrappers Cookbook"
+	@echo
 	@echo "Available targets:"
 	@echo "  install        - Install required gems"
 	@echo "  test-all       - Run all Test Kitchen tests"
@@ -53,5 +55,6 @@ help:
 	@echo "  test-default   - Run default suite tests"
 	@echo "  test-create    - Run create suite tests"
 	@echo "  test-remove    - Run remove suite tests"
-	@echo "  lint           - Run cookstyle linting"
+	@echo "  lint           - Run cookstyle linting for Chef 18+"
+	@echo "  docker-test    - Run tests in Docker container"
 	@echo "  clean          - Clean up test artifacts"

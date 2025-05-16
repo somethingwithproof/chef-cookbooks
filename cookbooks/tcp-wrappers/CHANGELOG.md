@@ -16,6 +16,9 @@ This file is used to list changes made in each version of the tcp_wrappers cookb
 - Testing and Quality:
   - Updated default Chef version in kitchen.yml to 18
   - Enhanced platform testing for latest OS versions
+  - Updated Gemfile with version constraints for Chef 18+ compatibility
+  - Modernized verify.sh script with platform selection
+  - Updated Makefile with additional Docker-based testing options
   
 - Modern Chef 18+ Practices:
   - Used structured attribute definition
@@ -29,6 +32,14 @@ This file is used to list changes made in each version of the tcp_wrappers cookb
   - Updated Chef dependency to require 18+
   - Removed constraints on Chef version upper bound
   - Added file headers and improved code documentation
+  
+- Removed Legacy Files:
+  - Removed Berksfile (replaced with modern dependency management)
+  - Removed Rakefile (replaced with Makefile and verify.sh)
+  - Removed .rubocop.yml and .rubocop_todo.yml (using cookstyle with --chef-version flag)
+  - Removed .rspec (using modern RSpec defaults)
+  - Removed redundant CHANGES.md (using CHANGELOG.md)
+  - Removed legacy GitHub workflows and templates (to be replaced with modern CI)
 
 ## 0.3.0 (UNRELEASED)
 

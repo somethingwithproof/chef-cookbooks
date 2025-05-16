@@ -1,14 +1,14 @@
 source 'https://rubygems.org'
 
 group :development do
-  gem 'chefspec'
-  gem 'cookstyle'
-  gem 'kitchen-docker'
-  gem 'kitchen-inspec'
-  gem 'test-kitchen'
+  # Testing and linting tools for Chef 18+
+  gem 'chefspec', '~> 9.3'
+  gem 'cookstyle', '~> 7.32'
+  gem 'kitchen-docker', '~> 2.13'
+  gem 'kitchen-inspec', '~> 2.6'
+  gem 'test-kitchen', '~> 3.5'
 end
 
 group :integration do
-  gem 'inspec'
-  # kitchen-docker is already specified above
+  gem 'inspec', '~> 5.21'
 end
