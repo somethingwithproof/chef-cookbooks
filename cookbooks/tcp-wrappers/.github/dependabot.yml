@@ -1,24 +1,22 @@
 ---
 version: 2
 updates:
-  - package-ecosystem: github-actions
+  - package-ecosystem: "bundler"
     directory: "/"
     schedule:
-      interval: monthly
-    open-pull-requests-limit: 10
-    labels:
-      - "dependencies"
-      - "github_actions"
+      interval: "weekly"
     assignees:
       - "thomasvincent"
-
-  - package-ecosystem: bundler
+    reviewers:
+      - "thomasvincent"
+    open-pull-requests-limit: 5
+    
+  - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: monthly
-    open-pull-requests-limit: 10
-    labels:
-      - "dependencies"
-      - "ruby"
+      interval: "weekly"
     assignees:
       - "thomasvincent"
+    reviewers:
+      - "thomasvincent"
+    open-pull-requests-limit: 5

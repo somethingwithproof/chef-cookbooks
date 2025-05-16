@@ -1,0 +1,67 @@
+---
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Cookstyle Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+          bundler-cache: true
+      - name: Install dependencies
+        run: bundle install
+      - name: Run Cookstyle
+        run: bundle exec cookstyle --chef-version 18.0
+
+  unit-test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+          bundler-cache: true
+      - name: Install dependencies
+        run: bundle install
+      - name: Run ChefSpec tests
+        run: bundle exec rspec
+
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [lint, unit-test]
+    strategy:
+      matrix:
+        os: ['ubuntu-2204', 'debian-11', 'almalinux-9']
+        suite: ['default', 'create', 'remove']
+      fail-fast: false
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+          bundler-cache: true
+      - name: Install dependencies
+        run: bundle install
+      - name: Run Test Kitchen
+        run: bundle exec kitchen test ${{ matrix.suite }}-${{ matrix.os }}
+        env:
+          CHEF_LICENSE: accept
+          KITCHEN_YAML: kitchen.yml
