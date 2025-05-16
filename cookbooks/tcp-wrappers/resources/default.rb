@@ -21,8 +21,32 @@ unified_mode true
 
 provides :tcp_wrappers
 
+description 'Resource to configure TCP Wrappers for services'
+introduced '0.1.0'
+examples <<~DOC
+  # Basic usage
+  tcp_wrappers 'sshd' do
+    daemon 'sshd'
+    hosts ['192.168.1.0/24', '10.0.0.0/8']
+    commands ['spawn /bin/echo `/bin/date` access granted>>/var/log/sshd.log']
+    action :install
+  end
+
+  # With custom template
+  tcp_wrappers 'ftpd' do
+    daemon 'ftpd'
+    hosts ['localhost']
+    template 'my_custom_template.erb'
+    variables({
+      custom_var: 'value'
+    })
+    action :install
+  end
+DOC
+
 property :daemon, String,
-         description: 'The daemon to configure in TCP Wrappers'
+         description: 'The daemon to configure in TCP Wrappers',
+         required: true
 property :hosts, Array,
          default: [],
          description: 'The hosts to allow or deny'
@@ -68,11 +92,10 @@ action :install do
       mode '0440'
       variables new_resource.variables
       sensitive true
+      verify_contents false # Chef 18+ best practice for template verification
     end
 
-    log "Custom template used for #{new_resource.name}" do
-      level :debug
-    end
+    Chef::Log.debug("Custom template used for #{new_resource.name}")
   else
     # Join hosts with a space
     hosts_allow = new_resource.hosts.join(' ')
@@ -90,7 +113,15 @@ action :install do
         commands: new_resource.commands
       )
       sensitive true
+      verify_contents false # Chef 18+ best practice for template verification
     end
+  end
+end
+
+# Documentation for the remove action
+action_class.class_eval do
+  def action_remove
+    describe_recipe 'Remove specified TCP wrappers configuration'
   end
 end
 
@@ -107,7 +138,7 @@ action_class do
   # According to the tcp_wrappers man pages tcp_wrappers will ignore files in an include dir that have a `.` or `~`
   # We convert either to `__`
   def tcp_wrappers_filename
-    # Chef 16 idiomatic - use Ruby string methods
+    # Chef 18+ idiomatic - use Ruby string methods
     new_resource.name.tr('.~', '__')
   end
 end

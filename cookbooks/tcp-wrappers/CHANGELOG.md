@@ -2,6 +2,34 @@
 
 This file is used to list changes made in each version of the tcp_wrappers cookbook.
 
+## 0.4.0 (UNRELEASED)
+
+- Complete modernization for Chef 18+
+- Resources:
+  - Added resource documentation and examples
+  - Added the `required` property attribute to required properties
+  - Improved action class with proper documentation
+  - Updated template resources with verify_contents option
+  - Updated log resources to use Chef::Log for efficiency
+  - Used Chef 18+ resource patterns and style
+  
+- Testing and Quality:
+  - Updated default Chef version in kitchen.yml to 18
+  - Enhanced platform testing for latest OS versions
+  
+- Modern Chef 18+ Practices:
+  - Used structured attribute definition
+  - Used conditional blocks instead of only_if in recipe
+  - Used proper template resource options for Chef 18+
+  - Used improved platform detection with Gem::Version comparison
+  - Added better logging and debug capabilities
+  
+- Code Improvements:
+  - Improved code organization and readability
+  - Updated Chef dependency to require 18+
+  - Removed constraints on Chef version upper bound
+  - Added file headers and improved code documentation
+
 ## 0.3.0 (UNRELEASED)
 
 - Complete modernization for Chef 16-18

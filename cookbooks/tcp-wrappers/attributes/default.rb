@@ -17,21 +17,27 @@
 # limitations under the License.
 #
 
-# Basic configuration defaults
-default['authorization']['tcp_wrappers']['hosts'] = []
-default['authorization']['tcp_wrappers']['daemons'] = []
-default['authorization']['tcp_wrappers']['options'] = []
-default['authorization']['tcp_wrappers']['hosts_allow_defaults'] = []
+# Basic configuration defaults - structured for Chef 18+
+default['authorization']['tcp_wrappers'] = {
+  'hosts' => [],
+  'daemons' => [],
+  'options' => [],
+  'hosts_allow_defaults' => [],
+  'prefix' => '/etc',
+  'include_wrappers_d' => true
+}
 
-# Installation and setup
-default['authorization']['tcp_wrappers']['prefix'] = '/etc'
-default['authorization']['tcp_wrappers']['include_wrappers_d'] = true
-
-# Platform-specific settings
-default['authorization']['tcp_wrappers']['package'] = value_for_platform(
-  ['ubuntu'] => {
-    '>= 22.04' => 'tcpd',
-    'default' => 'tcp_wrappers',
-  },
-  'default' => 'tcp_wrappers',
-)
+# Platform-specific settings - modern Chef 18+ approach 
+# Note: In Chef 18+, value_for_platform is still supported but we can use a more direct approach
+case node['platform']
+when 'ubuntu'
+  if Gem::Version.new(node['platform_version']) >= Gem::Version.new('22.04')
+    default['authorization']['tcp_wrappers']['package'] = 'tcpd'
+  else
+    default['authorization']['tcp_wrappers']['package'] = 'tcp_wrappers'
+  end
+when 'debian'
+  default['authorization']['tcp_wrappers']['package'] = 'tcp_wrappers'
+else 
+  default['authorization']['tcp_wrappers']['package'] = 'tcp_wrappers'
+end
