@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 group :development do
   # Testing and linting tools for Chef 18+
   gem 'chefspec', '~> 9.3'
-  gem 'cookstyle', '~> 7.32'
+  gem 'cookstyle', '~> 8.1'
   gem 'kitchen-docker', '~> 3.0'
   gem 'kitchen-inspec', '~> 2.6'
   gem 'test-kitchen', '~> 3.5'
