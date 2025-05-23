@@ -1,0 +1,80 @@
+version: 2
+updates:
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "02:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    labels:
+      - "ci"
+      - "dependencies"
+      - "github-actions"
+    reviewers:
+      - "thomasvincent"
+    commit-message:
+      prefix: "ci"
+      prefix-development: "ci"
+      include: "scope"
+
+  # Maintain dependencies for Ruby gems
+  - package-ecosystem: "bundler"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "02:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "ruby"
+    reviewers:
+      - "thomasvincent"
+    versioning-strategy: increase
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    groups:
+      # Group Chef-related dependencies
+      chef:
+        patterns:
+          - "chef*"
+          - "inspec*"
+          - "test-kitchen*"
+          - "kitchen-*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Group development dependencies
+      development:
+        patterns:
+          - "rake"
+          - "yard"
+          - "redcarpet"
+          - "rb-readline"
+        update-types:
+          - "minor"
+          - "patch"
+      # Group testing dependencies
+      testing:
+        patterns:
+          - "rspec*"
+          - "chefspec"
+          - "simplecov*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Group linting dependencies
+      linting:
+        patterns:
+          - "cookstyle"
+          - "rubocop*"
+        update-types:
+          - "minor"
+          - "patch"

@@ -1,0 +1,172 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+    tags: ['v*']
+  pull_request:
+    branches: [main, master, develop]
+  schedule:
+    # Run daily at 2 AM UTC for dependency security scanning
+    - cron: '0 2 * * *'
+
+env:
+  CHEF_LICENSE: accept-no-persist
+
+jobs:
+  lint:
+    name: Code Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          
+      - name: Run Cookstyle
+        run: bundle exec cookstyle
+        
+      - name: Validate metadata.rb
+        run: bundle exec chef generate cookbook --help > /dev/null
+
+  unit:
+    name: Unit Tests
+    needs: lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        chef-version: ['19', '18']
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          
+      - name: Override Chef version
+        run: |
+          bundle config set --local force_ruby_platform true
+          bundle add chef --version "~> ${{ matrix.chef-version }}.0" --skip-install
+          bundle install
+          
+      - name: Run ChefSpec tests
+        run: bundle exec rspec --format documentation
+        
+      - name: Generate test coverage
+        run: bundle exec rspec --format json --out rspec.json
+        
+      - name: Upload coverage to Codecov
+        if: matrix.chef-version == '19'
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/coverage.xml
+          fail_ci_if_error: false
+
+  integration:
+    name: Integration Tests
+    needs: unit
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os:
+          - 'ubuntu-22.04'
+          - 'ubuntu-20.04'
+          - 'debian-11'
+          - 'rockylinux-8'
+          - 'amazonlinux-2'
+        suite: ['default']
+      fail-fast: false
+      max-parallel: 5
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          
+      - name: Run Test Kitchen
+        run: |
+          export KITCHEN_YAML=.kitchen.dokken.yml
+          bundle exec kitchen test ${{ matrix.suite }}-${{ matrix.os }}
+        env:
+          CHEF_LICENSE: accept-no-persist
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  release:
+    name: Release to Supermarket
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') && github.repository == 'thomasvincent/chef-cookbook-template'
+    needs: [lint, unit, integration]
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        
+      - name: Generate changelog
+        run: |
+          if [ -f CHANGELOG.md ]; then
+            echo "Changelog already exists"
+          else
+            echo "## Release v${{ steps.get_version.outputs.VERSION }}" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            git log $(git describe --tags --abbrev=0 HEAD^)..HEAD --oneline >> CHANGELOG.md
+          fi
+          
+      - name: Setup Chef credentials
+        run: |
+          mkdir -p ~/.chef
+          echo "${{ secrets.CHEF_KEY }}" > ~/.chef/key.pem
+          cat > ~/.chef/credentials <<EOF
+          [default]
+          client_name = '${{ secrets.CHEF_USERNAME }}'
+          client_key = '~/.chef/key.pem'
+          chef_server_url = 'https://api.chef.io/organizations/${{ secrets.CHEF_ORG }}'
+          EOF
+          
+      - name: Publish to Chef Supermarket
+        run: |
+          bundle exec knife supermarket share cookbook-template \
+            --cookbook-path . \
+            --supermarket-site https://supermarket.chef.io
+        env:
+          CHEF_LICENSE: accept-no-persist
