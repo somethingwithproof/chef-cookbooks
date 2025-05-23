@@ -8,15 +8,15 @@ describe CookbookTemplate::Helpers do
     Class.new do
       include CookbookTemplate::Helpers
       attr_reader :node
-      
+
       def initialize(node)
         @node = node
       end
-      
+
       def platform_family?(*families)
         families.include?(node['platform_family'])
       end
-      
+
       def platform?(*platforms)
         platforms.include?(node['platform'])
       end
@@ -33,7 +33,7 @@ describe CookbookTemplate::Helpers do
 
     context 'on Ubuntu 14.04' do
       let(:node) { ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04').node }
-      
+
       it 'returns false' do
         expect(helper.systemd_platform?).to be false
       end
@@ -41,7 +41,7 @@ describe CookbookTemplate::Helpers do
 
     context 'on CentOS 7' do
       let(:node) { ChefSpec::SoloRunner.new(platform: 'centos', version: '7').node }
-      
+
       it 'returns true' do
         expect(helper.systemd_platform?).to be true
       end
@@ -49,7 +49,7 @@ describe CookbookTemplate::Helpers do
 
     context 'on CentOS 6' do
       let(:node) { ChefSpec::SoloRunner.new(platform: 'centos', version: '6').node }
-      
+
       it 'returns false' do
         expect(helper.systemd_platform?).to be false
       end
@@ -69,7 +69,7 @@ describe CookbookTemplate::Helpers do
 
     context 'on Ubuntu 14.04' do
       let(:node) { ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04').node }
-      
+
       before do
         allow(helper).to receive(:systemd_platform?).and_return(false)
       end
@@ -81,7 +81,7 @@ describe CookbookTemplate::Helpers do
 
     context 'on older platform' do
       let(:node) { ChefSpec::SoloRunner.new(platform: 'centos', version: '6').node }
-      
+
       before do
         allow(helper).to receive(:systemd_platform?).and_return(false)
       end
@@ -158,7 +158,7 @@ describe CookbookTemplate::Helpers do
     it 'merges default and custom variables' do
       custom_vars = { 'custom_key' => 'custom_value' }
       result = helper.render_config(custom_vars)
-      
+
       expect(result).to include('cookbook_name' => 'test-cookbook')
       expect(result).to include('node_name' => 'test-node')
       expect(result).to include('custom_key' => 'custom_value')

@@ -22,7 +22,7 @@ module CookbookTemplate
   module Helpers
     # Platform detection helpers
     def systemd_platform?
-      platform_family?('rhel', 'debian', 'suse') && 
+      platform_family?('rhel', 'debian', 'suse') &&
         (platform?('ubuntu') && node['platform_version'].to_f >= 15.04) ||
         (platform?('debian') && node['platform_version'].to_i >= 8) ||
         (platform_family?('rhel') && node['platform_version'].to_i >= 7) ||
@@ -61,7 +61,7 @@ module CookbookTemplate
     def port_open?(host, port, timeout = 5)
       require 'socket'
       require 'timeout'
-      
+
       Timeout.timeout(timeout) do
         TCPSocket.new(host, port).close
         true

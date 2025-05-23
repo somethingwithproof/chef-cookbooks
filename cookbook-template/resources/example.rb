@@ -193,18 +193,18 @@ action_class do
   def platform_uses_systemd?
     %w(ubuntu debian centos rhel rocky amazonlinux opensuse).include?(node['platform']) &&
       node['platform_version'].to_f >= case node['platform']
-                                        when 'ubuntu'
-                                          15.04
-                                        when 'debian'
-                                          8.0
-                                        when 'centos', 'rhel', 'rocky'
-                                          7.0
-                                        when 'amazonlinux'
-                                          2.0
-                                        when 'opensuse'
-                                          42.0
-                                        else
-                                          0.0
-                                        end
+                                       when 'ubuntu'
+                                         15.04
+                                       when 'debian'
+                                         8.0
+                                       when 'centos', 'rhel', 'rocky'
+                                         7.0
+                                       when 'amazonlinux'
+                                         2.0
+                                       when 'opensuse'
+                                         42.0
+                                       else
+                                         0.0
+                                       end
   end
 end

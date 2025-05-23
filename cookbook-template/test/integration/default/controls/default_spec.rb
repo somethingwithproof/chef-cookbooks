@@ -56,10 +56,10 @@ end
 
 # Test systemd service file (if applicable)
 if os.family == 'redhat' && os.release.to_i >= 7 ||
-   os.family == 'debian' && 
+   os.family == 'debian' &&
    ((os.name == 'ubuntu' && os.release.to_f >= 15.04) ||
     (os.name == 'debian' && os.release.to_i >= 8))
-  
+
   describe file('/etc/systemd/system/example-service.service') do
     it { should exist }
     it { should be_file }
@@ -116,9 +116,9 @@ describe command('systemctl is-active example-service') do
   its('stdout') { should match(/active|inactive/) }
   its('exit_status') { should be_in [0, 3] } # 0 = active, 3 = inactive
 end if os.family == 'redhat' && os.release.to_i >= 7 ||
-      os.family == 'debian' && 
-      ((os.name == 'ubuntu' && os.release.to_f >= 15.04) ||
-       (os.name == 'debian' && os.release.to_i >= 8))
+       os.family == 'debian' &&
+       ((os.name == 'ubuntu' && os.release.to_f >= 15.04) ||
+        (os.name == 'debian' && os.release.to_i >= 8))
 
 # Test idempotency - configuration should not change on second run
 describe file('/etc/example-service/service.conf') do

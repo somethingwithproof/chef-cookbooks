@@ -12,7 +12,7 @@ SimpleCov.start do
   add_group 'Recipes', 'recipes'
   add_group 'Libraries', 'libraries'
   add_group 'Attributes', 'attributes'
-  
+
   minimum_coverage 80
   refuse_coverage_drop
 end
@@ -34,7 +34,7 @@ PLATFORMS = {
     platform_family: 'debian'
   },
   'ubuntu-22.04' => {
-    platform: 'ubuntu', 
+    platform: 'ubuntu',
     version: '22.04',
     platform_family: 'debian'
   },
@@ -81,7 +81,7 @@ end
 # Shared examples for platform testing
 RSpec.shared_examples 'cookbook template platform' do |platform_name|
   let(:platform_config) { PLATFORMS[platform_name] }
-  
+
   let(:chef_run) do
     ChefSpec::SoloRunner.new(
       platform: platform_config[:platform],

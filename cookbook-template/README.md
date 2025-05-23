@@ -7,7 +7,7 @@ Modern Chef cookbook template with best practices for Chef 19+ development.
 
 ## Features
 
-- **Chef 19+ Compatible**: Leverages the latest Chef Infra features and patterns
+- **Chef 18+ Compatible**: Leverages modern Chef Infra features and patterns
 - **Modern Testing**: Comprehensive testing with ChefSpec, InSpec, and Test Kitchen
 - **Docker-based Testing**: Fast, consistent testing environments with kitchen-dokken
 - **Continuous Integration**: GitHub Actions workflows for automated testing and deployment

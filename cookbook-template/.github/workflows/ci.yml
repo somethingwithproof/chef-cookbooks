@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        chef-version: ['19', '18']
+        chef-version: ['18', '17']
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -63,7 +63,7 @@ jobs:
         run: bundle exec rspec --format json --out rspec.json
         
       - name: Upload coverage to Codecov
-        if: matrix.chef-version == '19'
+        if: matrix.chef-version == '18'
         uses: codecov/codecov-action@v3
         with:
           files: ./coverage/coverage.xml

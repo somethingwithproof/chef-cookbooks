@@ -3,17 +3,17 @@
 source 'https://rubygems.org'
 
 # Core Chef development tools
-gem 'chef', '~> 19.0'
+gem 'chef', '~> 18.7'
 gem 'chef-cli', '~> 5.6'
 
 # Testing frameworks
 gem 'chefspec', '~> 9.3'
-gem 'inspec', '~> 5.22'
+gem 'inspec', '~> 5.21'
 gem 'test-kitchen', '~> 3.5'
 
 # Test Kitchen drivers
-gem 'kitchen-dokken', '~> 2.20'
-gem 'kitchen-inspec', '~> 2.7'
+gem 'kitchen-dokken', '~> 2.18'
+gem 'kitchen-inspec', '~> 2.6'
 
 # Code quality and linting
 gem 'cookstyle', '~> 7.32'

@@ -8,7 +8,7 @@ provisioner:
   name: chef_zero
   chef_license: accept-no-persist
   product_name: chef
-  product_version: 19
+  product_version: 18
   install_strategy: always
   multiple_converge: 2
   enforce_idempotency: true
