@@ -8,11 +8,11 @@ gem 'chef-cli', '~> 5.6'
 
 # Testing frameworks
 gem 'chefspec', '~> 9.3'
-gem 'inspec', '~> 5.21'
-gem 'test-kitchen', '~> 3.5'
+gem 'inspec', '~> 5.22'
+gem 'test-kitchen', '~> 3.7'
 
 # Test Kitchen drivers
-gem 'kitchen-dokken', '~> 2.18'
+gem 'kitchen-dokken', '~> 2.20'
 gem 'kitchen-inspec', '~> 2.6'
 
 # Code quality and linting

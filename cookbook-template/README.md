@@ -72,12 +72,10 @@ bundle exec cookstyle
 
 This cookbook supports the following platforms:
 
-- **Ubuntu**: 20.04, 22.04
-- **Debian**: 10, 11
-- **CentOS**: 7, 8
-- **Rocky Linux**: 8, 9
-- **Amazon Linux**: 2
-- **openSUSE Leap**: 15
+- **Ubuntu**: 22.04, 24.04 LTS
+- **Debian**: 12 (Bookworm)
+- **Rocky Linux**: 9
+- **Amazon Linux**: 2023
 
 ## Resources
 

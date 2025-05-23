@@ -21,6 +21,14 @@ transport:
   name: dokken
 
 platforms:
+  - name: ubuntu-24.04
+    driver:
+      image: dokken/ubuntu-24.04
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - RUN /usr/bin/apt-get update
+        - RUN /usr/bin/apt-get install -y sudo lsb-release
+
   - name: ubuntu-22.04
     driver:
       image: dokken/ubuntu-22.04
@@ -29,35 +37,22 @@ platforms:
         - RUN /usr/bin/apt-get update
         - RUN /usr/bin/apt-get install -y sudo lsb-release
 
-  - name: ubuntu-20.04
+  - name: debian-12
     driver:
-      image: dokken/ubuntu-20.04
+      image: dokken/debian-12
       pid_one_command: /bin/systemd
       intermediate_instructions:
         - RUN /usr/bin/apt-get update
         - RUN /usr/bin/apt-get install -y sudo lsb-release
 
-  - name: debian-11
+  - name: rockylinux-9
     driver:
-      image: dokken/debian-11
-      pid_one_command: /bin/systemd
-      intermediate_instructions:
-        - RUN /usr/bin/apt-get update
-        - RUN /usr/bin/apt-get install -y sudo lsb-release
-
-  - name: centos-7
-    driver:
-      image: dokken/centos-7
+      image: dokken/rockylinux-9
       pid_one_command: /usr/lib/systemd/systemd
 
-  - name: rockylinux-8
+  - name: amazonlinux-2023
     driver:
-      image: dokken/rockylinux-8
-      pid_one_command: /usr/lib/systemd/systemd
-
-  - name: amazonlinux-2
-    driver:
-      image: dokken/amazonlinux-2
+      image: dokken/amazonlinux-2023
       pid_one_command: /usr/lib/systemd/systemd
 
 suites:

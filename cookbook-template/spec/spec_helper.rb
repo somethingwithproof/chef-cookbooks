@@ -28,9 +28,9 @@ end
 
 # Platform configurations for testing
 PLATFORMS = {
-  'ubuntu-20.04' => {
+  'ubuntu-24.04' => {
     platform: 'ubuntu',
-    version: '20.04',
+    version: '24.04',
     platform_family: 'debian'
   },
   'ubuntu-22.04' => {
@@ -38,24 +38,19 @@ PLATFORMS = {
     version: '22.04',
     platform_family: 'debian'
   },
-  'debian-11' => {
+  'debian-12' => {
     platform: 'debian',
-    version: '11',
+    version: '12',
     platform_family: 'debian'
   },
-  'centos-7' => {
-    platform: 'centos',
-    version: '7',
-    platform_family: 'rhel'
-  },
-  'rockylinux-8' => {
+  'rockylinux-9' => {
     platform: 'rocky',
-    version: '8',
+    version: '9',
     platform_family: 'rhel'
   },
-  'amazonlinux-2' => {
+  'amazonlinux-2023' => {
     platform: 'amazon',
-    version: '2',
+    version: '2023',
     platform_family: 'amazon'
   }
 }.freeze
