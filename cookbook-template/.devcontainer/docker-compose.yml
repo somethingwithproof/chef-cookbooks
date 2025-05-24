@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  chef-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspaces/chef-cookbook:cached
+      - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: /workspaces/chef-cookbook
+    command: sleep infinity
+    privileged: true
+    environment:
+      - CHEF_LICENSE=accept-silent
+      - KITCHEN_LOCAL_YAML=.kitchen.dokken.yml
+    ports:
+      - "3000:3000"
+      - "8080:8080"
+      - "9292:9292"
