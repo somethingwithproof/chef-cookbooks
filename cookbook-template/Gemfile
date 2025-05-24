@@ -17,7 +17,7 @@ gem 'kitchen-docker', '~> 3.0'       # For devcontainer testing (default)
 gem 'kitchen-inspec', '~> 2.6'
 
 # Code quality and linting
-gem 'cookstyle', '~> 7.32'
+gem 'cookstyle', '~> 8.1'
 
 # Development tools
 group :development do
