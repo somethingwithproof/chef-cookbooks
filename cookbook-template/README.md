@@ -17,21 +17,27 @@ Modern Chef cookbook template with best practices for Chef 19+ development.
 
 ## Prerequisites
 
-- **Chef Workstation** 23.10.1040+
-- **Ruby** 3.2.0+ (managed via rbenv/rvm)
-- **Docker** for Test Kitchen integration testing
+- **Docker** for devcontainer development
+- **VS Code** with Dev Containers extension (recommended)
+- Alternative: **Chef Workstation** 23.10.1040+ for native development
 
 ## Quick Start
 
-### Using as Template
+### 🐳 Devcontainer Development (Recommended)
 
-1. Click "Use this template" button on GitHub
-2. Clone your new repository
-3. Update `metadata.rb` with your cookbook details
-4. Replace template content with your cookbook logic
-5. Run tests: `bundle exec rake`
+1. **Clone the repository**: `git clone <your-cookbook-repo>`
+2. **Open in VS Code**: Use "Dev Containers: Open Folder in Container"
+3. **Wait for setup**: Container will automatically install dependencies
+4. **Start developing**: All tools pre-configured and ready
 
-### Development Setup
+```bash
+# Inside devcontainer - everything works out of the box
+cookstyle .                     # Linting
+bundle exec rspec               # Unit tests  
+kitchen test                    # Integration tests (uses devcontainer)
+```
+
+### 🏠 Native Development
 
 ```bash
 # Install dependencies
@@ -43,12 +49,27 @@ bundle exec rake
 # Run specific test suites
 bundle exec cookstyle           # Linting
 bundle exec rspec               # Unit tests
-bundle exec kitchen test        # Integration tests
+KITCHEN_LOCAL_YAML=.kitchen.dokken.yml kitchen test  # Integration tests
 ```
 
 ## Testing
 
-This template includes comprehensive testing at multiple levels:
+This template provides two testing environments:
+
+### 🐳 Devcontainer Testing (Default)
+Uses the same environment as development for consistency:
+```bash
+# Default Test Kitchen configuration uses devcontainer
+kitchen test                    # Uses devcontainer image
+kitchen list                    # Shows devcontainer platforms
+```
+
+### ⚡ CI/CD Testing (Fast)
+Uses dokken driver for faster CI execution:
+```bash
+# For CI/CD or when speed is critical
+KITCHEN_LOCAL_YAML=.kitchen.dokken.yml kitchen test
+```
 
 ### Unit Tests (ChefSpec)
 Fast, isolated tests for cookbook logic:
@@ -56,17 +77,16 @@ Fast, isolated tests for cookbook logic:
 bundle exec rspec
 ```
 
-### Integration Tests (InSpec + Test Kitchen)
-Full convergence testing in Docker containers:
-```bash
-bundle exec kitchen test
-```
-
 ### Linting (Cookstyle)
 Code quality and style enforcement:
 ```bash
 bundle exec cookstyle
 ```
+
+### Testing Environments
+- **Local Development**: devcontainer (consistent with dev environment)
+- **CI/CD Pipeline**: dokken (optimized for speed)
+- **Both support**: Multi-platform testing with same test suites
 
 ## Platform Support
 

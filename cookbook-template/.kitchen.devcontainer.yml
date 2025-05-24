@@ -1,16 +1,14 @@
 ---
-# Default Test Kitchen configuration using devcontainer
-# For local development: kitchen test
-# For CI/CD: KITCHEN_LOCAL_YAML=.kitchen.dokken.yml kitchen test
-
 driver:
   name: docker
   privileged: true
   use_sudo: false
-  build_context: .
+  build_context: .devcontainer
   dockerfile: .devcontainer/Dockerfile
-  image: chef-cookbook-devcontainer
   platform: linux/amd64
+  provision_command:
+    - apt-get update
+    - apt-get install -y systemd
   run_command: /sbin/init
   volume:
     - /sys/fs/cgroup:/sys/fs/cgroup:rw
@@ -35,9 +33,28 @@ provisioner:
 
 verifier:
   name: inspec
+  inspec_tests:
+    - test/integration/default
+
+transport:
+  name: docker
 
 platforms:
-  - name: devcontainer-ubuntu
+  - name: devcontainer-ubuntu-2204
+    driver:
+      image: chef-cookbook-devcontainer
+      platform: linux/amd64
+      run_command: /sbin/init
+      privileged: true
+      
+  - name: devcontainer-ubuntu-2404
+    driver:
+      image: chef-cookbook-devcontainer
+      platform: linux/amd64
+      run_command: /sbin/init
+      privileged: true
+
+  - name: devcontainer-debian-12
     driver:
       image: chef-cookbook-devcontainer
       platform: linux/amd64
@@ -47,12 +64,8 @@ platforms:
 suites:
   - name: default
     run_list:
-      - recipe[cookbook-template::default]
+      - recipe[<%= File.basename(Dir.pwd).gsub('-cookbook', '') %>::default]
     verifier:
       inspec_tests:
         - test/integration/default
     attributes:
-      cookbook_template:
-        service:
-          port: 8080
-          enabled: true
