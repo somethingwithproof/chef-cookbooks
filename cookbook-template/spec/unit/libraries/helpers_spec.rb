@@ -31,11 +31,11 @@ describe CookbookTemplate::Helpers do
       end
     end
 
-    context 'on Ubuntu 14.04' do
-      let(:node) { ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04').node }
+    context 'on Ubuntu 20.04' do
+      let(:node) { ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '20.04').node }
 
-      it 'returns false' do
-        expect(helper.systemd_platform?).to be false
+      it 'returns true' do
+        expect(helper.systemd_platform?).to be true
       end
     end
 
@@ -67,15 +67,15 @@ describe CookbookTemplate::Helpers do
       end
     end
 
-    context 'on Ubuntu 14.04' do
-      let(:node) { ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04').node }
+    context 'on legacy system' do
+      let(:node) { ChefSpec::SoloRunner.new(platform: 'centos', version: '6').node }
 
       before do
         allow(helper).to receive(:systemd_platform?).and_return(false)
       end
 
-      it 'returns upstart' do
-        expect(helper.service_manager).to eq('upstart')
+      it 'returns sysvinit' do
+        expect(helper.service_manager).to eq('sysvinit')
       end
     end
 

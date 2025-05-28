@@ -23,7 +23,7 @@ RSpec.configure do |config|
   config.formatter = :documentation
   config.log_level = :error
   config.file_cache_path = '/tmp/chef-cache'
-  config.cookbook_path = [File.expand_path('../../', __FILE__)]
+  config.cookbook_path = [File.expand_path('..', __dir__)]
 end
 
 # Platform configurations for testing
@@ -31,28 +31,28 @@ PLATFORMS = {
   'ubuntu-24.04' => {
     platform: 'ubuntu',
     version: '24.04',
-    platform_family: 'debian'
+    platform_family: 'debian',
   },
   'ubuntu-22.04' => {
     platform: 'ubuntu',
     version: '22.04',
-    platform_family: 'debian'
+    platform_family: 'debian',
   },
   'debian-12' => {
     platform: 'debian',
     version: '12',
-    platform_family: 'debian'
+    platform_family: 'debian',
   },
   'rockylinux-9' => {
     platform: 'rocky',
     version: '9',
-    platform_family: 'rhel'
+    platform_family: 'rhel',
   },
   'amazonlinux-2023' => {
     platform: 'amazon',
     version: '2023',
-    platform_family: 'amazon'
-  }
+    platform_family: 'amazon',
+  },
 }.freeze
 
 # Helper methods for specs

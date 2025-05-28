@@ -12,7 +12,7 @@ chef_version '>= 18.0'
 supports 'ubuntu', '>= 22.04'
 supports 'debian', '>= 12.0'
 supports 'rocky', '>= 9.0'
-supports 'amazonlinux', '>= 2023'
+supports 'amazon', '>= 2023.0'
 
 # Source code
 source_url 'https://github.com/thomasvincent/chef-cookbook-template'

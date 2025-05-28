@@ -24,20 +24,8 @@ default['cookbook_template']['service']['user'] = 'app'
 default['cookbook_template']['service']['group'] = 'app'
 
 # Package configuration - platform specific defaults
-case node['platform_family']
-when 'debian'
-  default['cookbook_template']['package']['name'] = 'example-service'
-  default['cookbook_template']['service']['name'] = 'example-service'
-when 'rhel', 'fedora', 'amazon'
-  default['cookbook_template']['package']['name'] = 'example-service'
-  default['cookbook_template']['service']['name'] = 'example-service'
-when 'suse'
-  default['cookbook_template']['package']['name'] = 'example-service'
-  default['cookbook_template']['service']['name'] = 'example-service'
-else
-  default['cookbook_template']['package']['name'] = 'example-service'
-  default['cookbook_template']['service']['name'] = 'example-service'
-end
+default['cookbook_template']['package']['name'] = 'example-service'
+default['cookbook_template']['service']['name'] = 'example-service'
 
 # Configuration file settings
 default['cookbook_template']['config']['template'] = 'service.conf.erb'

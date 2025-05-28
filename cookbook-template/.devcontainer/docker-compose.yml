@@ -1,20 +1,41 @@
-version: '3.8'
-
 services:
   chef-dev:
     build:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ..:/workspaces/chef-cookbook:cached
+      - ..:/workspace:cached
+      - ~/.ssh:/home/chef/.ssh:ro
       - /var/run/docker.sock:/var/run/docker.sock
-    working_dir: /workspaces/chef-cookbook
-    command: sleep infinity
-    privileged: true
     environment:
-      - CHEF_LICENSE=accept-silent
-      - KITCHEN_LOCAL_YAML=.kitchen.dokken.yml
-    ports:
-      - "3000:3000"
-      - "8080:8080"
-      - "9292:9292"
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    command: sleep infinity
+    network_mode: bridge
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+    privileged: true
+
+  # Test Kitchen target containers can be added here
+  # Example Ubuntu test target
+  test-ubuntu:
+    image: ubuntu:22.04
+    command: sleep infinity
+    networks:
+      - chef-test
+    depends_on:
+      - chef-dev
+
+  # Example Rocky Linux test target (CentOS 8 replacement)
+  test-rocky:
+    image: rockylinux:8
+    command: sleep infinity
+    networks:
+      - chef-test
+    depends_on:
+      - chef-dev
+
+networks:
+  chef-test:
+    driver: bridge

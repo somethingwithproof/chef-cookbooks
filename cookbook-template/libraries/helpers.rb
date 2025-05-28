@@ -33,7 +33,7 @@ module CookbookTemplate
     def service_manager
       return 'systemd' if systemd_platform?
       return 'upstart' if platform?('ubuntu') && node['platform_version'].to_f < 15.04
-      return 'sysvinit'
+      'sysvinit'
     end
 
     # Configuration helpers
@@ -88,7 +88,7 @@ module CookbookTemplate
       default_vars = {
         cookbook_name: cookbook_name,
         node_name: node.name,
-        timestamp: Time.now.strftime('%Y-%m-%d %H:%M:%S %Z')
+        timestamp: Time.now.strftime('%Y-%m-%d %H:%M:%S %Z'),
       }
       default_vars.merge(template_vars)
     end
@@ -105,5 +105,5 @@ module CookbookTemplate
 end
 
 # Include helpers in Chef::Recipe and Chef::Resource
-Chef::Recipe.include(CookbookTemplate::Helpers)
+Chef::DSL::Recipe.include(CookbookTemplate::Helpers)
 Chef::Resource.include(CookbookTemplate::Helpers)

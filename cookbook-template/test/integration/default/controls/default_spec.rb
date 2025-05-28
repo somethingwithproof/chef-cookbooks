@@ -74,7 +74,7 @@ end
 
 # Test port accessibility (if service supports it)
 describe port(8080) do
-  # Note: This test might fail if the example service doesn't actually bind to the port
+  # NOTE: This test might fail if the example service doesn't actually bind to the port
   # Comment out or modify based on actual service behavior
   # it { should be_listening }
   # its('protocols') { should include 'tcp' }
