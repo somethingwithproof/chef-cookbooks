@@ -4,7 +4,7 @@ describe 'r-language::packages' do
   context 'with packages defined' do
     let(:chef_run) do
       ChefSpec::SoloRunner.new do |node|
-        node.normal['r-language']['packages'] = ['dplyr', 'ggplot2']
+        node.normal['r-language']['packages'] = %w(dplyr ggplot2)
         node.normal['r-language']['cran_mirror'] = 'https://cloud.r-project.org'
       end.converge(described_recipe)
     end
@@ -17,7 +17,7 @@ describe 'r-language::packages' do
         mode: '0755',
         variables: {
           cran_mirror: 'https://cloud.r-project.org',
-          packages: ['dplyr', 'ggplot2']
+          packages: %w(dplyr ggplot2),
         }
       )
     end
@@ -57,7 +57,7 @@ describe 'r-language::packages' do
       expect(chef_run).to create_template("#{Chef::Config[:file_cache_path]}/install_r_packages.R").with(
         variables: {
           cran_mirror: 'https://cran.rstudio.com',
-          packages: ['dplyr']
+          packages: ['dplyr'],
         }
       )
     end

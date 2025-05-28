@@ -37,7 +37,7 @@ describe 'r-language::default' do
     let(:chef_run) do
       ChefSpec::SoloRunner.new do |node|
         node.normal['r-language']['install_method'] = 'package'
-        node.normal['r-language']['packages'] = ['dplyr', 'ggplot2']
+        node.normal['r-language']['packages'] = %w(dplyr ggplot2)
       end.converge(described_recipe)
     end
 

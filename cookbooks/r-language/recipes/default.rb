@@ -12,10 +12,8 @@ when 'package'
 when 'source'
   include_recipe 'r-language::source'
 else
-  Chef::Application.fatal!("Invalid install method specified: #{node['r-language']['install_method']}. Please use 'package' or 'source'.")
+  raise("Invalid install method specified: #{node['r-language']['install_method']}. Please use 'package' or 'source'.")
 end
 
 # Install additional R packages if specified
-unless node['r-language']['packages'].empty?
-  include_recipe 'r-language::packages'
-end
+include_recipe 'r-language::packages' unless node['r-language']['packages'].empty?

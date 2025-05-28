@@ -6,7 +6,7 @@
 #
 # Installs R programming language from source
 
-include_recipe 'build-essential'
+build_essential 'install compilation tools'
 
 # Install build dependencies
 case node['platform_family']
@@ -55,28 +55,28 @@ end
 # Set the R version and url
 r_version = node['r-language']['version'] || '4.3.1'
 r_url = node['r-language']['source_url'] || "https://cran.r-project.org/src/base/R-#{r_version.split('.').first}/R-#{r_version}.tar.gz"
-r_checksum = node['r-language']['source_checksum']
+node['r-language']['source_checksum']
 
 # Download and extract R source code
 source_dir = "/tmp/R-#{r_version}"
-bash "extract_r_source" do
-  cwd "/tmp"
+bash 'extract_r_source' do
+  cwd '/tmp'
   code <<-EOH
     curl -sSL #{r_url} -o r-#{r_version}.tar.gz
     tar -xzf r-#{r_version}.tar.gz
   EOH
-  not_if { ::File.exist?("/usr/local/bin/R") && `/usr/local/bin/R --version`.include?(r_version) }
+  not_if { File.exist?('/usr/local/bin/R') && `/usr/local/bin/R --version`.include?(r_version) }
 end
 
 # Configure and build R
-bash "build_and_install_r" do
+bash 'build_and_install_r' do
   cwd source_dir
   code <<-EOH
     ./configure #{node['r-language']['source']['configure_options'].join(' ')}
     make
     make install
   EOH
-  not_if { ::File.exist?("/usr/local/bin/R") && `/usr/local/bin/R --version`.include?(r_version) }
+  not_if { File.exist?('/usr/local/bin/R') && `/usr/local/bin/R --version`.include?(r_version) }
 end
 
 # Clean up source files

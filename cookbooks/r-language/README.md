@@ -4,22 +4,26 @@ A Chef cookbook that installs and configures R programming language. R is a syst
 
 ## Supported Platforms
 
-- Ubuntu 18.04+
-- Debian 10+
-- CentOS 7+
-- Red Hat Enterprise Linux 7+
-- Amazon Linux 2+
-- Fedora 30+
+- Amazon Linux 2.x, 2023
+- Debian 10.x, 11.x
+- FreeBSD 13.x
+- macOS 12.x, 13.x, 14.x
+- Oracle Enterprise Linux 7.x, 8.x
+- Red Hat Enterprise Linux (RHEL) 7.x, 8.x, 9.x
+- Rocky Linux 8.x, 9.x
+- SUSE Linux Enterprise Server (SLES) 12.x, 15.x
+- Ubuntu (LTS releases) 18.04, 20.04, 22.04
+- Windows 10, 11, Server 2016, 2019, 2022
 
 ## Supported Chef Versions
 
-- Chef 15+
+- Chef Infra Client 18+
 
 ## Dependencies
 
-- `apt` cookbook (>= 7.0)
-- `yum` cookbook (>= 5.0)
-- `build-essential` cookbook (>= 8.0)
+- `apt` cookbook (>= 8.0)
+- `yum` cookbook (>= 8.0)
+- `build-essential` cookbook (>= 9.0)
 
 ## Attributes
 

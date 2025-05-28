@@ -22,7 +22,7 @@ describe 'r_package' do
           package_name: 'dplyr',
           version: nil,
           repo: 'https://cloud.r-project.org',
-          bioc: false
+          bioc: false,
         }
       )
     end
@@ -48,7 +48,7 @@ describe 'r_package' do
           package_name: 'dplyr',
           version: '1.0.0',
           repo: 'https://cloud.r-project.org',
-          bioc: false
+          bioc: false,
         }
       )
     end
@@ -68,7 +68,7 @@ describe 'r_package' do
           package_name: 'dplyr',
           version: nil,
           repo: 'https://cran.rstudio.com',
-          bioc: false
+          bioc: false,
         }
       )
     end
@@ -88,7 +88,7 @@ describe 'r_package' do
           package_name: 'DESeq2',
           version: nil,
           repo: 'https://cloud.r-project.org',
-          bioc: true
+          bioc: true,
         }
       )
     end

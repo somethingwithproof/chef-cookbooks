@@ -1,5 +1,12 @@
 # R Language Cookbook Changelog
 
+## 0.3.0 (2025-05-10)
+
+- Updated cookbook for Chef 16+ compatibility
+- Removed foodcritic dependency in favor of Cookstyle
+- Updated dependency versions for newer Chef releases
+- Added dependabot configuration for automated dependency management
+
 ## 0.2.0 (2025-05-09)
 
 - Complete rewrite of the cookbook with modern Chef practices

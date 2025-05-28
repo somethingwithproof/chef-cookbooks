@@ -21,13 +21,12 @@ when 'debian'
     end
 
     # Determine which repository to use
-    if node['platform'] == 'ubuntu'
-      codename = node['lsb']['codename']
+    codename = node['lsb']['codename']
+    if platform?('ubuntu')
       repo = "#{node['r-language']['ubuntu']['repo']} #{codename}-cran40/"
       key = node['r-language']['ubuntu']['key']
       keyserver = node['r-language']['ubuntu']['keyserver']
     else # debian
-      codename = node['lsb']['codename']
       repo = "#{node['r-language']['debian']['repo']} #{codename}-cran40/"
       key = node['r-language']['debian']['key']
       keyserver = node['r-language']['debian']['keyserver']
@@ -64,7 +63,7 @@ when 'debian'
 
 when 'rhel', 'fedora', 'amazon'
   # Set up EPEL repository if on RHEL platform and repository is enabled
-  if node['r-language']['enable_repo'] && ['rhel', 'amazon'].include?(platform_family)
+  if node['r-language']['enable_repo'] && %w(rhel amazon).include?(platform_family)
     yum_repository 'epel' do
       description 'Extra Packages for Enterprise Linux'
       baseurl 'https://download.fedoraproject.org/pub/epel/$releasever/$basearch/'

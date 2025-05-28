@@ -1,36 +1,47 @@
 ---
 driver:
-  name: docker
-  use_sudo: false
+  name: dokken
+  chef_version: 18
   privileged: true
-  provision_command:
-    - systemctl enable sshd || true
+  env: [CHEF_LICENSE=accept]
+
+transport:
+  name: dokken
 
 provisioner:
-  name: chef_infra
-  chef_license: accept
-  product_name: chef
-  product_version: 16
+  name: dokken
+  cleanup_on_failure: false
   multiple_converge: 2
   enforce_idempotency: true
-  deprecations_as_errors: true
 
 verifier:
   name: inspec
 
 platforms:
   - name: ubuntu-20.04
-    driver_config:
-      run_command: /usr/lib/systemd/systemd
+    driver:
+      image: dokken/ubuntu-20.04
+      pid_one_command: /bin/systemd
   - name: ubuntu-22.04
-    driver_config:
-      run_command: /usr/lib/systemd/systemd
+    driver:
+      image: dokken/ubuntu-22.04
+      pid_one_command: /bin/systemd
   - name: debian-11
-    driver_config:
-      run_command: /usr/lib/systemd/systemd
-  - name: centos-stream-8
-    driver_config:
-      run_command: /usr/lib/systemd/systemd
+    driver:
+      image: dokken/debian-11
+      pid_one_command: /bin/systemd
+  - name: rockylinux-8
+    driver:
+      image: dokken/rockylinux-8
+      pid_one_command: /bin/systemd
+  - name: amazonlinux-2
+    driver:
+      image: dokken/amazonlinux-2
+      pid_one_command: /bin/systemd
+  - name: opensuse-leap-15
+    driver:
+      image: dokken/opensuse-leap-15
+      pid_one_command: /bin/systemd
 
 suites:
   - name: default

@@ -1,9 +1,9 @@
 AllCops:
   Exclude:
-    - 'vendor/**/*'
-    - 'spec/fixtures/**/*'
-    - '.kitchen/**/*'
-    - 'bin/**/*'
+    - "vendor/**/*"
+    - "spec/fixtures/**/*"
+    - ".kitchen/**/*"
+    - "bin/**/*"
   NewCops: enable
 
 Layout/LineLength:
@@ -17,8 +17,8 @@ Style/FrozenStringLiteralComment:
 
 Metrics/BlockLength:
   Exclude:
-    - 'spec/**/*'
-    - 'test/**/*'
+    - "spec/**/*"
+    - "test/**/*"
 
 Metrics/AbcSize:
   Max: 40

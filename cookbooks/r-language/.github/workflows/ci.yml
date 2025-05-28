@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, feature/*]
+    tags:
+      - v*
+  pull_request:
+    branches: [main, master]
+  schedule:
+    - cron: "0 1 * * *"
+
+jobs:
+  lint:
+    name: Cookstyle
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+      - name: Run Cookstyle
+        run: bundle exec cookstyle
+
+  unit:
+    name: Unit Tests
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+      - name: Run unit tests
+        run: bundle exec rspec
+
+  integration:
+    name: Integration Tests
+    needs: unit
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os:
+          [
+            "ubuntu-22.04",
+            "debian-11",
+            "rockylinux-8",
+            "amazonlinux-2",
+            "opensuse-leap-15",
+          ]
+        suite: ["default", "packages"]
+      fail-fast: false
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+      - name: Install Chef
+        uses: actionshub/chef-install@main
+        with:
+          channel: stable
+          version: 18
+      - name: Test Kitchen
+        run: |
+          chef gem install kitchen-dokken
+          KITCHEN_LOCAL_YAML=kitchen.yml kitchen test ${{ matrix.suite }}-${{ matrix.os }}
+        env:
+          CHEF_LICENSE: accept-no-persist
+
+  release:
+    name: Supermarket Release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [integration]
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Install Chef Workstation
+        uses: actionshub/chef-install@main
+        with:
+          channel: stable
+          version: 18
+      - name: Get the version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+      - name: Create Changelog
+        run: |
+          git log $(git describe --tags --abbrev=0 HEAD^)..HEAD --oneline > CHANGELOG.md
+      - name: Publish to Supermarket
+        run: |
+          mkdir -p ~/.chef
+          echo "${{ secrets.CHEF_KEY }}" > ~/.chef/key.pem
+          cat > ~/.chef/credentials <<EOF
+          [default]
+          client_name = '${{ secrets.CHEF_USERNAME }}'
+          client_key = '~/.chef/key.pem'
+          chef_server_url = 'https://api.chef.io/organizations/${{ secrets.CHEF_ORG }}'
+          EOF
+          knife supermarket share r-language -m "Release v${{ env.VERSION }}" --cookbook-path .
+        env:
+          CHEF_LICENSE: accept-no-persist

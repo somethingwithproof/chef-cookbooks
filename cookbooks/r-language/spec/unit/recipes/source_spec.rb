@@ -14,7 +14,7 @@ describe 'r-language::source' do
     end
 
     it 'includes the build-essential recipe' do
-      expect(chef_run).to include_recipe('build-essential')
+      expect(chef_run).to build_essential 'install compilation tools'
     end
 
     it 'installs required build dependencies' do
