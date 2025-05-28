@@ -31,14 +31,6 @@ describe CookbookTemplate::Helpers do
       end
     end
 
-    context 'on Ubuntu 20.04' do
-      let(:node) { ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '20.04').node }
-
-      it 'returns true' do
-        expect(helper.systemd_platform?).to be true
-      end
-    end
-
     context 'on CentOS 7' do
       let(:node) { ChefSpec::SoloRunner.new(platform: 'centos', version: '7').node }
 

@@ -10,6 +10,10 @@ on:
     # Run daily at 2 AM UTC for dependency security scanning
     - cron: '0 2 * * *'
 
+permissions:
+  contents: read
+  security-events: write
+
 env:
   CHEF_LICENSE: accept-no-persist
 
@@ -31,7 +35,7 @@ jobs:
         run: bundle exec cookstyle
         
       - name: Validate metadata.rb
-        run: bundle exec chef generate cookbook --help > /dev/null
+        run: bundle exec ruby -c metadata.rb
 
   unit:
     name: Unit Tests

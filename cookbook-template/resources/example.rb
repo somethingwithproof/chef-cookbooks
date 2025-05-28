@@ -115,7 +115,7 @@ action :create do
 
   # Configure and start service
   service service_name do
-    action new_resource.enabled ? %i(enable start) : %i(disable stop)
+    action new_resource.enabled ? %i[enable start] : %i[disable stop]
   end
 
   # Create systemd service file if on systemd platform
