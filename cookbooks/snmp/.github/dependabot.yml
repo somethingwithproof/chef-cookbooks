@@ -1,21 +1,24 @@
 version: 2
 updates:
-  - package_manager: bundler
+  - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
-      interval: daily
-    open_pull_requests_limit: 50
-    automerge: true
-    allow_major_updates: true
-    allow_rebase: true
-    allow_rebase_on_stable_branch: true
-    allow_rebase_on_tags: true
+      interval: 'daily'
+    open-pull-requests-limit: 10
     labels:
-      - dependabot
+      - 'dependencies'
+      - 'github-actions'
+
+  - package-ecosystem: 'bundler'
+    directory: '/'
+    schedule:
+      interval: 'daily'
+    open-pull-requests-limit: 10
+    labels:
+      - 'dependencies'
+      - 'bundler'
+      - 'dependabot'
     ignore:
-      - version: '*'
-        package: 'berkshelf'
-      - version: '*'
-        package: 'chefspec'
-      - version: '*'
-        package: 'foodcritic'
+      - dependency-name: 'berkshelf'
+      - dependency-name: 'chefspec'
+      - dependency-name: 'foodcritic'

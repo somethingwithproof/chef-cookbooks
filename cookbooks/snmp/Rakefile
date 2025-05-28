@@ -1,49 +1,31 @@
-#!/usr/bin/env rake
+require 'cookstyle'
+require 'rubocop/rake_task'
+require 'rspec/core/rake_task'
 
-# Load the necessary gems
-begin
-  require 'chefspec'
-  require 'foodcritic'
-  require 'rubocop'
-  require 'kitchen'
-rescue LoadError
-  puts '>>>>> One or more required gems are missing, please run `bundle install` to install them.'
+# Style tests. Rubocop
+desc 'Run Ruby style checks'
+RuboCop::RakeTask.new(:style) do |task|
+  task.options << '--display-cop-names'
 end
 
-# chefspec task against spec/*_spec.rb
-RSpec::Core::RakeTask.new(:chefspec) do |t|
-  t.pattern = 'spec/**/*_spec.rb'
+# Spec tests
+desc 'Run ChefSpec unit tests'
+RSpec::Core::RakeTask.new(:spec) do |task|
+  task.rspec_opts = '--color --format documentation'
 end
 
-# foodcritic linter task
-desc 'Run Foodcritic linter'
-task :foodcritic do
-  sh 'foodcritic -f correctness .'
+# Integration tests. Kitchen.ci
+namespace :integration do
+  desc 'Run Test Kitchen with Vagrant'
+  task :vagrant do
+    sh 'kitchen test'
+  end
+
+  desc 'Run Test Kitchen with Docker'
+  task :docker do
+    sh 'KITCHEN_LOCAL_YAML=.kitchen.docker.yml kitchen test'
+  end
 end
 
-# rubocop linter task
-desc 'Run RuboCop linter'
-task :rubocop do
-  sh 'rubocop --fail-level W'
-end
-
-# test-kitchen task
-desc 'Run Test Kitchen'
-task :test do
-  sh 'kitchen test'
-end
-
-# Deploy task
-desc 'Deploy to the Chef Server and pin to the environment'
-task :deploy do
-  sh 'berks upload'
-  sh 'berks apply ci'
-end
-
-# erubis syntax check task
-desc 'Check Erubis syntax'
-task :erbcheck do
-  sh "erubis -x -T '-' templates/default/*.erb | ruby -c"
-end
-
-#
+# Default
+task default: %w(style spec)

@@ -1,8 +1,7 @@
-# Cookbook Name:: snmp
+# Cookbook:: snmp
 # Recipe:: default
 #
-# Copyright 2010, Eric G. Wolfe
-# Copyright 2023, Thomas Vincent
+# Copyright:: 2010-2023, Eric G. Wolfe, Thomas Vincent
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,67 +16,14 @@
 # limitations under the License.
 
 # SNMP Cookbook - Default Recipe
-# Installs and configures SNMP service based on platform
+# Installs and configures SNMP service using the new custom resource
 
-# Simplified package mappings using platform_family for broader categorization
-package_mappings = {
-  'rhel' => {
-    package: 'net-snmp',
-    service: 'snmpd',
-    conf_file: '/etc/snmp/snmpd.conf'
-  },
-  'debian' => {
-    package: 'snmpd',
-    service: 'snmpd',
-    conf_file: '/etc/snmp/snmpd.conf'
-  },
-  'suse' => {
-    package: 'net-snmp',
-    service: 'snmpd',
-    conf_file: '/etc/snmp/snmpd.conf'
-  },
-  'solaris2' => {
-    package: 'SUNWucsnmp',
-    service: 'svc:/network/snmp/dmi:default',
-    conf_file: '/etc/sma/snmp/snmpd.conf'
-  },
-  'aix' => {
-    package: 'net-snmp',
-    service: 'snmpd',
-    conf_file: '/etc/snmpd.conf'
-  },
-  'mac_os_x' => {
-    package: 'net-snmp',
-    service: 'org.net-snmp.snmpd',
-    conf_file: '/usr/local/etc/snmp/snmpd.conf'
-  }
-}
-
-# Retrieve package info based on platform_family
-platform_family = node['platform_family']
-package_info = package_mappings[platform_family]
-
-# Install SNMP package
-package package_info[:package]
-
-# Configure Debian-specific default file
-template '/etc/default/snmpd' do
-  mode '0644'
-  owner 'root'
-  group 'root'
-  only_if { platform_family == 'debian' }
-end
-
-# Enable and start SNMP service
-service package_info[:service] do
-  action [:start, :enable]
-end
-
-# Configure SNMP with platform-specific configuration file
-template package_info[:conf_file] do
-  mode '0600'
-  owner 'root'
-  group 'root'
-  variables(groups: node['snmp']['groups'].keys.uniq)
-  notifies :restart, "service[#{package_info[:service]}]"
+snmp_install 'default' do
+  community node['snmp']['community']
+  groups node['snmp']['groups']
+  sec_name node['snmp']['sec_name']
+  sec_name6 node['snmp']['sec_name6']
+  trap_community node['snmp']['trap']['community']
+  trap_addresses node['snmp']['trap']['addresses']
+  trap_port node['snmp']['trap']['port']
 end

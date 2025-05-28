@@ -1,13 +1,19 @@
-maintainer 'THomas Vincent'
-maintainer_email 'thomasvincent@gmail.com'
-license 'Apache 2.0'
-description 'Installs/Configures snmp on redhat, centos, ubuntu, debian, windows, aix, solaris2'
-long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 name 'snmp'
-version '4.0.2'
+maintainer 'Thomas Vincent'
+maintainer_email 'thomasvincent@gmail.com'
+license 'Apache-2.0'
+description 'Installs/Configures snmp on redhat, centos, ubuntu, debian'
+version '5.0.0'
+chef_version '>= 18.0', '< 20.0'
 
-recipe 'snmp', 'Installs and configures snmpd'
+supports 'ubuntu', '>= 20.04'
+supports 'debian', '>= 11.0'
+supports 'centos', '>= 8'
+supports 'redhat', '>= 8'
+supports 'scientific', '>= 8'
+supports 'fedora', '>= 34'
+supports 'amazon', '>= 2'
+supports 'suse', '>= 15'
 
-%w(ubuntu debian redhat centos scientific fedora suse).each do |os|
-  supports os
-end
+source_url 'https://github.com/thomasvincent/chef-snmp-cookbook'
+issues_url 'https://github.com/thomasvincent/chef-snmp-cookbook/issues'

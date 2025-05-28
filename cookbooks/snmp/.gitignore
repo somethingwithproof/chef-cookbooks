@@ -1,14 +1,29 @@
-.coverage/
-metadata.json
-*.lock
 .kitchen/
 .kitchen.local.yml
-*.swp
-checkstyle.xml
-Vagrantfile
+kitchen/
+Policyfile.lock.json
+.kitchen.docker.yml
+Berksfile.lock
+.rakeTasks
+.DS_Store
+.bundle/
+vendor/
+.rspec_status
 
-#IDE
+# Editor directories and files
 .idea
-
-.history
 .vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Chef files
+.chef
+.zero-knife.rb
+.envrc
+
+# Log files
+*.log
+EOF < /dev/null

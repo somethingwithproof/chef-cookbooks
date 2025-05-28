@@ -1,12 +1,9 @@
 source 'https://rubygems.org'
 
-gem 'berkshelf', '~> 3.2'
-gem 'chefspec', '~> 4.1'
-gem 'foodcritic', '~> 4.0'
-gem 'rubocop'
-gem 'erubis'
-
-group :integration do
-  gem 'test-kitchen'
-  gem 'kitchen-vagrant'
-end
+gem 'chef', '>= 18.0', '< 20.0'
+gem 'cookstyle', '~> 7.32'
+gem 'chefspec', '~> 9.3'
+gem 'test-kitchen', '~> 3.5'
+gem 'kitchen-dokken', '~> 2.18'  # Preferred over kitchen-docker which lacks maintenance
+gem 'kitchen-inspec', '~> 2.6'
+gem 'inspec', '~> 5.21'
