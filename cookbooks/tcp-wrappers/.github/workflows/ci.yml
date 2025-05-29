@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -23,14 +23,14 @@ jobs:
       - name: Install dependencies
         run: bundle install
       - name: Run Cookstyle
-        run: bundle exec cookstyle --chef-version 18.0
+        run: bundle exec cookstyle --chef-version 19.0
 
   unit-test:
     name: Unit Tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -52,7 +52,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
