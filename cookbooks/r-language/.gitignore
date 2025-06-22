@@ -1,31 +1,68 @@
-.vagrant
-*~
-*#
-.#*
-\#*#
-.*.sw[a-z]
-*.un~
-
-# Bundler
-Gemfile.lock
-gems.locked
-bin/*
-.bundle/*
-
-# test kitchen
+# Test Kitchen
 .kitchen/
 .kitchen.local.yml
+kitchen.local.yml
 
 # Chef
-Berksfile.lock
-.zero-knife.rb
+.chef/
+nodes/
+clients/
+data_bags/
+environments/
+roles/
+
+# Policyfile
 Policyfile.lock.json
 
+# Bundler
+.bundle/
+vendor/bundle/
+Gemfile.lock
+
 # Ruby
-.ruby-version
-.ruby-gemset
+*.gem
+*.rbc
+.config
 coverage/
-node_modules/
-.idea/
+InstalledFiles
+pkg/
+spec/reports/
+test/tmp/
+test/version_tmp/
+tmp/
+
+# OS files
 .DS_Store
+*.swp
+*.swo
+*~
+.#*
+\#*#
+.vagrant/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.sublime-*
+
+# Documentation
+.yardoc/
+_yardoc/
+doc/
+rdoc/
+
+# Berkshelf (legacy - should not exist)
+Berksfile.lock
+.berkshelf/
+berks-cookbooks/
+
+# Testing
+.rspec_status
+.coverage/
+
+# InSpec
+inspec.lock
+
+# Claude settings
 **/.claude/settings.local.json

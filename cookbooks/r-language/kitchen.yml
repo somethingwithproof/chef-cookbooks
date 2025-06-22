@@ -1,48 +1,40 @@
 ---
 driver:
-  name: dokken
-  chef_version: 18
+  name: docker
+  use_sudo: false
   privileged: true
-  env: [CHEF_LICENSE=accept]
-
-transport:
-  name: dokken
 
 provisioner:
-  name: dokken
+  name: policyfile_zero
   policyfile_path: Policyfile.rb
-  cleanup_on_failure: false
-  multiple_converge: 2
-  enforce_idempotency: true
+  chef_license: accept
+  chef_omnibus_version: 18.7.10
+  deprecations_as_errors: true
 
 verifier:
   name: inspec
 
 platforms:
-  - name: ubuntu-20.04
-    driver:
-      image: dokken/ubuntu-20.04
-      pid_one_command: /bin/systemd
   - name: ubuntu-22.04
     driver:
-      image: dokken/ubuntu-22.04
-      pid_one_command: /bin/systemd
-  - name: debian-11
+      image: ubuntu:22.04
+      platform: ubuntu
+  - name: ubuntu-24.04
     driver:
-      image: dokken/debian-11
-      pid_one_command: /bin/systemd
-  - name: rockylinux-8
+      image: ubuntu:24.04
+      platform: ubuntu
+  - name: debian-12
     driver:
-      image: dokken/rockylinux-8
-      pid_one_command: /bin/systemd
-  - name: amazonlinux-2
+      image: debian:12
+      platform: debian
+  - name: centos-9
     driver:
-      image: dokken/amazonlinux-2
-      pid_one_command: /bin/systemd
-  - name: opensuse-leap-15
+      image: quay.io/centos/centos:stream9
+      platform: centos
+  - name: rockylinux-9
     driver:
-      image: dokken/opensuse-leap-15
-      pid_one_command: /bin/systemd
+      image: rockylinux:9
+      platform: rockylinux
 
 suites:
   - name: default

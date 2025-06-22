@@ -1,0 +1,19 @@
+name: r-language-default
+title: R Language Cookbook Default Tests
+maintainer: Thomas Vincent
+copyright: Thomas Vincent
+copyright_email: thomasvincent@github.com
+license: MIT
+summary: Verify R installation and basic functionality
+version: 1.0.0
+supports:
+  - platform-name: ubuntu
+    release: 22.04
+  - platform-name: ubuntu
+    release: 24.04
+  - platform-name: debian
+    release: 12.*
+  - platform-name: centos
+    release: 9.*
+  - platform-name: rocky
+    release: 9.*

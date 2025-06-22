@@ -3,8 +3,8 @@ maintainer 'Thomas Vincent'
 maintainer_email 'thomasvincent@github.com'
 license 'MIT'
 description 'Installs/Configures R programming language'
-version '0.4.0'
-chef_version '>= 18.0'
+version '1.0.0'
+chef_version '>= 18.7'
 
 # Chef 19+ has built-in package management
 

@@ -1,4 +1,4 @@
-# Rubocop configuration for Chef 18 cookbooks
+# Rubocop configuration for Chef 18.7 cookbooks
 inherit_gem:
   cookstyle: config/cookstyle.yml
 
@@ -11,33 +11,7 @@ AllCops:
     - ".kitchen/**/*"
     - "bin/**/*"
     - "berks-cookbooks/**/*"
-
-Layout/LineLength:
-  Max: 120
-
-Style/Documentation:
-  Enabled: false
-
-Style/FrozenStringLiteralComment:
-  Enabled: false
-
-Metrics/BlockLength:
-  Exclude:
-    - "spec/**/*"
-    - "test/**/*"
-
-Metrics/AbcSize:
-  Max: 40
-
-Metrics/MethodLength:
-  Max: 40
-
-Style/NumericLiterals:
-  Enabled: false
-
-Style/StringLiterals:
-  Enabled: true
-  EnforcedStyle: single_quotes
+    - "test/fixtures/**/*"
 
 # Chef specific cops
 Chef/Deprecations:
@@ -48,3 +22,45 @@ Chef/Correctness:
 
 Chef/Modernize:
   Enabled: true
+
+Chef/RedundantCode:
+  Enabled: true
+
+Chef/Sharing:
+  Enabled: true
+
+Chef/Style:
+  Enabled: true
+
+# Layout customizations
+Layout/LineLength:
+  Max: 120
+  Exclude:
+    - "metadata.rb"
+
+# Metrics customizations
+Metrics/BlockLength:
+  Exclude:
+    - "spec/**/*"
+    - "test/**/*"
+    - "Policyfile.rb"
+
+Metrics/AbcSize:
+  Max: 40
+
+Metrics/MethodLength:
+  Max: 40
+
+# Style preferences
+Style/Documentation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/NumericLiterals:
+  Enabled: false
+
+Style/StringLiterals:
+  Enabled: true
+  EnforcedStyle: single_quotes

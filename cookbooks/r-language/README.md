@@ -1,23 +1,46 @@
 # R Language Cookbook
 
-A Chef cookbook that installs and configures R programming language. R is a system for statistical computation and graphics.
+[![Chef Version](https://img.shields.io/badge/chef-18.7.10%2B-blue.svg)](https://www.chef.io)
+[![Test Kitchen](https://img.shields.io/badge/test--kitchen-docker-green.svg)](https://kitchen.ci)
+[![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
 
-## Supported Platforms
+A modern Chef cookbook that installs and configures the R programming language. This cookbook follows Chef 18.7.10+ best practices with Policyfile-driven configuration and Docker-based testing.
 
-- Amazon Linux 2.x, 2023
-- Debian 10.x, 11.x
-- FreeBSD 13.x
-- macOS 12.x, 13.x, 14.x
-- Oracle Enterprise Linux 7.x, 8.x
-- Red Hat Enterprise Linux (RHEL) 7.x, 8.x, 9.x
-- Rocky Linux 8.x, 9.x
-- SUSE Linux Enterprise Server (SLES) 12.x, 15.x
-- Ubuntu (LTS releases) 18.04, 20.04, 22.04
-- Windows 10, 11, Server 2016, 2019, 2022
+## 🚀 Quick Start
 
-## Supported Chef Versions
+```bash
+# Clone the cookbook
+git clone https://github.com/thomasvincent/chef-r-language-cookbook.git
+cd chef-r-language-cookbook
 
-- Chef Infra Client 18+
+# Install dependencies
+bundle install
+
+# Run all tests
+bundle exec kitchen test
+
+# Run specific platform
+bundle exec kitchen test default-ubuntu-2204
+```
+
+## 📋 Requirements
+
+- Chef Infra Client 18.7.10 or higher
+- Ruby 3.1+
+- Docker (for testing)
+
+## 🖥️ Supported Platforms
+
+| Platform     | Versions     | Status |
+| ------------ | ------------ | ------ |
+| Ubuntu       | 22.04, 24.04 | ✅     |
+| Debian       | 12           | ✅     |
+| CentOS       | Stream 9     | ✅     |
+| Rocky Linux  | 9            | ✅     |
+| Amazon Linux | 2023         | ✅     |
+| RHEL         | 9            | ✅     |
+| Windows      | 2019, 2022   | ✅     |
+| macOS        | 12+          | ✅     |
 
 ## Dependencies
 
@@ -102,58 +125,171 @@ r_package 'dplyr' do
 end
 ```
 
-## Usage
+## 🔧 Usage
 
-### Basic Installation
+### Policyfile Workflow (Recommended)
 
-Include `r-language` in your node's `run_list`:
-
-```json
-{
-  "run_list": ["recipe[r-language::default]"]
-}
-```
-
-This will install R using packages from your distribution's standard repositories.
-
-### Using CRAN Repositories
-
-To install from the official CRAN repositories with development packages:
+1. Create a `Policyfile.rb` in your repository:
 
 ```ruby
-node.default['r-language']['enable_repo'] = true
-node.default['r-language']['install_dev'] = true
+name 'my-app'
+default_source :supermarket
+
+run_list 'r-language::default'
+
+cookbook 'r-language', github: 'thomasvincent/chef-r-language-cookbook', tag: 'v1.0.0'
+
+# Set attributes
+default['r-language']['packages'] = ['dplyr', 'ggplot2', 'shiny']
+```
+
+2. Install and compile the policy:
+
+```bash
+chef install Policyfile.rb
+chef export Policyfile.rb ./export
+```
+
+3. Deploy with Chef:
+
+```bash
+# Using chef-client
+chef-client -z -j export/Policyfile.lock.json
+
+# Or push to Chef Server
+chef push production Policyfile.rb
+```
+
+### Basic Installation Examples
+
+#### Package Installation (Default)
+
+```ruby
+# In a recipe or Policyfile
 include_recipe 'r-language::default'
 ```
 
-### Installing from Source
-
-To compile and install R from source:
+#### Source Compilation
 
 ```ruby
-node.default['r-language']['install_method'] = 'source'
-node.default['r-language']['version'] = '4.3.1'
-include_recipe 'r-language::default'
+# Policyfile.rb
+default['r-language']['install_method'] = 'source'
+default['r-language']['version'] = '4.4.1'
 ```
 
-### Installing R Packages
-
-To install R packages:
+#### Installing R Packages
 
 ```ruby
-# Using the packages attribute
-node.default['r-language']['packages'] = ['dplyr', 'ggplot2', 'shiny']
+# Via attributes
+default['r-language']['packages'] = ['tidyverse', 'data.table', 'rmarkdown']
 
-# Or using the r_package resource directly
-r_package 'tidyverse' do
+# Via resource in a recipe
+r_package 'shiny' do
+  version '1.7.4'
+  action :install
+end
+
+# Bioconductor packages
+r_package 'DESeq2' do
+  bioc true
   action :install
 end
 ```
 
-## License
+## 🧪 Testing
 
-MIT (see LICENSE file)
+### Unit Tests
 
-## Authors
+```bash
+# Run ChefSpec unit tests
+bundle exec rspec
 
-- Thomas Vincent
+# Run with coverage
+CHEF_LICENSE=accept bundle exec rspec --format doc
+```
+
+### Integration Tests
+
+```bash
+# List available test suites
+bundle exec kitchen list
+
+# Run all tests
+bundle exec kitchen test
+
+# Run specific platform
+bundle exec kitchen test default-ubuntu-2204
+
+# Run tests in parallel
+bundle exec kitchen test -c 2
+```
+
+### Linting
+
+```bash
+# Cookstyle (Chef-specific RuboCop)
+bundle exec cookstyle
+
+# Auto-correct issues
+bundle exec cookstyle -a
+```
+
+## 📦 Development
+
+### Setup Development Environment
+
+```bash
+# Install dependencies
+bundle install
+
+# Install git hooks
+precommit install
+```
+
+### Policyfile Commands
+
+```bash
+# Update cookbook dependencies
+chef update Policyfile.rb
+
+# Show policy info
+chef show-policy
+
+# Clean policy cache
+chef clean-policy-cookbooks
+```
+
+### Docker Testing Tips
+
+```bash
+# Keep container running for debugging
+bundle exec kitchen create default-ubuntu-2204
+bundle exec kitchen converge default-ubuntu-2204
+bundle exec kitchen login default-ubuntu-2204
+
+# Clean up all test instances
+bundle exec kitchen destroy
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Run tests (`bundle exec kitchen test`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
+
+## 📋 License
+
+MIT License - see [LICENSE](LICENSE) file for details
+
+## 👥 Authors
+
+- **Thomas Vincent** - _Initial work_ - [thomasvincent](https://github.com/thomasvincent)
+
+## 🙏 Acknowledgments
+
+- Chef Software for the amazing Chef Infra
+- The R Project for Statistical Computing
+- All contributors to this cookbook
