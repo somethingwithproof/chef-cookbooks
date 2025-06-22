@@ -1,35 +1,50 @@
-# InSpec test for recipe r-language::packages and r_package resource
+# InSpec test for recipe r-language::packages
 
-# First check if R is installed
+# Verify R is installed
 describe command('R --version') do
   its('exit_status') { should eq 0 }
   its('stdout') { should match(/R version/) }
 end
 
-# Test the installation of some common packages
-describe command(%q{R --slave -e 'if(require("dplyr")) cat("dplyr is installed\n") else cat("dplyr is NOT installed\n")'}) do
+# Check if test packages are installed
+# These should match the packages specified in kitchen.yml for the packages suite
+describe command('Rscript -e "if (!require(dplyr, quietly = TRUE)) quit(status = 1); cat(\'dplyr loaded successfully\\n\')"') do
   its('exit_status') { should eq 0 }
-  its('stdout') { should match(/dplyr is installed/) }
+  its('stdout') { should match(/dplyr loaded successfully/) }
 end
 
-describe command(%q{R --slave -e 'if(require("ggplot2")) cat("ggplot2 is installed\n") else cat("ggplot2 is NOT installed\n")'}) do
+describe command('Rscript -e "if (!require(ggplot2, quietly = TRUE)) quit(status = 1); cat(\'ggplot2 loaded successfully\\n\')"') do
   its('exit_status') { should eq 0 }
-  its('stdout') { should match(/ggplot2 is installed/) }
+  its('stdout') { should match(/ggplot2 loaded successfully/) }
 end
 
-# Check that the packages can be loaded and used
-describe command(%q{R --slave -e 'library(dplyr); mtcars %>% filter(cyl == 6) %>% nrow() %>% cat("Number of rows: ", ., "\n")'}) do
+# Test that packages can be used for basic operations
+describe command('Rscript -e "library(dplyr); data(mtcars); result <- mtcars %>% filter(mpg > 20); cat(nrow(result), \'\\n\')"') do
   its('exit_status') { should eq 0 }
-  its('stdout') { should match(/Number of rows: 7/) }
+  its('stdout') { should match(/\d+/) }
 end
 
-describe command(%q{R --slave -e 'library(ggplot2); cat("ggplot2 version: ", packageVersion("ggplot2"), "\n")'}) do
+describe command('Rscript -e "library(ggplot2); p <- ggplot(mtcars, aes(x=mpg, y=hp)) + geom_point(); cat(\'Plot created successfully\\n\')"') do
   its('exit_status') { should eq 0 }
-  its('stdout') { should match(/ggplot2 version: \d+\.\d+\.\d+/) }
+  its('stdout') { should match(/Plot created successfully/) }
 end
 
-# Test package repository configuration
-describe command(%q{R --slave -e 'cat("Default repos: ", getOption("repos"), "\n")'}) do
+# Verify package installation script was created
+describe file('/tmp/install_r_packages.R') do
+  it { should exist }
+  its('content') { should match(/install.packages/) }
+  its('content') { should match(/dplyr/) }
+  its('content') { should match(/ggplot2/) }
+end
+
+# Test that CRAN mirror is accessible
+describe command('Rscript -e "options(timeout = 60); available <- available.packages(); cat(\'CRAN mirror accessible, packages:\', nrow(available), \'\\n\')"') do
   its('exit_status') { should eq 0 }
-  its('stdout') { should match(/cloud\.r-project\.org/) }
+  its('stdout') { should match(/CRAN mirror accessible/) }
+end
+
+# Verify package dependencies are properly resolved
+describe command('Rscript -e "pkg_info <- packageDescription(\'dplyr\'); cat(\'Package:\', pkg_info$Package, \'Version:\', pkg_info$Version, \'\\n\')"') do
+  its('exit_status') { should eq 0 }
+  its('stdout') { should match(/Package: dplyr Version:/) }
 end

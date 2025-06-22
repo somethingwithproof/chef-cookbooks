@@ -1,5 +1,23 @@
 require 'chefspec'
 
+# Enable coverage reporting when COVERAGE env var is set
+if ENV['COVERAGE']
+  require 'simplecov'
+  SimpleCov.start do
+    add_filter '/spec/'
+    add_filter '/test/'
+    add_filter '/vendor/'
+
+    add_group 'Recipes', 'recipes'
+    add_group 'Resources', 'resources'
+    add_group 'Libraries', 'libraries'
+    add_group 'Attributes', 'attributes'
+
+    minimum_coverage 80
+    minimum_coverage_by_file 70
+  end
+end
+
 RSpec.configure do |config|
   config.color = true
   config.formatter = :documentation
