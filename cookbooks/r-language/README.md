@@ -21,24 +21,22 @@ A Chef cookbook that installs and configures R programming language. R is a syst
 
 ## Dependencies
 
-- `apt` cookbook (>= 8.0)
-- `yum` cookbook (>= 8.0)
-- `build-essential` cookbook (>= 9.0)
+Chef 18+ includes built-in package management resources, so no external cookbook dependencies are required.
 
 ## Attributes
 
-| Key | Type | Description | Default |
-| --- | ---- | ----------- | ------- |
-| `['r-language']['version']` | String | R version to install (nil uses distro default) | `nil` |
-| `['r-language']['install_method']` | String | Installation method ('package' or 'source') | `'package'` |
-| `['r-language']['source_url']` | String | URL for source tarball | `nil` (auto-generated) |
-| `['r-language']['source_checksum']` | String | Checksum for source tarball | `nil` |
-| `['r-language']['cran_mirror']` | String | CRAN mirror URL | `'https://cloud.r-project.org'` |
-| `['r-language']['install_dev']` | Boolean | Whether to install development packages | `true` |
-| `['r-language']['install_recommended']` | Boolean | Whether to install recommended packages | `true` |
-| `['r-language']['enable_repo']` | Boolean | Whether to enable the R repository | `true` |
-| `['r-language']['packages']` | Array | R packages to install | `[]` |
-| `['r-language']['source']['configure_options']` | Array | Configure options for source install | See attributes file |
+| Key                                             | Type    | Description                                    | Default                         |
+| ----------------------------------------------- | ------- | ---------------------------------------------- | ------------------------------- |
+| `['r-language']['version']`                     | String  | R version to install (nil uses distro default) | `nil`                           |
+| `['r-language']['install_method']`              | String  | Installation method ('package' or 'source')    | `'package'`                     |
+| `['r-language']['source_url']`                  | String  | URL for source tarball                         | `nil` (auto-generated)          |
+| `['r-language']['source_checksum']`             | String  | Checksum for source tarball                    | `nil`                           |
+| `['r-language']['cran_mirror']`                 | String  | CRAN mirror URL                                | `'https://cloud.r-project.org'` |
+| `['r-language']['install_dev']`                 | Boolean | Whether to install development packages        | `true`                          |
+| `['r-language']['install_recommended']`         | Boolean | Whether to install recommended packages        | `true`                          |
+| `['r-language']['enable_repo']`                 | Boolean | Whether to enable the R repository             | `true`                          |
+| `['r-language']['packages']`                    | Array   | R packages to install                          | `[]`                            |
+| `['r-language']['source']['configure_options']` | Array   | Configure options for source install           | See attributes file             |
 
 For additional attributes related to repository configuration, please refer to the `attributes/default.rb` file.
 
@@ -112,9 +110,7 @@ Include `r-language` in your node's `run_list`:
 
 ```json
 {
-  "run_list": [
-    "recipe[r-language::default]"
-  ]
+  "run_list": ["recipe[r-language::default]"]
 }
 ```
 

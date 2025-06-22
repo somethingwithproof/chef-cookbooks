@@ -2,17 +2,19 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install essential packages
+# Install essential packages and Ruby 3.1
 RUN apt-get update && apt-get install -y \
     curl \
     wget \
     git \
     build-essential \
-    ruby \
-    ruby-dev \
+    software-properties-common \
+    && add-apt-repository ppa:brightbox/ruby-ng \
+    && apt-get update \
+    && apt-get install -y ruby3.1 ruby3.1-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Chef
+# Install Chef 18 (includes Ruby 3.1)
 RUN curl -L https://omnitruck.chef.io/install.sh | bash -s -- -v 18
 
 # Set up working directory
