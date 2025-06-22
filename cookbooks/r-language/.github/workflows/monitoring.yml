@@ -1,0 +1,150 @@
+name: Monitoring & Observability
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  schedule:
+    - cron: "0 */6 * * *" # Every 6 hours
+
+jobs:
+  performance-monitoring:
+    name: Performance Monitoring
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.1"
+          bundler-cache: true
+
+      - name: Setup Docker
+        uses: docker/setup-buildx-action@v3
+
+      - name: Install Chef
+        uses: actionshub/chef-install@main
+        with:
+          channel: stable
+          version: latest
+
+      - name: Run Performance Tests with Metrics
+        run: |
+          export CHEF_LICENSE=accept-no-persist
+
+          # Start metrics collection
+          echo "Starting performance monitoring..."
+          START_TIME=$(date +%s.%N)
+
+          # Run test with detailed timing
+          bundle exec kitchen create default-ubuntu-2204
+          CREATE_TIME=$(date +%s.%N)
+
+          bundle exec kitchen converge default-ubuntu-2204
+          CONVERGE_TIME=$(date +%s.%N)
+
+          # Collect system metrics during test
+          docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}\t{{.BlockIO}}" > metrics.txt
+
+          bundle exec kitchen verify default-ubuntu-2204
+          VERIFY_TIME=$(date +%s.%N)
+
+          # Calculate precise durations
+          CREATE_DURATION=$(echo "$CREATE_TIME - $START_TIME" | bc)
+          CONVERGE_DURATION=$(echo "$CONVERGE_TIME - $CREATE_TIME" | bc)
+          VERIFY_DURATION=$(echo "$VERIFY_TIME - $CONVERGE_TIME" | bc)
+          TOTAL_DURATION=$(echo "$VERIFY_TIME - $START_TIME" | bc)
+
+          # Generate metrics report
+          cat > performance-report.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "git_sha": "${{ github.sha }}",
+            "git_ref": "${{ github.ref }}",
+            "performance": {
+              "create_duration": $CREATE_DURATION,
+              "converge_duration": $CONVERGE_DURATION,
+              "verify_duration": $VERIFY_DURATION,
+              "total_duration": $TOTAL_DURATION
+            }
+          }
+          EOF
+
+          echo "Performance Results:"
+          cat performance-report.json | jq '.'
+        env:
+          CHEF_LICENSE: accept-no-persist
+
+      - name: Upload Performance Metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-metrics-${{ github.sha }}
+          path: |
+            performance-report.json
+            metrics.txt
+          retention-days: 90
+
+      - name: Send Metrics to Webhook (Optional)
+        if: env.WEBHOOK_URL != ''
+        run: |
+          curl -X POST ${{ env.WEBHOOK_URL }} \
+            -H "Content-Type: application/json" \
+            -d @performance-report.json
+        env:
+          WEBHOOK_URL: ${{ secrets.METRICS_WEBHOOK_URL }}
+
+      - name: Cleanup
+        if: always()
+        run: |
+          bundle exec kitchen destroy default-ubuntu-2204 || true
+
+  health-check:
+    name: Health Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Validate Repository Health
+        run: |
+          echo "Repository Health Check Report" > health-report.md
+          echo "================================" >> health-report.md
+          echo "" >> health-report.md
+
+          # Check file sizes
+          echo "## File Size Analysis" >> health-report.md
+          find . -name "*.rb" -type f -exec wc -l {} + | sort -nr | head -10 >> health-report.md
+          echo "" >> health-report.md
+
+          # Check test coverage (basic)
+          echo "## Test File Coverage" >> health-report.md
+          echo "Recipe files: $(find recipes/ -name "*.rb" | wc -l)" >> health-report.md
+          echo "Unit test files: $(find spec/ -name "*_spec.rb" | wc -l)" >> health-report.md
+          echo "Integration test files: $(find test/ -name "*_test.rb" -o -name "*_spec.rb" | wc -l)" >> health-report.md
+          echo "" >> health-report.md
+
+          # Check documentation
+          echo "## Documentation Status" >> health-report.md
+          if [ -f "README.md" ]; then
+            echo "✅ README.md exists ($(wc -l < README.md) lines)" >> health-report.md
+          else
+            echo "❌ README.md missing" >> health-report.md
+          fi
+
+          if [ -f "CHANGELOG.md" ]; then
+            echo "✅ CHANGELOG.md exists" >> health-report.md
+          else
+            echo "❌ CHANGELOG.md missing" >> health-report.md
+          fi
+
+          cat health-report.md
+
+      - name: Upload Health Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: health-report
+          path: health-report.md
+          retention-days: 30

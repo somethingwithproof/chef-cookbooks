@@ -1,0 +1,224 @@
+name: Chaos Engineering
+
+on:
+  schedule:
+    - cron: "0 3 * * 1" # Weekly on Monday at 3 AM UTC
+  workflow_dispatch:
+    inputs:
+      chaos_level:
+        description: "Chaos testing level"
+        required: true
+        default: "low"
+        type: choice
+        options:
+          - low
+          - medium
+          - high
+
+jobs:
+  chaos-testing:
+    name: Chaos Engineering Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        chaos_scenario:
+          - "network_latency"
+          - "disk_pressure"
+          - "memory_pressure"
+          - "package_repository_failure"
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.1"
+          bundler-cache: true
+
+      - name: Setup Docker
+        uses: docker/setup-buildx-action@v3
+
+      - name: Install Chef
+        uses: actionshub/chef-install@main
+        with:
+          channel: stable
+          version: latest
+
+      - name: Run Chaos Test - ${{ matrix.chaos_scenario }}
+        run: |
+          export CHEF_LICENSE=accept-no-persist
+          echo "Running chaos scenario: ${{ matrix.chaos_scenario }}"
+
+          # Create test instance
+          bundle exec kitchen create default-ubuntu-2204
+
+          case "${{ matrix.chaos_scenario }}" in
+            "network_latency")
+              echo "Introducing network latency..."
+              # Simulate network issues during package installation
+              docker exec $(docker ps -q --filter "name=default-ubuntu-2204") \
+                bash -c "tc qdisc add dev eth0 root netem delay 1000ms 200ms"
+              ;;
+            "disk_pressure")
+              echo "Creating disk pressure..."
+              # Fill up disk space partially
+              docker exec $(docker ps -q --filter "name=default-ubuntu-2204") \
+                bash -c "dd if=/dev/zero of=/tmp/largefile bs=1M count=1000 || true"
+              ;;
+            "memory_pressure")
+              echo "Creating memory pressure..."
+              # Start memory-intensive process
+              docker exec -d $(docker ps -q --filter "name=default-ubuntu-2204") \
+                bash -c "dd if=/dev/zero of=/dev/null bs=1M & stress --vm 1 --vm-bytes 256M --timeout 300s &"
+              ;;
+            "package_repository_failure")
+              echo "Simulating package repository failure..."
+              # Block access to R repository temporarily
+              docker exec $(docker ps -q --filter "name=default-ubuntu-2204") \
+                bash -c "echo '127.0.0.1 cloud.r-project.org' >> /etc/hosts"
+              ;;
+          esac
+
+          # Attempt Chef run under chaos conditions
+          START_TIME=$(date +%s)
+          if bundle exec kitchen converge default-ubuntu-2204; then
+            CONVERGE_STATUS="SUCCESS"
+          else
+            CONVERGE_STATUS="FAILED"
+          fi
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
+
+          # Restore system state
+          case "${{ matrix.chaos_scenario }}" in
+            "network_latency")
+              docker exec $(docker ps -q --filter "name=default-ubuntu-2204") \
+                bash -c "tc qdisc del dev eth0 root || true"
+              ;;
+            "disk_pressure")
+              docker exec $(docker ps -q --filter "name=default-ubuntu-2204") \
+                bash -c "rm -f /tmp/largefile"
+              ;;
+            "memory_pressure")
+              docker exec $(docker ps -q --filter "name=default-ubuntu-2204") \
+                bash -c "pkill -f stress || true"
+              ;;
+            "package_repository_failure")
+              docker exec $(docker ps -q --filter "name=default-ubuntu-2204") \
+                bash -c "sed -i '/cloud.r-project.org/d' /etc/hosts"
+              ;;
+          esac
+
+          # Verify recovery
+          if [ "$CONVERGE_STATUS" = "FAILED" ]; then
+            echo "Testing recovery after chaos..."
+            if bundle exec kitchen converge default-ubuntu-2204; then
+              RECOVERY_STATUS="SUCCESS"
+            else
+              RECOVERY_STATUS="FAILED"
+            fi
+          else
+            RECOVERY_STATUS="N/A"
+          fi
+
+          # Verify system functionality
+          if bundle exec kitchen verify default-ubuntu-2204; then
+            VERIFY_STATUS="SUCCESS"
+          else
+            VERIFY_STATUS="FAILED"
+          fi
+
+          # Generate chaos test report
+          cat > chaos-report-${{ matrix.chaos_scenario }}.json << EOF
+          {
+            "scenario": "${{ matrix.chaos_scenario }}",
+            "chaos_level": "${{ github.event.inputs.chaos_level || 'low' }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "duration": $DURATION,
+            "converge_status": "$CONVERGE_STATUS",
+            "recovery_status": "$RECOVERY_STATUS",
+            "verify_status": "$VERIFY_STATUS",
+            "resilience_score": $(if [ "$VERIFY_STATUS" = "SUCCESS" ]; then echo "100"; elif [ "$RECOVERY_STATUS" = "SUCCESS" ]; then echo "75"; elif [ "$CONVERGE_STATUS" = "SUCCESS" ]; then echo "50"; else echo "0"; fi)
+          }
+          EOF
+
+          echo "Chaos Test Results for ${{ matrix.chaos_scenario }}:"
+          cat chaos-report-${{ matrix.chaos_scenario }}.json | jq '.'
+        env:
+          CHEF_LICENSE: accept-no-persist
+
+      - name: Upload Chaos Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: chaos-test-results-${{ matrix.chaos_scenario }}
+          path: chaos-report-${{ matrix.chaos_scenario }}.json
+          retention-days: 30
+
+      - name: Cleanup
+        if: always()
+        run: |
+          bundle exec kitchen destroy default-ubuntu-2204 || true
+
+  chaos-summary:
+    name: Chaos Engineering Summary
+    needs: chaos-testing
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Download all chaos test results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: chaos-test-results-*
+          merge-multiple: true
+
+      - name: Generate Chaos Engineering Report
+        run: |
+          echo "# Chaos Engineering Test Results" > chaos-summary.md
+          echo "" >> chaos-summary.md
+          echo "**Test Date:** $(date -u +%Y-%m-%d)" >> chaos-summary.md
+          echo "**Chaos Level:** ${{ github.event.inputs.chaos_level || 'low' }}" >> chaos-summary.md
+          echo "" >> chaos-summary.md
+
+          total_score=0
+          test_count=0
+
+          for report in chaos-report-*.json; do
+            if [ -f "$report" ]; then
+              scenario=$(jq -r '.scenario' "$report")
+              status=$(jq -r '.verify_status' "$report")
+              score=$(jq -r '.resilience_score' "$report")
+              duration=$(jq -r '.duration' "$report")
+
+              echo "## $scenario" >> chaos-summary.md
+              echo "- **Status:** $status" >> chaos-summary.md
+              echo "- **Resilience Score:** $score/100" >> chaos-summary.md
+              echo "- **Duration:** ${duration}s" >> chaos-summary.md
+              echo "" >> chaos-summary.md
+
+              total_score=$((total_score + score))
+              test_count=$((test_count + 1))
+            fi
+          done
+
+          if [ $test_count -gt 0 ]; then
+            avg_score=$((total_score / test_count))
+            echo "## Overall Resilience Score: $avg_score/100" >> chaos-summary.md
+
+            if [ $avg_score -ge 80 ]; then
+              echo "🟢 **Status: EXCELLENT** - System shows high resilience" >> chaos-summary.md
+            elif [ $avg_score -ge 60 ]; then
+              echo "🟡 **Status: GOOD** - System shows moderate resilience" >> chaos-summary.md
+            else
+              echo "🔴 **Status: NEEDS IMPROVEMENT** - System shows low resilience" >> chaos-summary.md
+            fi
+          fi
+
+          cat chaos-summary.md
+
+      - name: Upload Summary Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: chaos-engineering-summary
+          path: chaos-summary.md
+          retention-days: 90
