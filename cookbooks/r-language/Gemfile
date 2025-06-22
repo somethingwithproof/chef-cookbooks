@@ -1,12 +1,13 @@
 source 'https://rubygems.org'
 
-gem 'chef', '~> 18.0'
-gem 'chefspec'
-gem 'cookstyle'
-gem 'inspec'
-gem 'kitchen-dokken'
-gem 'kitchen-inspec'
-gem 'benchmark'
-gem 'rake', '~> 13.0'
-gem 'syslog', '~> 0.1.2'
-gem 'test-kitchen'
+group :development, :test do
+  gem 'chefspec'
+  gem 'cookstyle'
+  gem 'fauxhai-ng'
+  gem 'inspec'
+  gem 'kitchen-dokken'
+  gem 'kitchen-inspec'
+  gem 'rake'
+  gem 'syslog', '~> 0.1.2' # Required for Ruby 3.4+ compatibility
+  gem 'test-kitchen'
+end

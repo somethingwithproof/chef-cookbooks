@@ -1,23 +1,33 @@
-# R Language Cookbook Changelog
+# Changelog
 
-## 0.3.0 (2025-05-10)
+All notable changes to this project will be documented in this file.
 
-- Updated cookbook for Chef 16+ compatibility
-- Removed foodcritic dependency in favor of Cookstyle
-- Updated dependency versions for newer Chef releases
-- Added dependabot configuration for automated dependency management
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.2.0 (2025-05-09)
+## [Unreleased]
 
-- Complete rewrite of the cookbook with modern Chef practices
-- Added support for Chef 15+
-- Support for multiple installation methods: package and source
-- Added custom resource for R package management
-- Comprehensive test suite with ChefSpec and InSpec
-- Support for multiple platforms: Ubuntu, Debian, CentOS, RHEL, Amazon Linux, Fedora
-- Documentation updates
+### Changed
 
-## 0.1.0 (Initial release)
+- Updated to Chef 18+ with Ruby 3.1 support
+- Removed external cookbook dependencies (apt, yum) - using Chef 18 built-in resources
+- Modernized testing with fauxhai-ng and minimal Gemfile
+- Switched from Berksfile to Policyfile for dependency management
+- Updated all platforms to non-EOL versions
+- Improved resource implementation following Chef 18 best practices
+
+### Fixed
+
+- Fixed all RSpec test failures
+- Fixed Ruby 3.4 compatibility issues
+- Updated CI/CD pipeline for modern Chef testing
+
+## [0.4.0] - 2024-05-01
+
+### Added
 
 - Initial release of r-language cookbook
-- Basic installation of R
+- Support for package and source installation methods
+- Custom resource for R package management
+- Multi-platform support (Ubuntu, Debian, RHEL, SUSE, etc.)
+- Comprehensive test coverage with ChefSpec and InSpec

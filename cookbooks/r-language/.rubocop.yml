@@ -1,10 +1,16 @@
+# Rubocop configuration for Chef 18 cookbooks
+inherit_gem:
+  cookstyle: config/cookstyle.yml
+
 AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.1
   Exclude:
     - "vendor/**/*"
     - "spec/fixtures/**/*"
     - ".kitchen/**/*"
     - "bin/**/*"
-  NewCops: enable
+    - "berks-cookbooks/**/*"
 
 Layout/LineLength:
   Max: 120
@@ -32,3 +38,13 @@ Style/NumericLiterals:
 Style/StringLiterals:
   Enabled: true
   EnforcedStyle: single_quotes
+
+# Chef specific cops
+Chef/Deprecations:
+  Enabled: true
+
+Chef/Correctness:
+  Enabled: true
+
+Chef/Modernize:
+  Enabled: true

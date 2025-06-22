@@ -10,6 +10,7 @@ transport:
 
 provisioner:
   name: dokken
+  policyfile_path: Policyfile.rb
   cleanup_on_failure: false
   multiple_converge: 2
   enforce_idempotency: true

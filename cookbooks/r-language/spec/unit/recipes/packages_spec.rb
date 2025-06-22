@@ -3,7 +3,7 @@ require 'spec_helper'
 describe 'r-language::packages' do
   context 'with packages defined' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04') do |node|
+      ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '20.04') do |node|
         node.normal['r-language']['packages'] = %w(dplyr ggplot2)
         node.normal['r-language']['cran_mirror'] = 'https://cloud.r-project.org'
       end.converge(described_recipe)
@@ -35,7 +35,7 @@ describe 'r-language::packages' do
 
   context 'with no packages defined' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04') do |node|
+      ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '20.04') do |node|
         node.normal['r-language']['packages'] = []
       end.converge(described_recipe)
     end
@@ -55,7 +55,7 @@ describe 'r-language::packages' do
 
   context 'with custom CRAN mirror' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04') do |node|
+      ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '20.04') do |node|
         node.normal['r-language']['packages'] = ['dplyr']
         node.normal['r-language']['cran_mirror'] = 'https://cran.rstudio.com'
       end.converge(described_recipe)

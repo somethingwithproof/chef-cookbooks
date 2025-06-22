@@ -10,10 +10,8 @@ default_source :supermarket
 # Include the cookbook locally
 cookbook 'r-language', path: '.'
 
-# Dependencies
-cookbook 'apt', '~> 8.0'
-cookbook 'yum', '~> 8.0'
-cookbook 'build-essential', '~> 9.0'
+# No external cookbook dependencies needed
+# Chef 18+ includes built-in package management resources
 
 # Run List for when this application is run directly
 run_list 'r-language::default'
