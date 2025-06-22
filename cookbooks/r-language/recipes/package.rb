@@ -16,8 +16,11 @@ when 'debian'
       action :nothing
     end
 
-    package 'apt-transport-https' do
-      action :install
+    # Install required packages for apt repository management
+    %w(apt-transport-https ca-certificates gnupg).each do |pkg|
+      package pkg do
+        action :install
+      end
     end
 
     # Determine which repository to use
