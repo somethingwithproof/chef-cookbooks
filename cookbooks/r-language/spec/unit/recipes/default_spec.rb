@@ -3,9 +3,13 @@ require 'spec_helper'
 describe 'r-language::default' do
   context 'when using package installation method' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new do |node|
+      ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04') do |node|
         node.normal['r-language']['install_method'] = 'package'
       end.converge(described_recipe)
+    end
+
+    before(:each) do
+      stub_commands
     end
 
     it 'includes the package recipe' do
@@ -19,9 +23,13 @@ describe 'r-language::default' do
 
   context 'when using source installation method' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new do |node|
+      ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04') do |node|
         node.normal['r-language']['install_method'] = 'source'
       end.converge(described_recipe)
+    end
+
+    before(:each) do
+      stub_commands
     end
 
     it 'includes the source recipe' do
@@ -35,10 +43,14 @@ describe 'r-language::default' do
 
   context 'when specifying R packages to install' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new do |node|
+      ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04') do |node|
         node.normal['r-language']['install_method'] = 'package'
         node.normal['r-language']['packages'] = %w(dplyr ggplot2)
       end.converge(described_recipe)
+    end
+
+    before(:each) do
+      stub_commands
     end
 
     it 'includes the packages recipe' do
@@ -48,10 +60,14 @@ describe 'r-language::default' do
 
   context 'when not specifying R packages to install' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new do |node|
+      ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04') do |node|
         node.normal['r-language']['install_method'] = 'package'
         node.normal['r-language']['packages'] = []
       end.converge(described_recipe)
+    end
+
+    before(:each) do
+      stub_commands
     end
 
     it 'does not include the packages recipe' do
@@ -61,9 +77,13 @@ describe 'r-language::default' do
 
   context 'when specifying an invalid installation method' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new do |node|
+      ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04') do |node|
         node.normal['r-language']['install_method'] = 'invalid'
       end
+    end
+
+    before(:each) do
+      stub_commands
     end
 
     it 'raises an error' do

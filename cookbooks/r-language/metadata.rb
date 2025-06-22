@@ -6,8 +6,7 @@ description 'Installs/Configures R programming language'
 version '0.4.0'
 chef_version '>= 18.0'
 
-depends 'apt', '>= 8.0'
-depends 'yum', '>= 8.0'
+# Chef 19+ has built-in package management
 
 # Current non-EOL platforms as of May 2025
 supports 'amazon', '>= 2.0'

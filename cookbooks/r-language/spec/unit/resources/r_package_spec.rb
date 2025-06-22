@@ -11,6 +11,10 @@ describe 'r_package' do
       end
     end
 
+    before(:each) do
+      stub_r_package_shell_out('dplyr', false)
+    end
+
     it 'creates the R script template' do
       expect(chef_run).to create_template("#{Chef::Config[:file_cache_path]}/install_dplyr.R").with(
         cookbook: 'r-language',
@@ -42,6 +46,10 @@ describe 'r_package' do
       end
     end
 
+    before(:each) do
+      stub_r_package_shell_out('dplyr', false, '1.0.0')
+    end
+
     it 'creates the R script template with version' do
       expect(chef_run).to create_template("#{Chef::Config[:file_cache_path]}/install_dplyr.R").with(
         variables: {
@@ -60,6 +68,10 @@ describe 'r_package' do
         repo 'https://cran.rstudio.com'
         action :install
       end
+    end
+
+    before(:each) do
+      stub_r_package_shell_out('dplyr', false)
     end
 
     it 'creates the R script template with custom repo' do
@@ -82,6 +94,10 @@ describe 'r_package' do
       end
     end
 
+    before(:each) do
+      stub_r_package_shell_out('DESeq2', false)
+    end
+
     it 'creates the R script template for Bioconductor' do
       expect(chef_run).to create_template("#{Chef::Config[:file_cache_path]}/install_DESeq2.R").with(
         variables: {
@@ -99,6 +115,10 @@ describe 'r_package' do
       r_package 'dplyr' do
         action :remove
       end
+    end
+
+    before(:each) do
+      stub_r_package_shell_out('dplyr', true)
     end
 
     it 'creates the R script to remove the package' do

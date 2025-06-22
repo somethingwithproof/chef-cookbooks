@@ -11,6 +11,10 @@ describe 'r-language::package' do
       end.converge(described_recipe)
     end
 
+    before(:each) do
+      stub_commands
+    end
+
     it 'installs apt-transport-https' do
       expect(chef_run).to install_package('apt-transport-https')
     end
@@ -18,7 +22,7 @@ describe 'r-language::package' do
     it 'adds the r-project apt repository' do
       expect(chef_run).to add_apt_repository('r-project').with(
         uri: 'https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/',
-        key: 'E298A3A825C0D65DFD57CBB651716619E084DAB9'
+        key: ['E298A3A825C0D65DFD57CBB651716619E084DAB9']
       )
     end
 
@@ -43,10 +47,14 @@ describe 'r-language::package' do
       end.converge(described_recipe)
     end
 
+    before(:each) do
+      stub_commands
+    end
+
     it 'adds the r-project apt repository with correct debian settings' do
       expect(chef_run).to add_apt_repository('r-project').with(
         uri: 'https://cloud.r-project.org/bin/linux/debian buster-cran40/',
-        key: 'E19F5F87128899B192B1A2C2AD5F960A256A04AF'
+        key: ['E19F5F87128899B192B1A2C2AD5F960A256A04AF']
       )
     end
   end
@@ -56,6 +64,10 @@ describe 'r-language::package' do
       ChefSpec::SoloRunner.new(platform: 'centos', version: '8') do |node|
         node.normal['r-language']['enable_repo'] = true
       end.converge(described_recipe)
+    end
+
+    before(:each) do
+      stub_commands
     end
 
     it 'creates the epel yum repository' do
@@ -75,6 +87,10 @@ describe 'r-language::package' do
       end.converge(described_recipe)
     end
 
+    before(:each) do
+      stub_commands
+    end
+
     it 'installs r-base package with specific version' do
       expect(chef_run).to install_package('r-base').with(version: '4.0.2')
     end
@@ -86,6 +102,10 @@ describe 'r-language::package' do
         node.normal['lsb']['codename'] = 'focal'
         node.normal['r-language']['enable_repo'] = false
       end.converge(described_recipe)
+    end
+
+    before(:each) do
+      stub_commands
     end
 
     it 'does not add the r-project apt repository' do

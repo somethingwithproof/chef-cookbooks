@@ -65,7 +65,7 @@ bash 'extract_r_source' do
     curl -sSL #{r_url} -o r-#{r_version}.tar.gz
     tar -xzf r-#{r_version}.tar.gz
   EOH
-  not_if { File.exist?('/usr/local/bin/R') && `/usr/local/bin/R --version`.include?(r_version) }
+  not_if { ::File.exist?('/usr/local/bin/R') }
 end
 
 # Configure and build R
@@ -76,7 +76,7 @@ bash 'build_and_install_r' do
     make
     make install
   EOH
-  not_if { File.exist?('/usr/local/bin/R') && `/usr/local/bin/R --version`.include?(r_version) }
+  not_if { ::File.exist?('/usr/local/bin/R') }
 end
 
 # Clean up source files

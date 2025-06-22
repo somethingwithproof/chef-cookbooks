@@ -8,23 +8,22 @@ describe 'r-language::source' do
       end.converge(described_recipe)
     end
 
-    before do
-      allow(File).to receive(:exist?).and_call_original
-      allow(File).to receive(:exist?).with('/usr/local/bin/R').and_return(false)
+    before(:each) do
+      stub_commands
+      allow(::File).to receive(:exist?).and_call_original
+      allow(::File).to receive(:exist?).with('/usr/local/bin/R').and_return(false)
     end
 
     it 'includes the build-essential recipe' do
-      expect(chef_run).to build_essential 'install compilation tools'
+      expect(chef_run).to install_build_essential('install compilation tools')
     end
 
     it 'installs required build dependencies' do
-      %w(
-        gfortran libblas-dev liblapack-dev libpcre2-dev libcurl4-openssl-dev
-        libbz2-dev liblzma-dev libreadline-dev xorg-dev libcairo2-dev
-        libpango1.0-dev libjpeg-dev libpng-dev libxml2-dev
-      ).each do |pkg|
-        expect(chef_run).to install_package(pkg)
-      end
+      expect(chef_run).to install_package(%w(
+                                            gfortran libblas-dev liblapack-dev libpcre2-dev libcurl4-openssl-dev
+                                            libbz2-dev liblzma-dev libreadline-dev xorg-dev libcairo2-dev
+                                            libpango1.0-dev libjpeg-dev libpng-dev libxml2-dev
+                                          ))
     end
 
     it 'executes extract_r_source' do
@@ -51,19 +50,18 @@ describe 'r-language::source' do
       end.converge(described_recipe)
     end
 
-    before do
-      allow(File).to receive(:exist?).and_call_original
-      allow(File).to receive(:exist?).with('/usr/local/bin/R').and_return(false)
+    before(:each) do
+      stub_commands
+      allow(::File).to receive(:exist?).and_call_original
+      allow(::File).to receive(:exist?).with('/usr/local/bin/R').and_return(false)
     end
 
     it 'installs required build dependencies for RHEL-based systems' do
-      %w(
-        gcc-gfortran blas-devel lapack-devel pcre2-devel libcurl-devel
-        bzip2-devel xz-devel readline-devel libXt-devel cairo-devel
-        pango-devel libjpeg-devel libpng-devel libxml2-devel
-      ).each do |pkg|
-        expect(chef_run).to install_package(pkg)
-      end
+      expect(chef_run).to install_package(%w(
+                                            gcc-gfortran blas-devel lapack-devel pcre2-devel libcurl-devel
+                                            bzip2-devel xz-devel readline-devel libXt-devel cairo-devel
+                                            pango-devel libjpeg-devel libpng-devel libxml2-devel
+                                          ))
     end
   end
 
@@ -74,13 +72,10 @@ describe 'r-language::source' do
       end.converge(described_recipe)
     end
 
-    before do
-      allow(File).to receive(:exist?).and_call_original
-      allow(File).to receive(:exist?).with('/usr/local/bin/R').and_return(true)
-      allow_any_instance_of(Chef::Resource::Bash).to receive(:not_if).and_yield
-      allow(Mixlib::ShellOut).to receive(:new).with('/usr/local/bin/R --version').and_return(
-        double(run_command: nil, stdout: 'R version 4.3.1', stderr: '')
-      )
+    before(:each) do
+      stub_commands
+      allow(::File).to receive(:exist?).and_call_original
+      allow(::File).to receive(:exist?).with('/usr/local/bin/R').and_return(true)
     end
 
     it 'does not extract R source' do
