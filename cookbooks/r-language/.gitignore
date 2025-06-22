@@ -1,44 +1,44 @@
+# Ruby and Bundler
+*.gem
+*.rbc
+.bundle
+.config
+coverage
+InstalledFiles
+lib/bundler/man
+pkg
+rdoc
+spec/reports
+test/tmp
+test/version_tmp
+tmp
+_Store
+*~
+*#
+.#*
+\#*#
+.*.sw[a-z]
+*.un~
+*.tmp
+*.bk
+*.bkup
+
 # Test Kitchen
 .kitchen/
 .kitchen.local.yml
 kitchen.local.yml
 
-# Chef
+# Chef Infra
 .chef/
-nodes/
-clients/
-data_bags/
-environments/
-roles/
-
-# Policyfile
-Policyfile.lock.json
-
-# Bundler
-.bundle/
-vendor/bundle/
+Berksfile.lock
 Gemfile.lock
+Policyfile.lock.json
+.zero-knife.rb
 
-# Ruby
-*.gem
-*.rbc
-.config
-coverage/
-InstalledFiles
-pkg/
-spec/reports/
-test/tmp/
-test/version_tmp/
-tmp/
-
-# OS files
-.DS_Store
-*.swp
-*.swo
-*~
-.#*
-\#*#
-.vagrant/
+# Documentation
+_site/
+.yardoc/
+doc/
 
 # IDE
 .idea/
@@ -46,23 +46,22 @@ tmp/
 .vscode/
 *.sublime-*
 
-# Documentation
-.yardoc/
-_yardoc/
-doc/
-rdoc/
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
 
-# Berkshelf (legacy - should not exist)
-Berksfile.lock
-.berkshelf/
-berks-cookbooks/
+# Vagrant
+.vagrant/
 
-# Testing
-.rspec_status
-.coverage/
+# Python
+__pycache__/
+*.pyc
 
-# InSpec
-inspec.lock
+# Logs
+*.log
 
-# Claude settings
-**/.claude/settings.local.json
+# Temporary files
+*.swp
+*.swo
+*~

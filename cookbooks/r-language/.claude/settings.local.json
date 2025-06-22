@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(bundle exec:*)",
+      "Bash(bundle install)",
+      "Bash(bundle update:*)",
+      "Bash(berks install:*)",
+      "Bash(rm:*)",
+      "Bash(pre-commit:*)",
+      "Bash(kitchen list:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh workflow view:*)",
+      "Bash(gh run watch:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(gh api:*)",
+      "WebFetch(domain:docs.chef.io)",
+      "Bash(gem list:*)",
+      "Bash(gem specification:*)",
+      "Bash(touch:*)",
+      "Bash(true)"
+    ],
+    "deny": []
+  }
+}

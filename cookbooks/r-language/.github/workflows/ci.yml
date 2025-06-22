@@ -48,13 +48,13 @@ jobs:
       matrix:
         os:
           [
-            "ubuntu-22.04",
-            "debian-11",
-            "rockylinux-8",
-            "amazonlinux-2",
-            "opensuse-leap-15",
+            "ubuntu-2204",
+            "ubuntu-2404",
+            "debian-12",
+            "centos-9",
+            "rockylinux-9",
           ]
-        suite: ["default", "packages"]
+        suite: ["default", "source", "packages"]
       fail-fast: false
     steps:
       - name: Check out code
@@ -64,6 +64,8 @@ jobs:
         with:
           ruby-version: "3.1"
           bundler-cache: true
+      - name: Setup Docker
+        uses: docker/setup-buildx-action@v3
       - name: Install Chef
         uses: actionshub/chef-install@main
         with:
@@ -71,10 +73,11 @@ jobs:
           version: latest
       - name: Test Kitchen
         run: |
-          chef gem install kitchen-dokken
-          KITCHEN_LOCAL_YAML=kitchen.yml kitchen test ${{ matrix.suite }}-${{ matrix.os }}
+          export CHEF_LICENSE=accept-no-persist
+          bundle exec kitchen test ${{ matrix.suite }}-${{ matrix.os }} --destroy=always
         env:
           CHEF_LICENSE: accept-no-persist
+          KITCHEN_YAML: kitchen.yml
 
   release:
     name: Supermarket Release
