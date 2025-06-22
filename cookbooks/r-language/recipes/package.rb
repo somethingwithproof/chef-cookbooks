@@ -26,21 +26,22 @@ when 'debian'
     # Determine which repository to use
     codename = node['lsb']['codename']
     if platform?('ubuntu')
-      repo = "#{node['r-language']['ubuntu']['repo']} #{codename}-cran40/"
+      repo_uri = node['r-language']['ubuntu']['repo']
+      repo_distribution = "#{codename}-cran40/"
       key = node['r-language']['ubuntu']['key']
       keyserver = node['r-language']['ubuntu']['keyserver']
     else # debian
-      repo = "#{node['r-language']['debian']['repo']} #{codename}-cran40/"
+      repo_uri = node['r-language']['debian']['repo']
+      repo_distribution = "#{codename}-cran40/"
       key = node['r-language']['debian']['key']
       keyserver = node['r-language']['debian']['keyserver']
     end
 
     apt_repository 'r-project' do
-      uri repo
+      uri repo_uri
+      distribution repo_distribution
       keyserver keyserver
       key key
-      distribution ''
-      components ['']
       action :add
       notifies :update, 'apt_update[update]', :immediately
     end

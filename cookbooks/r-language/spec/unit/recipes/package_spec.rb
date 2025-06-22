@@ -21,7 +21,8 @@ describe 'r-language::package' do
 
     it 'adds the r-project apt repository' do
       expect(chef_run).to add_apt_repository('r-project').with(
-        uri: 'https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/',
+        uri: 'https://cloud.r-project.org/bin/linux/ubuntu',
+        distribution: 'focal-cran40/',
         key: ['E298A3A825C0D65DFD57CBB651716619E084DAB9']
       )
     end
@@ -53,7 +54,8 @@ describe 'r-language::package' do
 
     it 'adds the r-project apt repository with correct debian settings' do
       expect(chef_run).to add_apt_repository('r-project').with(
-        uri: 'https://cloud.r-project.org/bin/linux/debian buster-cran40/',
+        uri: 'https://cloud.r-project.org/bin/linux/debian',
+        distribution: 'buster-cran40/',
         key: ['E19F5F87128899B192B1A2C2AD5F960A256A04AF']
       )
     end
