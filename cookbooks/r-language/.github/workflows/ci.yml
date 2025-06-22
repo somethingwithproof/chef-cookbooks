@@ -68,7 +68,7 @@ jobs:
         uses: actionshub/chef-install@main
         with:
           channel: stable
-          version: 18
+          version: latest
       - name: Test Kitchen
         run: |
           chef gem install kitchen-dokken
