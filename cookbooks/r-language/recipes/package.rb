@@ -28,20 +28,17 @@ when 'debian'
     if platform?('ubuntu')
       repo_uri = node['r-language']['ubuntu']['repo']
       repo_distribution = "#{codename}-cran40/"
-      key = node['r-language']['ubuntu']['key']
-      keyserver = node['r-language']['ubuntu']['keyserver']
+      key_url = node['r-language']['ubuntu']['key_url']
     else # debian
       repo_uri = node['r-language']['debian']['repo']
       repo_distribution = "#{codename}-cran40/"
-      key = node['r-language']['debian']['key']
-      keyserver = node['r-language']['debian']['keyserver']
+      key_url = node['r-language']['debian']['key_url']
     end
 
     apt_repository 'r-project' do
       uri repo_uri
       distribution repo_distribution
-      keyserver keyserver
-      key key
+      key key_url
       action :add
       notifies :update, 'apt_update[update]', :immediately
     end
