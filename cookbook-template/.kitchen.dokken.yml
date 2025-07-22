@@ -3,7 +3,7 @@ driver:
   name: dokken
   privileged: true
   chef_image: chef/chef
-  chef_version: 18
+  chef_version: latest # Use latest Chef 19
 
 provisioner:
   name: dokken
