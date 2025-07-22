@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  CHEF_LICENSE: accept-no-persist
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          
+      - name: Run Cookstyle
+        run: bundle exec cookstyle
+        
+      - name: Validate metadata.rb
+        run: bundle exec ruby -c metadata.rb
+
+  unit:
+    name: Unit Tests
+    needs: lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        chef-version: ['19']
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          
+      - name: Run ChefSpec tests
+        run: bundle exec rspec --format documentation
+
+  integration:
+    name: Integration Tests
+    needs: unit
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os:
+          - 'ubuntu-22.04'
+          - 'ubuntu-20.04'
+          - 'debian-12'
+          - 'rockylinux-9'
+        suite: ['default']
+      fail-fast: false
+      max-parallel: 3
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          
+      - name: Run Test Kitchen
+        run: |
+          export KITCHEN_YAML=.kitchen.dokken.yml
+          bundle exec kitchen test ${{ matrix.suite }}-${{ matrix.os }}
+        env:
+          CHEF_LICENSE: accept-no-persist
