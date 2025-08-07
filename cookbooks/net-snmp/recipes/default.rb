@@ -31,7 +31,7 @@ end
 # Install SNMP daemon
 daemon_package = case node['platform_family']
                  when 'rhel', 'fedora', 'amazon'
-                   'net-snmp-agent-libs'
+                   'net-snmp'
                  when 'debian'
                    'snmpd'
                  end
