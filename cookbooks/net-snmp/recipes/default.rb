@@ -40,6 +40,14 @@ package daemon_package do
   action :install
 end
 # Start and enable SNMP service
-service 'snmpd' do
+service_name = case node['platform_family']
+               when 'rhel', 'fedora', 'amazon'
+                 'snmpd'
+               when 'debian'
+                 'snmpd'
+               # Add other platforms here if needed
+               end
+
+service service_name do
   action [:enable, :start]
 end
