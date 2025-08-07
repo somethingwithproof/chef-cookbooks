@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe 'net-snmp::default' do
   let(:chef_run) do
-    ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04') do |node|
+    ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '22.04') do |node|
       # Set any attributes you need
     end.converge(described_recipe)
   end
