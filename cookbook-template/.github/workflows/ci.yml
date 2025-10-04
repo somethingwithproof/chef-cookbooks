@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -46,7 +46,7 @@ jobs:
         chef-version: ['19']
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -90,7 +90,7 @@ jobs:
       max-parallel: 5
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -111,7 +111,7 @@ jobs:
     if: github.event_name != 'pull_request'
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
@@ -134,7 +134,7 @@ jobs:
     needs: [lint, unit, integration]
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
