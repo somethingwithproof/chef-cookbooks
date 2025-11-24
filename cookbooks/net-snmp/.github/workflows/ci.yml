@@ -5,12 +5,12 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 # Cancel previous runs on the same PR
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
 
 permissions:
   contents: read
@@ -22,20 +22,20 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    timeout-minutes: 15  # Prevent hung jobs
+    timeout-minutes: 15
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
-        
+        uses: actions/checkout@v4
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
           bundler-cache: true
-          
+
       - name: Run Cookstyle
         run: bundle exec cookstyle
-        
+
       - name: Validate metadata.rb
         run: bundle exec ruby -c metadata.rb
 
@@ -43,20 +43,20 @@ jobs:
     name: Unit Tests
     needs: lint
     runs-on: ubuntu-latest
-    timeout-minutes: 15  # Prevent hung jobs
+    timeout-minutes: 15
     strategy:
       matrix:
         chef-version: ['19']
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
-        
+        uses: actions/checkout@v4
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
           bundler-cache: true
-          
+
       - name: Run ChefSpec tests
         run: bundle exec rspec --format documentation
 
@@ -64,7 +64,7 @@ jobs:
     name: Integration Tests
     needs: unit
     runs-on: ubuntu-latest
-    timeout-minutes: 15  # Prevent hung jobs
+    timeout-minutes: 45
     strategy:
       matrix:
         os:
@@ -77,17 +77,27 @@ jobs:
       max-parallel: 3
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
-        
+        uses: actions/checkout@v4
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
           bundler-cache: true
-          
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
+
       - name: Run Test Kitchen
         run: |
           export KITCHEN_YAML=.kitchen.dokken.yml
           bundle exec kitchen test ${{ matrix.suite }}-${{ matrix.os }}
         env:
           CHEF_LICENSE: accept-no-persist
+
+      - name: Upload kitchen logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kitchen-logs-${{ matrix.suite }}-${{ matrix.os }}
+          path: .kitchen/logs/
