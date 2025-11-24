@@ -91,7 +91,7 @@ jobs:
           CHEF_LICENSE: accept-no-persist
 
       - name: Upload Performance Metrics
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: performance-metrics-${{ github.sha }}
           path: |
@@ -156,7 +156,7 @@ jobs:
           cat health-report.md
 
       - name: Upload Health Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: health-report
           path: health-report.md

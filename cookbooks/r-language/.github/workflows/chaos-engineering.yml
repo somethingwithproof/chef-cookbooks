@@ -161,7 +161,7 @@ jobs:
           CHEF_LICENSE: accept-no-persist
 
       - name: Upload Chaos Test Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: chaos-test-results-${{ matrix.chaos_scenario }}
           path: chaos-report-${{ matrix.chaos_scenario }}.json
@@ -180,7 +180,7 @@ jobs:
     if: always()
     steps:
       - name: Download all chaos test results
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           pattern: chaos-test-results-*
           merge-multiple: true
@@ -230,7 +230,7 @@ jobs:
           cat chaos-summary.md
 
       - name: Upload Summary Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: chaos-engineering-summary
           path: chaos-summary.md

@@ -115,7 +115,7 @@ jobs:
           CHEF_LICENSE: accept-no-persist
 
       - name: Upload Performance Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: performance-results-${{ matrix.scenario }}-${{ matrix.platform }}
           path: performance-results/
@@ -177,7 +177,7 @@ jobs:
           CHEF_LICENSE: accept-no-persist
 
       - name: Upload Resource Analysis
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: resource-analysis
           path: |
