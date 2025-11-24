@@ -13,50 +13,48 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-
-
 # Minimal permissions by default
 permissions:
   contents: read
+
+env:
+  CHEF_LICENSE: accept-no-persist
 
 jobs:
   lint:
     name: Cookstyle Lint
     runs-on: ubuntu-latest
-    timeout-minutes: 15  # Prevent hung jobs
+    timeout-minutes: 15
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
           bundler-cache: true
-      - name: Install dependencies
-        run: bundle install
       - name: Run Cookstyle
         run: bundle exec cookstyle --chef-version 19.0
 
   unit-test:
     name: Unit Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 15  # Prevent hung jobs
+    timeout-minutes: 15
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
           bundler-cache: true
-      - name: Install dependencies
-        run: bundle install
       - name: Run ChefSpec tests
         run: bundle exec rspec
 
   integration-test:
     name: Integration Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     needs: [lint, unit-test]
     strategy:
       matrix:
@@ -65,16 +63,22 @@ jobs:
       fail-fast: false
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
           bundler-cache: true
-      - name: Install dependencies
-        run: bundle install
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
       - name: Run Test Kitchen
         run: bundle exec kitchen test ${{ matrix.suite }}-${{ matrix.os }}
         env:
-          CHEF_LICENSE: accept
+          CHEF_LICENSE: accept-no-persist
           KITCHEN_YAML: kitchen.yml
+      - name: Upload kitchen logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kitchen-logs-${{ matrix.suite }}-${{ matrix.os }}
+          path: .kitchen/logs/
