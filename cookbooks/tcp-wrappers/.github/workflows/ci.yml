@@ -8,10 +8,22 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Cancel previous runs on the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+
+
+# Minimal permissions by default
+permissions:
+  contents: read
+
 jobs:
   lint:
     name: Cookstyle Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code
         uses: actions/checkout@v6
@@ -28,6 +40,7 @@ jobs:
   unit-test:
     name: Unit Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code
         uses: actions/checkout@v6
