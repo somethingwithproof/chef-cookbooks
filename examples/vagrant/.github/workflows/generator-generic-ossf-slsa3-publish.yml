@@ -16,9 +16,16 @@ on:
   release:
     types: [created]
 
+# Cancel previous runs on the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     outputs:
       digests: ${{ steps.hash.outputs.digests }}
 
