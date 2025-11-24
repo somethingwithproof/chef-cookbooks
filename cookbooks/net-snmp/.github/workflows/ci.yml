@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -41,7 +41,7 @@ jobs:
         chef-version: ['19']
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -68,7 +68,7 @@ jobs:
       max-parallel: 3
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
