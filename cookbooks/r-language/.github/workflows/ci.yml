@@ -10,10 +10,22 @@ on:
   schedule:
     - cron: "0 1 * * *"
 
+# Cancel previous runs on the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+
+
+# Minimal permissions by default
+permissions:
+  contents: read
+
 jobs:
   lint:
     name: Cookstyle
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code
         uses: actions/checkout@v6
@@ -29,6 +41,7 @@ jobs:
     name: Unit Tests
     needs: lint
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code
         uses: actions/checkout@v6
@@ -44,6 +57,7 @@ jobs:
     name: Integration Tests
     needs: unit
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     strategy:
       matrix:
         os:
@@ -97,6 +111,7 @@ jobs:
   release:
     name: Supermarket Release
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [integration]
     steps:

@@ -15,10 +15,22 @@ on:
           - medium
           - high
 
+# Cancel previous runs on the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+
+
+# Minimal permissions by default
+permissions:
+  contents: read
+
 jobs:
   chaos-testing:
     name: Chaos Engineering Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     strategy:
       matrix:
         chaos_scenario:
@@ -164,6 +176,7 @@ jobs:
     name: Chaos Engineering Summary
     needs: chaos-testing
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     if: always()
     steps:
       - name: Download all chaos test results

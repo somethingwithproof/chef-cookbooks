@@ -16,10 +16,22 @@ on:
   schedule:
     - cron: "0 2 * * 0" # Weekly on Sunday at 2 AM UTC
 
+# Cancel previous runs on the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+
+
+# Minimal permissions by default
+permissions:
+  contents: read
+
 jobs:
   performance-benchmark:
     name: Performance Benchmarks
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     strategy:
       matrix:
         scenario: ["default", "packages"]
@@ -117,6 +129,7 @@ jobs:
   resource-usage:
     name: Resource Usage Analysis
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code
         uses: actions/checkout@v6

@@ -8,10 +8,22 @@ on:
   schedule:
     - cron: "0 */6 * * *" # Every 6 hours
 
+# Cancel previous runs on the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+
+
+# Minimal permissions by default
+permissions:
+  contents: read
+
 jobs:
   performance-monitoring:
     name: Performance Monitoring
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code
         uses: actions/checkout@v6
@@ -104,6 +116,7 @@ jobs:
   health-check:
     name: Health Check
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code
         uses: actions/checkout@v6

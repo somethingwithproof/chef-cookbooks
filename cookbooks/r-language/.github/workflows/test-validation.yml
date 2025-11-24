@@ -6,10 +6,22 @@ on:
   pull_request:
     branches: [main, master]
 
+# Cancel previous runs on the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+
+
+# Minimal permissions by default
+permissions:
+  contents: read
+
 jobs:
   validate-tests:
     name: Validate Test Coverage
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code
         uses: actions/checkout@v6
@@ -58,6 +70,7 @@ jobs:
   lint-validation:
     name: Extended Linting
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code
         uses: actions/checkout@v6
@@ -98,6 +111,7 @@ jobs:
   documentation-validation:
     name: Documentation Validation
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code
         uses: actions/checkout@v6

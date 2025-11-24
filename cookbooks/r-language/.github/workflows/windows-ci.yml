@@ -6,10 +6,22 @@ on:
   pull_request:
     branches: [main, master]
 
+# Cancel previous runs on the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+
+
+# Minimal permissions by default
+permissions:
+  contents: read
+
 jobs:
   windows-test:
     name: Windows Integration Tests
     runs-on: windows-latest
+    timeout-minutes: 15  # Prevent hung jobs
     strategy:
       matrix:
         os: ["windows-2019", "windows-2022"]

@@ -8,10 +8,22 @@ on:
   schedule:
     - cron: "0 6 * * 1" # Weekly on Monday at 6 AM UTC
 
+# Cancel previous runs on the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+
+
+# Minimal permissions by default
+permissions:
+  contents: read
+
 jobs:
   e2e-smoke:
     name: E2E Smoke Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     strategy:
       matrix:
         platform: ["ubuntu-2204", "debian-12"]
@@ -54,6 +66,7 @@ jobs:
   e2e-comprehensive:
     name: E2E Comprehensive Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     if: github.event_name == 'schedule' || contains(github.event.head_commit.message, '[e2e-full]')
     strategy:
       matrix:
@@ -89,6 +102,7 @@ jobs:
   security-scan:
     name: Security Scanning
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code
         uses: actions/checkout@v6
@@ -117,6 +131,7 @@ jobs:
   dependency-check:
     name: Dependency Verification
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code
         uses: actions/checkout@v6
