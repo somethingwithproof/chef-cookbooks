@@ -12,5 +12,5 @@ group :development do
 end
 
 group :integration do
-  gem 'inspec', '~> 7.0'
+  gem 'inspec', '~> 6.0'
 end
