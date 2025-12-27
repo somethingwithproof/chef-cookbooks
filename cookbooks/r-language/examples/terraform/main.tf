@@ -32,6 +32,12 @@ variable "environment" {
   default     = "development"
 }
 
+variable "allowed_cidrs" {
+  description = "CIDR blocks allowed to access SSH/RStudio/Shiny"
+  type        = list(string)
+  default     = []
+}
+
 variable "r_packages" {
   description = "R packages to install"
   type        = list(string)
@@ -64,7 +70,7 @@ resource "aws_security_group" "r_server" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.allowed_cidrs
   }
 
   ingress {
@@ -72,7 +78,7 @@ resource "aws_security_group" "r_server" {
     from_port   = 8787
     to_port     = 8787
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.allowed_cidrs
   }
 
   ingress {
@@ -80,7 +86,7 @@ resource "aws_security_group" "r_server" {
     from_port   = 3838
     to_port     = 3838
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.allowed_cidrs
   }
 
   egress {
@@ -141,11 +147,16 @@ resource "aws_instance" "r_server" {
   user_data              = local.user_data
   user_data_replace_on_change = true
 
+  metadata_options {
+    http_endpoint = "enabled"
+    http_tokens   = "required"
+  }
+
   root_block_device {
     volume_type           = "gp3"
-    volume_size          = 50
+    volume_size           = 50
     delete_on_termination = true
-    encrypted            = true
+    encrypted             = true
   }
 
   tags = {
