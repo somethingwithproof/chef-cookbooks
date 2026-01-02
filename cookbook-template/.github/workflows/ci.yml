@@ -2,6 +2,7 @@ name: CI
 
 on:
   push:
+  workflow_dispatch:
     branches: [main, master, develop]
     tags: ['v*']
   pull_request:
@@ -30,7 +31,7 @@ jobs:
     timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -54,7 +55,7 @@ jobs:
         chef-version: ['19']
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -99,7 +100,7 @@ jobs:
       max-parallel: 5
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -121,7 +122,7 @@ jobs:
     if: github.event_name != 'pull_request'
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
@@ -144,7 +145,7 @@ jobs:
     needs: [lint, unit, integration]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
