@@ -1,12 +1,95 @@
 # tcp_wrappers Cookbook
 
-[![Build Status](https://github.com/thomasvincent/chef-tcp-wrappers/actions/workflows/ci.yml/badge.svg)](https://github.com/thomasvincent/chef-tcp-wrappers/actions/workflows/ci.yml) [![Chef cookbook](https://img.shields.io/badge/Cookbook%20Version-0.3.0-blue.svg)](https://github.com/thomasvincent/chef-tcp-wrappers)
+> **Deprecated: Use firewalld instead**
+>
+> This cookbook is deprecated. TCP Wrappers is considered legacy technology and is no longer
+> actively maintained in many modern Linux distributions. We recommend migrating to firewalld
+> or nftables for access control.
+
+[![Build Status](https://github.com/thomasvincent/chef-tcp-wrappers/actions/workflows/ci.yml/badge.svg)](https://github.com/thomasvincent/chef-tcp-wrappers/actions/workflows/ci.yml) [![Chef cookbook](https://img.shields.io/badge/Cookbook%20Version-0.5.0-blue.svg)](https://github.com/thomasvincent/chef-tcp-wrappers)
 
 A Chef Infra cookbook for managing TCP Wrappers configurations on modern Linux distributions.
 
 The Chef `tcp_wrappers` cookbook installs the `tcp_wrappers` package and configures the `/etc/hosts.deny` or `/etc/hosts.allow` file.
 
 It also exposes a custom resource for adding and managing tcp_wrappers rules.
+
+## Migration Guide
+
+### Why Migrate?
+
+TCP Wrappers (hosts.allow/hosts.deny) is a legacy access control mechanism that:
+- Is no longer actively maintained
+- Has been removed from many modern Linux distributions
+- Provides limited functionality compared to modern firewalls
+- Only works with services compiled with libwrap support
+
+### Recommended Alternatives
+
+#### 1. firewalld (Recommended)
+
+firewalld provides dynamic firewall management with support for network zones:
+
+```ruby
+# Using the firewalld cookbook
+firewalld_rich_rule 'Allow SSH from trusted network' do
+  zone 'public'
+  family 'ipv4'
+  source_address '192.168.1.0/24'
+  service_name 'ssh'
+  action :accept
+end
+
+firewalld_rich_rule 'Allow SSH from datacenter' do
+  zone 'public'
+  family 'ipv4'
+  source_address '10.0.0.0/8'
+  service_name 'ssh'
+  action :accept
+end
+```
+
+#### 2. nftables
+
+For more advanced use cases, nftables provides a modern packet filtering framework:
+
+```ruby
+# Using nftables directly
+nftables_rule 'allow_ssh_trusted' do
+  table 'inet filter'
+  chain 'input'
+  rule 'ip saddr 192.168.1.0/24 tcp dport 22 accept'
+  action :create
+end
+```
+
+#### 3. iptables (Legacy but widely supported)
+
+```ruby
+# Using the iptables cookbook
+iptables_rule 'allow_ssh' do
+  lines [
+    '-A INPUT -s 192.168.1.0/24 -p tcp --dport 22 -j ACCEPT',
+    '-A INPUT -s 10.0.0.0/8 -p tcp --dport 22 -j ACCEPT'
+  ]
+end
+```
+
+### Migration Steps
+
+1. **Audit existing tcp_wrappers rules**: Review your `/etc/hosts.allow` and `/etc/hosts.deny` files
+2. **Map rules to firewall equivalents**: Convert each tcp_wrappers rule to firewalld rules
+3. **Test in staging**: Deploy firewall rules to a test environment first
+4. **Deploy firewall rules**: Add firewalld rules before removing tcp_wrappers
+5. **Remove tcp_wrappers**: Once firewall rules are confirmed working, remove this cookbook
+
+### Rule Conversion Examples
+
+| tcp_wrappers (hosts.allow) | firewalld equivalent |
+|---------------------------|---------------------|
+| `sshd: 192.168.1.0/24` | `firewall-cmd --add-rich-rule='rule family="ipv4" source address="192.168.1.0/24" service name="ssh" accept'` |
+| `ALL: 10.0.0.0/8` | `firewall-cmd --zone=trusted --add-source=10.0.0.0/8` |
+| `sshd: .example.com` | Use DNS-based rules in firewalld or ipset |
 
 ## Requirements
 
@@ -22,7 +105,7 @@ It also exposes a custom resource for adding and managing tcp_wrappers rules.
 
 ### Chef
 
-- Chef 16.0+
+- Chef 18.0+
 
 ### Cookbooks
 
