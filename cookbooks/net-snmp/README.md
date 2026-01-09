@@ -1,99 +1,201 @@
 # chef-net-snmp-cookbook
 
-A Chef cookbook for installing and configuring Net-SNMP with SNMPv3 support.
+Chef cookbook for installing and configuring Net-SNMP with SNMPv3 support.
+
+[![CI](https://github.com/thomasvincent/chef-net-snmp-cookbook/actions/workflows/ci.yml/badge.svg)](https://github.com/thomasvincent/chef-net-snmp-cookbook/actions/workflows/ci.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+## Overview
+
+This cookbook provides comprehensive SNMP daemon management including:
+
+- Net-SNMP package installation and service management
+- SNMPv2c community string configuration (for legacy systems)
+- **SNMPv3 user management with authentication and encryption** (recommended)
+- Custom resources for declarative configuration
+- Disk, load, and process monitoring
+- SELinux support for RHEL-based systems
+
+## Security Notice
+
+**SNMPv1/v2c use cleartext community strings and are vulnerable to sniffing attacks.**
+
+For production environments, use SNMPv3 with:
+- Strong authentication (SHA-256 or better)
+- Encryption (AES-256)
+- Unique credentials per system
 
 ## Requirements
 
-- Chef Infra Client >= 18.0
-- Platforms:
-  - Ubuntu 20.04+
-  - Debian 11+
-  - CentOS/RHEL 8+
-  - Rocky Linux 8+
-  - AlmaLinux 8+
-  - Amazon Linux 2+
+- **Chef**: >= 19.0
+- **Platforms**: Ubuntu 20.04+, Debian 11+, CentOS 8+, RHEL 8+, Amazon Linux 2+, Rocky 8+, Alma 8+
 
 ## Usage
 
-Add `recipe[net-snmp::default]` to your run list.
+### Basic Installation
+
+Add to your `Berksfile`:
+
+```ruby
+cookbook 'net-snmp', git: 'https://github.com/thomasvincent/chef-net-snmp-cookbook'
+```
+
+Include in your recipe or run_list:
+
+```ruby
+include_recipe 'net-snmp::default'
+```
+
+### SNMPv3 Configuration (Recommended)
+
+```ruby
+# In your attributes or recipe
+node.default['net_snmp']['v3_users'] = [
+  {
+    'username' => 'monitoring',
+    'auth_protocol' => 'SHA-256',
+    'auth_password' => 'YourSecureAuthPassword123!',
+    'priv_protocol' => 'AES-256',
+    'priv_password' => 'YourSecurePrivPassword456!',
+    'security_level' => 'authPriv',
+    'access_level' => 'ro',
+    'view' => 'systemview'
+  }
+]
+
+include_recipe 'net-snmp::v3'
+```
+
+### Using Custom Resources
+
+#### snmp_config
+
+Configure the SNMP daemon:
+
+```ruby
+snmp_config 'main' do
+  sys_location 'Data Center 1, Rack 42'
+  sys_contact 'ops@example.com'
+  listen_address 'udp:161'
+  community_strings [
+    { community: 'readSecret', access: 'rocommunity', source: '10.0.0.0/8', view: 'systemview' }
+  ]
+  views [
+    { name: 'systemview', type: 'included', oid: '.1.3.6.1.2.1' }
+  ]
+  disk_monitoring ['/', '/var']
+  load_thresholds({ '1min' => 12, '5min' => 10, '15min' => 5 })
+  action :create
+end
+```
+
+#### snmp_user
+
+Create SNMPv3 users:
+
+```ruby
+snmp_user 'monitoring' do
+  auth_protocol 'SHA-256'
+  auth_password 'secure_password_here'
+  priv_protocol 'AES-256'
+  priv_password 'another_secure_password'
+  security_level 'authPriv'
+  access_level 'ro'
+  view 'systemview'
+  action :create
+end
+```
+
+### Testing SNMPv3 Connection
+
+```bash
+# Test authentication and encryption
+snmpget -v3 -u monitoring -l authPriv \
+  -a SHA-256 -A 'YourAuthPassword' \
+  -x AES-256 -X 'YourPrivPassword' \
+  localhost sysDescr.0
+```
 
 ## Attributes
 
-| Attribute | Default | Description |
-|-----------|---------|-------------|
-| `node['net-snmp']['snmpv3']['enabled']` | `false` | Enable SNMPv3 configuration |
-| `node['net-snmp']['snmpv3']['users']` | `[]` | Array of SNMPv3 user configurations |
+| Attribute | Description | Default |
+|-----------|-------------|---------|
+| `node['net_snmp']['sys_location']` | System location | `'Unknown'` |
+| `node['net_snmp']['sys_contact']` | System contact | `'root@localhost'` |
+| `node['net_snmp']['listen_address']` | Listen address | `'udp:161,udp6:[::1]:161'` |
+| `node['net_snmp']['community_strings']` | SNMPv2c communities | `[]` |
+| `node['net_snmp']['v3_users']` | SNMPv3 user definitions | `[]` |
+| `node['net_snmp']['views']` | View definitions | System views |
+| `node['net_snmp']['disk_monitoring']` | Disk paths to monitor | `[]` |
+| `node['net_snmp']['load_thresholds']` | Load average thresholds | `{ '1min' => 12, ... }` |
 
-## SNMPv3 Setup
+## Recipes
 
-SNMPv3 provides enhanced security through authentication and encryption. To enable SNMPv3:
+| Recipe | Description |
+|--------|-------------|
+| `default` | Installs Net-SNMP packages and starts service |
+| `v3` | Configures SNMPv3 users (includes default) |
 
-### Basic Configuration
+## Custom Resources
 
-```ruby
-default['net-snmp']['snmpv3']['enabled'] = true
-default['net-snmp']['snmpv3']['users'] = [
-  {
-    'username' => 'monitoring_user',
-    'auth_protocol' => 'SHA',
-    'auth_password' => 'your_auth_password_min_8_chars',
-    'priv_protocol' => 'AES',
-    'priv_password' => 'your_priv_password_min_8_chars',
-  },
-]
-```
+### snmp_config
 
-### Security Levels
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `config_file` | String | `/etc/snmp/snmpd.conf` | Configuration file path |
+| `sys_location` | String | `'Unknown'` | SNMP sysLocation |
+| `sys_contact` | String | `'root@localhost'` | SNMP sysContact |
+| `community_strings` | Array | `[]` | SNMPv2c communities |
+| `views` | Array | System views | View definitions |
+| `disk_monitoring` | Array | `[]` | Disk paths to monitor |
 
-SNMPv3 supports three security levels:
+### snmp_user
 
-1. **noAuthNoPriv** - No authentication, no encryption (not recommended)
-2. **authNoPriv** - Authentication only (SHA/MD5)
-3. **authPriv** - Authentication and encryption (SHA+AES recommended)
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `username` | String | (name) | SNMPv3 username |
+| `auth_protocol` | String | `'SHA-256'` | Authentication protocol |
+| `auth_password` | String | (required) | Auth password (min 8 chars) |
+| `priv_protocol` | String | `'AES-256'` | Privacy protocol |
+| `priv_password` | String | auth_password | Privacy password |
+| `security_level` | String | `'authPriv'` | Security level |
+| `access_level` | String | `'ro'` | Access level (ro/rw) |
 
-### Recommended Settings
+## Troubleshooting
 
-For production environments, always use:
-
-- **Authentication Protocol**: SHA (SHA-256 or SHA-512 preferred if available)
-- **Privacy Protocol**: AES (AES-256 preferred if available)
-- **Passwords**: Minimum 12 characters, use secrets management
-
-### Testing SNMPv3
-
-```bash
-# Test SNMPv3 connection
-snmpwalk -v3 -u monitoring_user -l authPriv \
-  -a SHA -A 'your_auth_password' \
-  -x AES -X 'your_priv_password' \
-  localhost .1.3.6.1.2.1.1
-```
-
-### Security Best Practices
-
-1. **Never commit passwords** - Use Chef encrypted data bags or external secrets management
-2. **Rotate credentials regularly** - Implement credential rotation policies
-3. **Restrict network access** - Use firewall rules to limit SNMP access
-4. **Monitor access logs** - Enable and review SNMP access logging
-5. **Disable SNMPv1/v2c** - This cookbook disables legacy protocols when SNMPv3 is enabled
-
-## Testing
-
-### Unit Tests (ChefSpec)
+### SNMP service won't start
 
 ```bash
-bundle exec rspec
+# Check configuration syntax
+snmpd -C -c /etc/snmp/snmpd.conf
+
+# Check logs
+journalctl -u snmpd -f
 ```
 
-### Integration Tests (Test Kitchen)
+### SNMPv3 authentication fails
+
+1. Verify user exists: `cat /var/lib/snmp/snmpd.conf`
+2. Check password length (minimum 8 characters)
+3. Ensure protocols match between client and server
+4. Restart snmpd after user creation
+
+### SELinux blocking SNMP
 
 ```bash
-# Run all tests
-bundle exec kitchen test
+# Check for denials
+ausearch -m avc -ts recent | grep snmp
 
-# Run SNMPv3 specific tests
-bundle exec kitchen test snmpv3
+# Apply custom policy if needed
+semodule -i snmpd_custom.pp
 ```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Write tests for your changes
+4. Submit a pull request
 
 ## License
 
@@ -101,4 +203,4 @@ Apache-2.0
 
 ## Author
 
-Thomas Vincent
+Thomas Vincent (<thomasvincent@github.com>)
