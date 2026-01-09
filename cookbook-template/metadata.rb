@@ -4,9 +4,9 @@ name 'cookbook-template'
 maintainer 'Thomas Vincent'
 maintainer_email 'thomasvincent@gmail.com'
 license 'Apache-2.0'
-description 'Modern Chef cookbook template with best practices for Chef 19+'
+description 'Modern Chef cookbook template with best practices for Chef 18+'
 version '1.0.0'
-chef_version '>= 19.0'
+chef_version '>= 18.0'
 
 # Platform support
 supports 'ubuntu', '>= 22.04'

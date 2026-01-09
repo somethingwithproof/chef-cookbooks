@@ -3,7 +3,7 @@
 [![CI](https://github.com/thomasvincent/chef-cookbook-template/workflows/CI/badge.svg)](https://github.com/thomasvincent/chef-cookbook-template/actions)
 [![Chef Cookbook](https://img.shields.io/cookbook/v/cookbook-template.svg)](https://supermarket.chef.io/cookbooks/cookbook-template)
 
-Modern Chef cookbook template with best practices for Chef 19+ development.
+Modern Chef cookbook template with best practices for Chef 18+ development.
 
 ## Features
 
@@ -15,78 +15,148 @@ Modern Chef cookbook template with best practices for Chef 19+ development.
 - **Code Quality**: Cookstyle linting and automated code formatting
 - **Template Repository**: Ready to use as a GitHub template for new cookbooks
 
-## Prerequisites
+## Modern Setup
 
-- **Docker** for devcontainer development
-- **VS Code** with Dev Containers extension (recommended)
-- Alternative: **Chef Workstation** 23.10.1040+ for native development
+### Prerequisites
 
-## Quick Start
+- Ruby 3.2+
+- Chef Workstation 23.0+ or Chef Infra Client 18.0+
+- Vagrant and VirtualBox (for integration testing)
+- Docker (optional, for dokken-based testing)
 
-### 🐳 Devcontainer Development (Recommended)
-
-1. **Clone the repository**: `git clone <your-cookbook-repo>`
-2. **Open in VS Code**: Use "Dev Containers: Open Folder in Container"
-3. **Wait for setup**: Container will automatically install dependencies
-4. **Start developing**: All tools pre-configured and ready
+### Installation
 
 ```bash
-# Inside devcontainer - everything works out of the box
-cookstyle .                     # Linting
-bundle exec rspec               # Unit tests  
-kitchen test                    # Integration tests (uses devcontainer)
-```
+# Clone the repository
+git clone https://github.com/thomasvincent/chef-cookbook-template.git
+cd chef-cookbook-template
 
-### 🏠 Native Development
-
-```bash
 # Install dependencies
 bundle install
+```
 
-# Run all tests
-bundle exec rake
+### Quick Start
 
-# Run specific test suites
-bundle exec cookstyle           # Linting
-bundle exec rspec               # Unit tests
-KITCHEN_LOCAL_YAML=.kitchen.dokken.yml kitchen test  # Integration tests
+```bash
+# Run linting
+bundle exec cookstyle
+
+# Run unit tests
+bundle exec rspec
+
+# Run integration tests
+bundle exec kitchen test
+```
+
+## Kitchen Usage
+
+Test Kitchen is configured to use Vagrant by default for integration testing.
+
+### Basic Commands
+
+```bash
+# List available test instances
+kitchen list
+
+# Create test instance
+kitchen create
+
+# Converge (apply cookbook)
+kitchen converge
+
+# Run verification tests
+kitchen verify
+
+# Full test cycle (create, converge, verify, destroy)
+kitchen test
+
+# Destroy test instance
+kitchen destroy
+```
+
+### Configuration
+
+The `kitchen.yml` file defines the testing configuration:
+
+- **Driver**: Vagrant for local VM-based testing
+- **Provisioner**: chef_solo for cookbook convergence
+- **Platform**: Ubuntu 22.04 LTS
+- **Suite**: Default recipe test suite
+
+### Testing Multiple Platforms
+
+To test on multiple platforms, add additional platforms to `kitchen.yml`:
+
+```yaml
+platforms:
+  - name: ubuntu-22.04
+  - name: ubuntu-24.04
+  - name: debian-12
+  - name: rockylinux-9
 ```
 
 ## Testing
 
-This template provides two testing environments:
-
-### 🐳 Devcontainer Testing (Default)
-Uses the same environment as development for consistency:
-```bash
-# Default Test Kitchen configuration uses devcontainer
-kitchen test                    # Uses devcontainer image
-kitchen list                    # Shows devcontainer platforms
-```
-
-### ⚡ CI/CD Testing (Fast)
-Uses dokken driver for faster CI execution:
-```bash
-# For CI/CD or when speed is critical
-KITCHEN_LOCAL_YAML=.kitchen.dokken.yml kitchen test
-```
-
 ### Unit Tests (ChefSpec)
-Fast, isolated tests for cookbook logic:
+
+Unit tests are located in `spec/unit/recipes/` and use ChefSpec:
+
 ```bash
 bundle exec rspec
 ```
 
-### Linting (Cookstyle)
-Code quality and style enforcement:
+### Integration Tests (Test Kitchen)
+
+Integration tests verify the cookbook works on real systems:
+
 ```bash
-bundle exec cookstyle
+bundle exec kitchen test
 ```
 
-### Testing Environments
-- **Local Development**: devcontainer (consistent with dev environment)
-- **CI/CD Pipeline**: dokken (optimized for speed)
-- **Both support**: Multi-platform testing with same test suites
+### Linting (Cookstyle)
+
+Code style and best practices enforcement:
+
+```bash
+bundle exec cookstyle
+bundle exec cookstyle -a  # Auto-correct issues
+```
+
+## Security Tips
+
+### Secrets Management
+
+- **Never commit secrets**: Use `.gitignore` to exclude sensitive files
+- **Use encrypted data bags**: Store secrets in encrypted data bags
+- **Chef Vault**: Consider using Chef Vault for secret management
+- **Environment variables**: Pass secrets via environment variables in CI/CD
+
+### Code Security
+
+- **Regularly update dependencies**: Run `bundle update` regularly
+- **Enable Dependabot**: Automated security updates for dependencies
+- **Run security scans**: Use `bundle audit` to check for vulnerabilities
+- **Review third-party cookbooks**: Audit dependencies before use
+
+### Infrastructure Security
+
+- **Principle of least privilege**: Minimize permissions in recipes
+- **Validate inputs**: Always validate attribute inputs
+- **Use HTTPS**: Ensure all remote resources use HTTPS
+- **Keep Chef updated**: Use the latest stable Chef version
+
+### Recommended Tools
+
+```bash
+# Check for vulnerable gems
+bundle audit check --update
+
+# Scan cookbook for security issues
+bundle exec cookstyle --only Security
+
+# Verify cookbook signatures
+knife cookbook verify cookbook-template
+```
 
 ## Platform Support
 
@@ -97,39 +167,6 @@ This cookbook supports the following platforms:
 - **Rocky Linux**: 9
 - **Amazon Linux**: 2023
 
-## Resources
-
-### `cookbook_template_example`
-
-Example custom resource demonstrating modern patterns:
-
-```ruby
-cookbook_template_example 'my_service' do
-  port 8080
-  enabled true
-  action :create
-end
-```
-
-#### Properties
-
-- `port` (Integer) - Service port number (default: 8080)
-- `enabled` (Boolean) - Whether service should be enabled (default: true)
-- `config_template` (String) - Template file name (default: 'service.conf.erb')
-
-#### Actions
-
-- `:create` - Install and configure the service (default)
-- `:remove` - Remove the service
-
-## Attributes
-
-| Attribute | Default | Description |
-|-----------|---------|-------------|
-| `['cookbook_template']['service']['port']` | `8080` | Default service port |
-| `['cookbook_template']['service']['enabled']` | `true` | Enable service by default |
-| `['cookbook_template']['package']['name']` | Platform-specific | Package name to install |
-
 ## Usage
 
 ### Basic Usage
@@ -137,20 +174,7 @@ end
 Include the cookbook in your run list:
 
 ```ruby
-include_recipe 'cookbook-template::default'
-```
-
-### Advanced Usage
-
-Use the custom resource directly:
-
-```ruby
-cookbook_template_example 'web_service' do
-  port 3000
-  enabled true
-  config_template 'custom.conf.erb'
-  action :create
-end
+include_recipe 'chef-cookbook-template::default'
 ```
 
 ## Development
@@ -174,16 +198,6 @@ This cookbook enforces high code quality standards:
 6. Commit your changes (`git commit -am 'Add amazing feature'`)
 7. Push to the branch (`git push origin feature/amazing-feature`)
 8. Open a Pull Request
-
-### Release Process
-
-This cookbook uses automated releases:
-
-1. Update version in `metadata.rb`
-2. Update `CHANGELOG.md`
-3. Create a git tag: `git tag v1.0.0`
-4. Push tag: `git push origin v1.0.0`
-5. GitHub Actions will automatically release to Supermarket
 
 ## License
 
