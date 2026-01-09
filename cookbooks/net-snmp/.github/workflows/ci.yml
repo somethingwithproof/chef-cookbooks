@@ -25,7 +25,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -46,10 +46,10 @@ jobs:
     timeout-minutes: 15
     strategy:
       matrix:
-        chef-version: ['19']
+        chef-version: ['18', '19']
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -60,9 +60,28 @@ jobs:
       - name: Run ChefSpec tests
         run: bundle exec rspec --format documentation
 
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Run bundle-audit
+        run: |
+          gem install bundler-audit
+          bundle-audit check --update
+
   integration:
     name: Integration Tests
-    needs: unit
+    needs: [unit, security]
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -72,12 +91,12 @@ jobs:
           - 'ubuntu-20.04'
           - 'debian-12'
           - 'rockylinux-9'
-        suite: ['default']
+        suite: ['default', 'snmpv3']
       fail-fast: false
-      max-parallel: 3
+      max-parallel: 4
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -97,7 +116,8 @@ jobs:
 
       - name: Upload kitchen logs on failure
         if: failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: kitchen-logs-${{ matrix.suite }}-${{ matrix.os }}
           path: .kitchen/logs/
+          retention-days: 7

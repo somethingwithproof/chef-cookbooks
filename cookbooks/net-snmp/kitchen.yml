@@ -1,0 +1,50 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_infra
+  product_name: chef
+  install_strategy: once
+  multiple_converge: 2
+  enforce_idempotency: true
+  deprecations_as_errors: true
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: ubuntu-22.04
+  - name: ubuntu-20.04
+  - name: debian-12
+  - name: debian-11
+  - name: centos-stream-8
+  - name: rockylinux-9
+  - name: rockylinux-8
+  - name: almalinux-9
+
+suites:
+  - name: default
+    run_list:
+      - recipe[net-snmp::default]
+    verifier:
+      inspec_tests:
+        - test/integration/default
+    attributes:
+
+  - name: snmpv3
+    run_list:
+      - recipe[net-snmp::default]
+    verifier:
+      inspec_tests:
+        - test/integration/snmpv3
+    attributes:
+      net-snmp:
+        snmpv3:
+          enabled: true
+          users:
+            - username: snmpv3user
+              auth_protocol: SHA
+              auth_password: authpass123456
+              priv_protocol: AES
+              priv_password: privpass123456

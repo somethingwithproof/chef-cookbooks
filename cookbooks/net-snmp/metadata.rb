@@ -4,9 +4,9 @@ name 'net-snmp'
 maintainer 'Thomas Vincent'
 maintainer_email 'thomasvincent@github.com'
 license 'Apache-2.0'
-description 'Installs and configures Net-SNMP'
-version '1.0.0'
-chef_version '>= 19.0'
+description 'Installs and configures Net-SNMP with SNMPv3 support'
+version '2.0.0'
+chef_version '>= 18.0'
 
 # Platform support
 supports 'ubuntu', '>= 20.04'
