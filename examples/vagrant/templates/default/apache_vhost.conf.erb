@@ -1,0 +1,17 @@
+<VirtualHost *:<%= @port %>>
+  ServerName <%= @server_name %>
+<% @server_aliases.each do |server_alias| %>
+  ServerAlias <%= server_alias %>
+<% end %>
+
+  DocumentRoot <%= @docroot %>
+
+  <Directory <%= @docroot %>>
+    Options FollowSymLinks
+    AllowOverride All
+    Require all granted
+  </Directory>
+
+  ErrorLog ${APACHE_LOG_DIR}/<%= @server_name %>-error.log
+  CustomLog ${APACHE_LOG_DIR}/<%= @server_name %>-access.log combined
+</VirtualHost>

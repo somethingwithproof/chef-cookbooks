@@ -1,6 +1,0 @@
-name 'Site'
-maintainer       'Thomas Vincent'
-maintainer_email 'thomasvincent@gmail.com'
-license          'Apache-2.0'
-description      'Installs/Configures Site'
-version          '0.0.1'
