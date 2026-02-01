@@ -48,8 +48,12 @@ describe 'tcp_wrappers::default' do
       expect { chef_run }.to_not raise_error
     end
 
-    it 'installs the tcp_wrappers package' do
-      expect(chef_run).to install_package('tcp_wrappers')
+    it 'does not install tcp_wrappers package' do
+      expect(chef_run).not_to install_package('tcp_wrappers')
+    end
+
+    it 'logs a warning about tcp_wrappers being unavailable' do
+      expect(chef_run).to write_log('tcp_wrappers_unavailable').with(level: :warn)
     end
   end
 

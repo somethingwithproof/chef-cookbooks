@@ -19,8 +19,17 @@
 # Chef 18+ recommends declaring resources with a single block of code
 # Install appropriate package using attribute
 if platform_family?('debian', 'rhel', 'amazon', 'fedora')
-  package node['authorization']['tcp_wrappers']['package'] do
-    action :install
+  # tcp_wrappers package was removed in RHEL 9+ / Fedora 36+
+  if platform_family?('rhel', 'fedora') && node['platform_version'].to_i >= 9
+    log 'tcp_wrappers_unavailable' do
+      message "tcp_wrappers package is not available on #{node['platform']} #{node['platform_version']}. " \
+              'Use firewalld or nftables instead.'
+      level :warn
+    end
+  else
+    package node['authorization']['tcp_wrappers']['package'] do
+      action :install
+    end
   end
 end
 
