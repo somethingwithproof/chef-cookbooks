@@ -1,0 +1,48 @@
+# snmptrapd.conf
+# Managed by Chef - DO NOT EDIT MANUALLY
+
+# Listen address
+snmpTrapdAddr <%= @listen_address %>
+
+<% if @auth_required -%>
+# Require authentication for traps
+authCommunity log,execute,net <%= @community %>
+disableAuthorization no
+<% else -%>
+# Accept all traps (less secure)
+disableAuthorization yes
+<% if @community -%>
+authCommunity log,execute,net <%= @community %>
+<% end -%>
+<% end -%>
+
+<% @v3_users.each do |user| -%>
+# SNMPv3 User: <%= user['username'] || user[:username] %>
+createUser -e <%= user['engine_id'] || '0x80001f8880' %> <%= user['username'] || user[:username] %> <%= user['auth_protocol'] || user[:auth_protocol] || 'SHA' %> "<%= user['auth_password'] || user[:auth_password] %>" <%= user['priv_protocol'] || user[:priv_protocol] || 'AES' %> "<%= user['priv_password'] || user[:priv_password] %>"
+authUser log,execute <%= user['username'] || user[:username] %>
+<% end -%>
+
+# Trap handling configuration
+<% case @log_type
+   when 'syslog' -%>
+# Log traps to syslog
+traphandle default /usr/bin/logger -t snmptrapd
+<% when 'file' -%>
+# Log traps to file
+logOption f <%= @log_file %>
+traphandle default /usr/bin/tee -a <%= @log_file %>
+<% when 'execute' -%>
+<% if @trap_handler -%>
+# Execute custom handler for all traps
+traphandle default <%= @trap_handler %>
+<% end -%>
+<% end -%>
+
+<% @forward_addresses.each do |addr| -%>
+# Forward traps to <%= addr %>
+forward default <%= addr %>
+<% end -%>
+
+# Output format
+format1 %V\n% Agent Address: %A \n Agent Hostname: %B \n Date: %H - %J - %K \n Enterprise OID: %N \n Trap Type: %W \n Trap Sub-Type: %q \n Community: %P \n Uptime: %T\n\n
+format2 %V\n% Agent Address: %A \n Agent Hostname: %B \n Date: %H - %J - %K \n Enterprise OID: %N \n Trap Type: %W \n Trap Sub-Type: %q \n Community: %P \n Uptime: %T\n%v\n

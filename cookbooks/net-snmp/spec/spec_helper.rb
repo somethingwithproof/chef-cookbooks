@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'chefspec'
-require 'chefspec/berkshelf'
+# Use ChefSpec without Berkshelf or Policyfile resolver
 
 RSpec.configure do |config|
   config.color = true

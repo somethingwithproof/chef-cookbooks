@@ -71,7 +71,7 @@ property :owner, String,
          description: 'Owner of the configuration file'
 
 property :group, String,
-         default: lazy { platform_family?('debian') ? 'root' : 'root' },
+         default: 'root',
          description: 'Group of the configuration file'
 
 property :mode, String,

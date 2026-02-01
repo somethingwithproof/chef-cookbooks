@@ -16,79 +16,134 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Install Net-SNMP package
-package_name = case node['platform_family']
-               when 'rhel', 'fedora', 'amazon'
-                 'net-snmp'
-               when 'debian'
-                 'snmp'
-               end
+# Install Net-SNMP based on platform
+case node['platform_family']
+when 'rhel', 'fedora', 'amazon'
+  package 'net-snmp' do
+    action :install
+  end
 
-package package_name do
-  action :install
-end
-
-# Install SNMP daemon
-daemon_package = case node['platform_family']
-                 when 'rhel', 'fedora', 'amazon'
-                   'net-snmp'
-                 when 'debian'
-                   'snmpd'
-                 end
-
-package daemon_package do
-  action :install
-end
-
-# Install net-snmp-utils for SNMPv3 user creation on RHEL-based systems
-if platform_family?('rhel', 'fedora', 'amazon')
   package 'net-snmp-utils' do
     action :install
   end
+when 'debian'
+  package 'snmp' do
+    action :install
+  end
+
+  package 'snmpd' do
+    action :install
+  end
+
+  package 'snmp-mibs-downloader' do
+    action :install
+  end
+when 'freebsd'
+  # Bootstrap pkg if needed
+  execute 'bootstrap_pkg' do
+    command 'pkg bootstrap -y'
+    not_if 'pkg -N'
+  end
+
+  package 'net-snmp' do
+    action :install
+  end
+
+  # Enable snmpd in rc.conf
+  execute 'enable_snmpd_freebsd' do
+    command 'sysrc snmpd_enable="YES"'
+    not_if 'sysrc -n snmpd_enable | grep -q YES'
+  end
+when 'mac_os_x'
+  # macOS uses Homebrew for net-snmp
+  homebrew_package 'net-snmp' do
+    action :install
+    only_if { ::File.exist?('/opt/homebrew/bin/brew') || ::File.exist?('/usr/local/bin/brew') }
+  end
 end
 
-# Configure SNMPv3 if enabled
-if node['net-snmp']['snmpv3']['enabled']
-  # Determine config directory based on platform
-  snmp_conf_dir = '/etc/snmp'
+# Configure SNMPv3 if users are defined
+if node['net_snmp']['v3_users'] && !node['net_snmp']['v3_users'].empty?
+  # Create snmpd.conf.d directory for modular configuration
+  directory node['net_snmp']['config_include_dir'] do
+    owner 'root'
+    group 'root'
+    mode '0755'
+    recursive true
+  end
 
   # Create snmpd.conf with SNMPv3 configuration
-  template "#{snmp_conf_dir}/snmpd.conf" do
+  template node['net_snmp']['config_file'] do
     source 'snmpd.conf.erb'
     owner 'root'
     group 'root'
     mode '0600'
     sensitive true
     variables(
-      snmpv3_users: node['net-snmp']['snmpv3']['users']
+      sys_location: node['net_snmp']['sys_location'],
+      sys_contact: node['net_snmp']['sys_contact'],
+      sys_name: node['net_snmp']['sys_name'],
+      listen_address: node['net_snmp']['listen_address'],
+      community_strings: node['net_snmp']['community_strings'],
+      v3_users: node['net_snmp']['v3_users'],
+      views: node['net_snmp']['views'],
+      groups: node['net_snmp']['groups'],
+      access_rules: node['net_snmp']['access_rules'],
+      disk_monitoring: node['net_snmp']['disk_monitoring'],
+      load_thresholds: node['net_snmp']['load_thresholds'],
+      extend_scripts: node['net_snmp']['extend_scripts'],
+      pass_scripts: node['net_snmp']['pass_scripts'],
+      disable_snmpv1: node['net_snmp']['disable_snmpv1'],
+      disable_snmpv2c: node['net_snmp']['disable_snmpv2c']
     )
     notifies :restart, 'service[snmpd]', :delayed
   end
 
   # Create SNMPv3 users
-  node['net-snmp']['snmpv3']['users'].each do |user|
+  node['net_snmp']['v3_users'].each do |user|
+    username = user['username'] || user[:username]
+    auth_password = user['auth_password'] || user[:auth_password]
+    auth_protocol = user['auth_protocol'] || user[:auth_protocol] || 'SHA'
+    priv_password = user['priv_password'] || user[:priv_password]
+    priv_protocol = user['priv_protocol'] || user[:priv_protocol] || 'AES'
+
     # Stop snmpd before creating users (required for net-snmp-create-v3-user)
-    execute "create_snmpv3_user_#{user['username']}" do
-      command <<-EOH
+    execute "create_snmpv3_user_#{username}" do
+      command <<~BASH
         service snmpd stop || true
         net-snmp-create-v3-user -ro \
-          -A '#{user['auth_password']}' \
-          -a #{user['auth_protocol']} \
-          -X '#{user['priv_password']}' \
-          -x #{user['priv_protocol']} \
-          #{user['username']}
+          -A '#{auth_password}' \
+          -a #{auth_protocol} \
+          -X '#{priv_password}' \
+          -x #{priv_protocol} \
+          #{username}
         service snmpd start
-      EOH
+      BASH
       sensitive true
-      not_if "grep -q 'usmUser.*#{user['username']}' /var/lib/snmp/snmpd.conf 2>/dev/null"
+      not_if "grep -q 'usmUser.*#{username}' /var/lib/snmp/snmpd.conf 2>/dev/null"
     end
   end
 end
 
-# Service name
-service_name = 'snmpd'
+# Service name based on platform
+service_name = node['net_snmp']['service_name']
 
 # Start and enable SNMP service
-service service_name do
-  action [:enable, :start]
+case node['platform_family']
+when 'freebsd'
+  service service_name do
+    action [:enable, :start]
+    provider Chef::Provider::Service::Freebsd
+  end
+when 'mac_os_x'
+  # macOS uses Homebrew services for net-snmp
+  execute 'start_snmpd_macos' do
+    command 'brew services start net-snmp'
+    not_if 'brew services list | grep net-snmp | grep started'
+    only_if { ::File.exist?('/opt/homebrew/bin/brew') || ::File.exist?('/usr/local/bin/brew') }
+  end
+else
+  service service_name do
+    action [:enable, :start]
+  end
 end

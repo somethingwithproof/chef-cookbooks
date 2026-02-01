@@ -19,7 +19,7 @@ property :username, String,
          description: 'SNMPv3 username'
 
 property :auth_protocol, String,
-         equal_to: %w[MD5 SHA SHA-224 SHA-256 SHA-384 SHA-512],
+         equal_to: %w(MD5 SHA SHA-224 SHA-256 SHA-384 SHA-512),
          default: 'SHA-256',
          description: 'Authentication protocol (SHA-256 recommended)'
 
@@ -29,7 +29,7 @@ property :auth_password, String,
          description: 'Authentication password (minimum 8 characters)'
 
 property :priv_protocol, String,
-         equal_to: %w[DES AES AES-128 AES-192 AES-256],
+         equal_to: %w(DES AES AES-128 AES-192 AES-256),
          default: 'AES-256',
          description: 'Privacy/encryption protocol (AES-256 recommended)'
 
@@ -38,12 +38,12 @@ property :priv_password, String,
          description: 'Privacy password (defaults to auth_password if not set)'
 
 property :security_level, String,
-         equal_to: %w[noAuthNoPriv authNoPriv authPriv],
+         equal_to: %w(noAuthNoPriv authNoPriv authPriv),
          default: 'authPriv',
          description: 'Security level (authPriv recommended for production)'
 
 property :access_level, String,
-         equal_to: %w[ro rw],
+         equal_to: %w(ro rw),
          default: 'ro',
          description: 'Access level (read-only or read-write)'
 
@@ -118,7 +118,7 @@ action :delete do
     notifies :restart, 'service[snmpd]', :delayed
   end
 
-  # Note: Removing from persistent storage requires service restart
+  # NOTE: Removing from persistent storage requires service restart
   log "SNMPv3 user #{new_resource.username} configuration removed. Restart snmpd to complete removal." do
     level :info
   end
