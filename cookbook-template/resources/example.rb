@@ -115,7 +115,7 @@ action :create do
 
   # Configure and start service
   service service_name do
-    action new_resource.enabled ? %i[enable start] : %i[disable stop]
+    action new_resource.enabled ? %i(enable start) : %i(disable stop)
   end
 
   # Create systemd service file if on systemd platform
@@ -196,7 +196,7 @@ action_class do
       node['platform_version'].to_f >= 15.04
     when 'debian'
       node['platform_version'].to_f >= 8.0
-    when 'centos', 'rhel', 'redhat', 'oracle', 'almalinux', 'rocky'
+    when 'centos', 'redhat', 'oracle', 'almalinux', 'rocky'
       node['platform_version'].to_f >= 7.0
     when 'amazon'
       node['platform_version'].to_f >= 2.0

@@ -23,7 +23,7 @@ module CookbookTemplate
     # Platform detection helpers
     def systemd_platform?
       platform_family?('rhel', 'debian', 'suse') &&
-        (platform?('ubuntu') && node['platform_version'].to_f >= 15.04) ||
+        platform?('ubuntu') && node['platform_version'].to_f >= 15.04 ||
         (platform?('debian') && node['platform_version'].to_i >= 8) ||
         (platform_family?('rhel') && node['platform_version'].to_i >= 7) ||
         (platform?('opensuse') && node['platform_version'].to_f >= 42.0)
@@ -66,13 +66,13 @@ module CookbookTemplate
         TCPSocket.new(host, port).close
         true
       end
-    rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Timeout::Error
+    rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, SocketError, Timeout::Error
       false
     end
 
     # File system helpers
     def safe_file_path(path)
-      ::File.expand_path(path).gsub(/\.\./, '')
+      ::File.expand_path(path).gsub('..', '')
     end
 
     def directory_exists?(path)

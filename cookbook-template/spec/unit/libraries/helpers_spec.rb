@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+require_relative '../../../libraries/helpers'
 
 describe CookbookTemplate::Helpers do
   let(:node) { ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '20.04').node }
@@ -126,11 +127,13 @@ describe CookbookTemplate::Helpers do
 
   describe '#port_open?' do
     it 'returns false for closed port' do
+      allow(TCPSocket).to receive(:new).and_raise(Errno::ECONNREFUSED)
       expect(helper.port_open?('localhost', 99999, 1)).to be false
     end
 
     it 'handles connection errors gracefully' do
-      expect { helper.port_open?('invalid-host', 80, 1) }.to_not raise_error
+      allow(TCPSocket).to receive(:new).and_raise(SocketError)
+      expect(helper.port_open?('invalid-host', 80, 1)).to be false
     end
   end
 
@@ -151,10 +154,10 @@ describe CookbookTemplate::Helpers do
       custom_vars = { 'custom_key' => 'custom_value' }
       result = helper.render_config(custom_vars)
 
-      expect(result).to include('cookbook_name' => 'test-cookbook')
-      expect(result).to include('node_name' => 'test-node')
+      expect(result).to include(cookbook_name: 'test-cookbook')
+      expect(result).to include(node_name: 'test-node')
       expect(result).to include('custom_key' => 'custom_value')
-      expect(result).to have_key('timestamp')
+      expect(result).to have_key(:timestamp)
     end
   end
 end
