@@ -1,8 +1,6 @@
 ---
 driver:
-  name: docker
-  use_sudo: false
-  privileged: true
+  name: dokken
   provision_command:
     - apt-get update
     - apt-get install -y apt-transport-https lsb-release procps net-tools
