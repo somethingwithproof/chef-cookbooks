@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe 'tcp_wrappers resource' do
-  context 'create action' do
+  context 'install action' do
     let(:chef_run) do
       ChefSpec::SoloRunner.new(step_into: ['tcp_wrappers']) do |node|
         node.default['authorization']['tcp_wrappers']['prefix'] = '/etc'

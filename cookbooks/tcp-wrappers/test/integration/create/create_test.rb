@@ -27,7 +27,7 @@ control 'tcp-wrappers-sshd-file-1.0' do
   describe file('/etc/wrappers.d/sshd') do
     it { should be_file }
     its('mode') { should cmp '0440' }
-    its('content') { should match(%r{ALLOW}) }
+    its('content') { should match(/ALLOW/) }
   end
 end
 
@@ -43,7 +43,7 @@ control 'tcp-wrappers-ftpd-file-1.0' do
   describe file('/etc/wrappers.d/ftpd') do
     it { should be_file }
     its('mode') { should cmp '0440' }
-    its('content') { should match(%r{ALLOW}) }
+    its('content') { should match(/ALLOW/) }
   end
 end
 
@@ -59,7 +59,7 @@ control 'tcp-wrappers-all-services-file-1.0' do
   describe file('/etc/wrappers.d/all_services') do
     it { should be_file }
     its('mode') { should cmp '0440' }
-    its('content') { should match(%r{ALL : 127.0.0.1 : ALLOW}) }
+    its('content') { should match(/ALL : 127.0.0.1 : ALLOW/) }
   end
 end
 

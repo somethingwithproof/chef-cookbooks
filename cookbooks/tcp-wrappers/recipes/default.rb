@@ -21,7 +21,6 @@
 if platform_family?('debian', 'rhel', 'amazon', 'fedora')
   package node['authorization']['tcp_wrappers']['package'] do
     action :install
-    compile_time false
   end
 end
 
@@ -48,7 +47,6 @@ if node['authorization']['tcp_wrappers']['include_wrappers_d']
     )
     action :create_if_missing
     sensitive true
-    verify_contents false # Chef 18+ best practice
   end
 
   # Configure hosts.deny file if wrappers_d integration is enabled
@@ -64,6 +62,5 @@ if node['authorization']['tcp_wrappers']['include_wrappers_d']
     )
     action :create_if_missing
     sensitive true
-    verify_contents false # Chef 18+ best practice
   end
 end

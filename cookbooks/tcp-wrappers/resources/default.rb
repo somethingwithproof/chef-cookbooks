@@ -92,10 +92,12 @@ action :install do
       mode '0440'
       variables new_resource.variables
       sensitive true
-      verify_contents false # Chef 18+ best practice for template verification
     end
 
-    Chef::Log.debug("Custom template used for #{new_resource.name}")
+    log "tcp_wrappers_custom_template_#{new_resource.name}" do
+      message "Custom template used for #{new_resource.name}"
+      level :debug
+    end
   else
     # Join hosts with a space
     hosts_allow = new_resource.hosts.join(' ')
@@ -113,14 +115,13 @@ action :install do
         commands: new_resource.commands
       )
       sensitive true
-      verify_contents false # Chef 18+ best practice for template verification
     end
   end
 end
 
 # Documentation for the remove action
-action_class.class_eval do
-  def action_remove
+action_class do
+  action :remove do
     describe_recipe 'Remove specified TCP wrappers configuration'
   end
 end
