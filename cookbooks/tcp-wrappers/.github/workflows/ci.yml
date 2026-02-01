@@ -34,7 +34,7 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
       - name: Run Cookstyle
-        run: bundle exec cookstyle --chef-version 19.0
+        run: bundle exec cookstyle
 
   unit-test:
     name: Unit Tests
