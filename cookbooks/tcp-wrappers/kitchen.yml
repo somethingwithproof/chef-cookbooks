@@ -1,63 +1,47 @@
 ---
 driver:
   name: dokken
-  provision_command:
-    - apt-get update
-    - apt-get install -y apt-transport-https lsb-release procps net-tools
+  privileged: true
+  chef_version: 18
+  chef_license: accept-no-persist
+
+transport:
+  name: dokken
 
 provisioner:
-  name: chef_zero
-  product_name: chef
-  product_version: <%= ENV['CHEF_VERSION'] || '18' %>
+  name: dokken
   chef_license: accept-no-persist
   enforce_idempotency: true
   multiple_converge: 2
   deprecations_as_errors: true
-  retry_on_exit_code:
-    - 213
-  max_retries: 1
-  wait_for_retry: 10
 
 verifier:
   name: inspec
   sudo: true
 
 platforms:
-  - name: ubuntu-20.04
-    driver_config:
-      image: ubuntu:20.04
-      platform: ubuntu
-      run_command: /sbin/init
-      provision_command:
-        - apt-get update
-        - apt-get install -y apt-transport-https lsb-release procps net-tools systemd
-
   - name: ubuntu-22.04
-    driver_config:
-      image: ubuntu:22.04
-      platform: ubuntu
-      run_command: /sbin/init
-      provision_command:
-        - apt-get update
-        - apt-get install -y apt-transport-https lsb-release procps net-tools systemd
+    driver:
+      image: dokken/ubuntu-22.04
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - RUN /usr/bin/apt-get update
+        - RUN apt-get install -y apt-transport-https lsb-release procps net-tools
 
   - name: debian-11
-    driver_config:
-      image: debian:11
-      platform: debian
-      run_command: /sbin/init
-      provision_command:
-        - apt-get update
-        - apt-get install -y apt-transport-https lsb-release procps net-tools systemd
+    driver:
+      image: dokken/debian-11
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - RUN /usr/bin/apt-get update
+        - RUN apt-get install -y apt-transport-https lsb-release procps net-tools
 
   - name: almalinux-9
-    driver_config:
-      image: almalinux:9
-      platform: rhel
-      run_command: /usr/lib/systemd/systemd
-      provision_command:
-        - yum -y install which initscripts wget net-tools systemd
-        - yum -y update
+    driver:
+      image: dokken/almalinux-9
+      pid_one_command: /usr/lib/systemd/systemd
+      intermediate_instructions:
+        - RUN yum -y install which initscripts wget net-tools
 
 suites:
   - name: default
