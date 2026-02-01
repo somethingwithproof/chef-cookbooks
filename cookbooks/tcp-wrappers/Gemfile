@@ -8,7 +8,7 @@ group :development do
   gem 'cookstyle', '~> 8.1'
   gem 'kitchen-docker', '~> 3.0'
   gem 'kitchen-inspec', '~> 3.0'
-  gem 'test-kitchen', '~> 3.7'
+  gem 'test-kitchen', '~> 4.0'
 end
 
 group :integration do
