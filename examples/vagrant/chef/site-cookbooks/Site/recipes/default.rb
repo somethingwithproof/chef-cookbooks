@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: Site
+# Cookbook:: Site
 # Recipe:: default
 #
-# Copyright 2016, YOUR_COMPANY_NAME
+# Copyright:: 2016, Thomas Vincent
 #
 # All rights reserved - Do Not Redistribute
 #

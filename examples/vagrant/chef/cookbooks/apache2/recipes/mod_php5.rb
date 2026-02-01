@@ -1,10 +1,10 @@
 #
-# Cookbook Name:: apache2
+# Cookbook:: apache2
 # Recipe:: mod_php5
 #
-# Copyright 2008-2013, Chef Software, Inc.
-# Copyright 2014, OneHealth Solutions, Inc.
-# Copyright 2014, Viverae, Inc.
+# Copyright:: 2008-2013, Chef Software, Inc.
+# Copyright:: 2014, OneHealth Solutions, Inc.
+# Copyright:: 2014, Viverae, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ when 'arch'
 when 'rhel'
   package 'which'
   package 'php package' do
-    if node['platform_version'].to_f < 6.0 && node['platform'] != 'amazon'
+    if node['platform_version'].to_f < 6.0 && !platform?('amazon')
       package_name 'php53'
     else
       package_name 'php'

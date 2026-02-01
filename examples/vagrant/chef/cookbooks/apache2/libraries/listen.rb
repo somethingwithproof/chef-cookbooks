@@ -1,9 +1,8 @@
-# encoding: utf-8
 #
-# Cookbook Name:: apache2
+# Cookbook:: apache2
 # Libraries:: listen
 #
-# Copyright 2015, Ontario Systems, LLC
+# Copyright:: 2015, Ontario Systems, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,8 +26,6 @@ module Apache2
     end
 
     module_function :merge_listen_attributes
-
-    private_class_method
 
     def self.converted_listen_ports_and_addresses(node)
       return [] unless node['apache']['listen_ports'] || node['apache']['listen_addresses']

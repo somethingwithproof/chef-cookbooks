@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: apache2
+# Cookbook:: apache2
 # Attributes:: mod_php5
 #
-# Copyright 2014, Viverae, Inc.
+# Copyright:: 2014, Viverae, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@
 
 default['apache']['mod_php5']['install_method'] = 'package'
 default['apache']['mod_php5']['so_filename'] = 'libphp5.so'
-default['apache']['mod_php5']['so_filename'] = 'mod_php5.so' if node['platform_family'] == 'suse'
+default['apache']['mod_php5']['so_filename'] = 'mod_php5.so' if platform_family?('suse')
 
-if node['platform'] == 'amazon' && node['apache']['version'] == '2.4'
+if platform?('amazon') && node['apache']['version'] == '2.4'
   default['apache']['mod_php5']['so_filename'] = 'libphp.so'
 end

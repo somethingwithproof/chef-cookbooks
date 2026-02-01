@@ -1,0 +1,10 @@
+name 'vagrant_example'
+maintainer 'Thomas Vincent'
+maintainer_email 'thomasvincent@gmail.com'
+license 'Apache-2.0'
+description 'Example Vagrant cookbook with Apache2'
+version '1.0.0'
+chef_version '>= 18.0'
+
+supports 'ubuntu'
+supports 'debian'

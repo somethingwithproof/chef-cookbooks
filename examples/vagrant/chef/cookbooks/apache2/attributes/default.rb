@@ -1,9 +1,9 @@
 #
-# Cookbook Name:: apache2
+# Cookbook:: apache2
 # Attributes:: default
 #
-# Copyright 2008-2013, Chef Software, Inc.
-# Copyright 2014, Viverae, Inc.
+# Copyright:: 2008-2013, Chef Software, Inc.
+# Copyright:: 2014, Viverae, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@
 #
 
 default['apache']['mpm'] =
-  case node['platform_family']
-  when 'debian'
+  if platform_family?('debian')
     case node['platform']
     when 'ubuntu'
       if node['platform_version'].to_f >= 14.04
@@ -55,8 +54,7 @@ default['apache']['version'] =
       '2.4'
     end
   when 'rhel'
-    case node['platform']
-    when 'amazon'
+    if platform?('amazon')
       node['platform_version'].to_f >= 2013.09 ? '2.4' : '2.2'
     else
       node['platform_version'].to_f >= 7.0 ? '2.4' : '2.2'
@@ -64,8 +62,7 @@ default['apache']['version'] =
   when 'fedora'
     node['platform_version'].to_f >= 18 ? '2.4' : '2.2'
   when 'suse'
-    case node['platform']
-    when 'suse'
+    if platform?('suse')
       node['platform_version'].to_f >= 12.1 ? '2.4' : '2.2'
     else
       '2.4'
@@ -82,7 +79,7 @@ default['apache']['default_site_name'] = 'default'
 # Where the various parts of apache are
 case node['platform']
 when 'redhat', 'centos', 'scientific', 'fedora', 'amazon', 'oracle'
-  if node['platform'] == 'amazon'
+  if platform?('amazon')
     if node['apache']['version'] == '2.4'
       default['apache']['package'] = 'httpd24'
       default['apache']['devel_package'] = 'httpd24-devel'
@@ -347,15 +344,15 @@ default['apache']['default_modules'] = %w(
 )
 
 %w(log_config logio).each do |log_mod|
-  default['apache']['default_modules'] << log_mod if %w(rhel fedora suse arch freebsd).include?(node['platform_family'])
+  default['apache']['default_modules'] << log_mod if platform_family?('rhel', 'fedora', 'suse', 'arch', 'freebsd')
 end
 
 if node['apache']['version'] == '2.4'
   %w(unixd).each do |unix_mod|
-    default['apache']['default_modules'] << unix_mod if %w(rhel fedora suse arch freebsd).include?(node['platform_family'])
+    default['apache']['default_modules'] << unix_mod if platform_family?('rhel', 'fedora', 'suse', 'arch', 'freebsd')
   end
 
-  unless node['platform'] == 'amazon'
-    default['apache']['default_modules'] << 'systemd' if %w(rhel fedora).include?(node['platform_family'])
+  unless platform?('amazon')
+    default['apache']['default_modules'] << 'systemd' if platform_family?('rhel', 'fedora')
   end
 end

@@ -1,10 +1,10 @@
 #
-# Cookbook Name:: apache2
+# Cookbook:: apache2
 # Recipe:: mod_perl
 #
 # adapted from the mod_python recipe by Jeremy Bingham
 #
-# Copyright 2008-2013, Chef Software, Inc.
+# Copyright:: 2008-2013, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,9 +21,7 @@
 
 case node['platform_family']
 when 'debian'
-  %w(libapache2-mod-perl2 libapache2-request-perl apache2-mpm-prefork).each do |pkg|
-    package pkg
-  end
+  package %w(libapache2-mod-perl2 libapache2-request-perl apache2-mpm-prefork)
 when 'suse'
   package 'apache2-mod_perl' do
     notifies :run, 'execute[generate-module-list]', :immediately

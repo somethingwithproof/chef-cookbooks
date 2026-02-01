@@ -1,9 +1,9 @@
 #
-# Cookbook Name:: apache2
+# Cookbook:: apache2
 # Attributes:: mod_auth_openid
 #
-# Copyright 2013, Chef Software, Inc.
-# Copyright 2014-2016, Alexander van Zoest
+# Copyright:: 2013, Chef Software, Inc.
+# Copyright:: 2014-2016, Alexander van Zoest
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,8 +27,7 @@ default['apache']['mod_auth_openid']['cache_dir']  = '/var/cache/mod_auth_openid
 default['apache']['mod_auth_openid']['dblocation'] = "#{node['apache']['mod_auth_openid']['cache_dir']}/mod_auth_openid.db"
 
 default['apache']['mod_auth_openid']['configure_flags'] =
-  case node['platform_family']
-  when 'freebsd'
+  if platform_family?('freebsd')
     [
       'CPPFLAGS=-I/usr/local/include',
       'LDFLAGS=-I/usr/local/lib -lsqlite3',

@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: apache2
+# Cookbook:: apache2
 # Recipe:: mod_ssl
 #
-# Copyright 2008-2013, Chef Software, Inc.
+# Copyright:: 2008-2013, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ end
 include_recipe 'apache2::default'
 
 if platform_family?('rhel', 'fedora', 'suse')
-  if 'suse' != node['platform']
+  unless platform?('suse')
     package node['apache']['mod_ssl']['pkg_name'] do
       notifies :run, 'execute[generate-module-list]', :immediately
     end
