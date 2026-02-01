@@ -1,21 +1,18 @@
 # chef-tcp-wrappers
 
 ## Purpose
-Chef cookbook for managing TCP Wrappers (`/etc/hosts.allow`, `/etc/hosts.deny`) with custom resources for rule management.
+DEPRECATED Chef cookbook for managing TCP Wrappers (`/etc/hosts.allow`, `/etc/hosts.deny`). Use firewalld or nftables instead.
 
 ## Stack
-- Chef 16+ / Ruby
-- ChefSpec (unit), InSpec (integration), Test Kitchen
-- Makefile for common tasks
-- Docker for testing
+- Chef 18+ / Ruby
+- ChefSpec (unit), InSpec (integration), Test Kitchen (kitchen-dokken)
 
 ## Build / Test
 ```bash
 bundle install
+bundle exec cookstyle          # Lint
 bundle exec rspec              # ChefSpec unit tests
-bundle exec kitchen test       # Integration tests (Docker)
-make test                      # Full test suite
-make lint                      # Lint
+bundle exec kitchen test       # Integration tests (Docker/Dokken)
 ```
 
 ## Standards
