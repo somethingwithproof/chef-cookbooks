@@ -8,7 +8,7 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-22.04
+    runs-on: [self-hosted, chef]
     steps:
     - name: Check out code
       uses: actions/checkout@v6
@@ -24,7 +24,7 @@ jobs:
 
   unit:
     needs: lint
-    runs-on: ubuntu-22.04
+    runs-on: [self-hosted, chef]
     steps:
     - name: Check out code
       uses: actions/checkout@v6
@@ -42,7 +42,7 @@ jobs:
   # TODO: Fix integration tests - temporarily disabled
   # integration:
   #   needs: [lint, unit]
-  #   runs-on: ubuntu-22.04
+  #   runs-on: [self-hosted, chef]
   #   strategy:
   #     fail-fast: false
   #     matrix:
