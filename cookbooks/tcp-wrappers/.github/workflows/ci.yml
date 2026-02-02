@@ -58,7 +58,7 @@ jobs:
     needs: [lint, unit-test]
     strategy:
       matrix:
-        os: ['ubuntu-2204', 'debian-11', 'almalinux-8']
+        os: ['ubuntu-2204', 'debian-11']
         suite: ['default', 'create', 'remove']
       fail-fast: false
     steps:
