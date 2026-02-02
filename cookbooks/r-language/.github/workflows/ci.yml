@@ -56,7 +56,7 @@ jobs:
   integration:
     name: Integration Tests
     needs: unit
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, chef]
     timeout-minutes: 15  # Prevent hung jobs
     strategy:
       matrix:
