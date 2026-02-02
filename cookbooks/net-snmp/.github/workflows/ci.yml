@@ -82,7 +82,7 @@ jobs:
   integration:
     name: Integration Tests
     needs: [unit, security]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, chef]
     timeout-minutes: 45
     strategy:
       matrix:
