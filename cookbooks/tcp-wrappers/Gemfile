@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'chef', '~> 18.0'
+gem 'chef-cli', '~> 5.0'
 
 group :development do
   gem 'chefspec', '~> 9.3'

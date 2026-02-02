@@ -9,7 +9,8 @@ transport:
   name: dokken
 
 provisioner:
-  name: dokken
+  name: policyfile_zero
+  always_update_cookbooks: true
   chef_license: accept-no-persist
   enforce_idempotency: true
   multiple_converge: 2
