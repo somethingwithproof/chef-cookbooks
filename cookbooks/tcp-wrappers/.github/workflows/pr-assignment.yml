@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   auto-assign:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, chef]
     steps:
       - name: Auto-assign PR to creator
         uses: thomaseizinger/assign-pr-creator-action@v1.0.0

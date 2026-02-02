@@ -23,7 +23,7 @@ env:
 jobs:
   lint:
     name: Cookstyle Lint
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, chef]
     timeout-minutes: 15
     steps:
       - name: Check out code
@@ -38,7 +38,7 @@ jobs:
 
   unit-test:
     name: Unit Tests
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, chef]
     timeout-minutes: 15
     steps:
       - name: Check out code

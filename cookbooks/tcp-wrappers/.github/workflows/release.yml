@@ -20,7 +20,7 @@ permissions:
 jobs:
   release:
     name: Create Release
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, chef]
     steps:
       - name: Check out code
         uses: actions/checkout@v6
