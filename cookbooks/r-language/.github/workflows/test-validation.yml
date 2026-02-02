@@ -20,7 +20,7 @@ permissions:
 jobs:
   validate-tests:
     name: Validate Test Coverage
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, chef]
     timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code
@@ -69,7 +69,7 @@ jobs:
 
   lint-validation:
     name: Extended Linting
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, chef]
     timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code
@@ -110,7 +110,7 @@ jobs:
 
   documentation-validation:
     name: Documentation Validation
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, chef]
     timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code

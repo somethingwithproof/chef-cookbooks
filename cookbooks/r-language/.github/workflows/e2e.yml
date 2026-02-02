@@ -22,7 +22,7 @@ permissions:
 jobs:
   e2e-smoke:
     name: E2E Smoke Tests
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, chef]
     timeout-minutes: 15  # Prevent hung jobs
     strategy:
       matrix:
@@ -65,7 +65,7 @@ jobs:
 
   e2e-comprehensive:
     name: E2E Comprehensive Tests
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, chef]
     timeout-minutes: 15  # Prevent hung jobs
     if: github.event_name == 'schedule' || contains(github.event.head_commit.message, '[e2e-full]')
     strategy:
@@ -101,7 +101,7 @@ jobs:
 
   security-scan:
     name: Security Scanning
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, chef]
     timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code
@@ -130,7 +130,7 @@ jobs:
 
   dependency-check:
     name: Dependency Verification
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, chef]
     timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code
