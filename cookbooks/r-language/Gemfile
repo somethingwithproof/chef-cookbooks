@@ -11,4 +11,4 @@ gem 'test-kitchen'
 gem 'rake'
 
 # Required for Ruby 3.4+ compatibility (local development)
-gem 'syslog', '~> 0.3.0'
+gem 'syslog', '~> 0.4.0'
