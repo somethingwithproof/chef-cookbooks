@@ -61,6 +61,7 @@ action :create do
     recursive true
   end
 
+  # Apache vhost configuration (contains development-only security settings)
   template "#{new_resource.sites_available}/#{new_resource.site_name}.conf" do
     source 'apache_vhost.conf.erb'
     cookbook 'vagrant_example'
