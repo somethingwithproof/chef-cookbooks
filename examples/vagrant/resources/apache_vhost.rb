@@ -27,17 +27,41 @@ property :server_aliases, Array,
          default: [],
          description: 'ServerAlias directive values'
 
+property :config_dir, String,
+         required: true,
+         description: 'Apache configuration directory'
+
+property :sites_available, String,
+         required: true,
+         description: 'Sites available directory'
+
+property :sites_enabled, String,
+         required: true,
+         description: 'Sites enabled directory'
+
+property :apache_user, String,
+         required: true,
+         description: 'Apache user'
+
+property :apache_group, String,
+         required: true,
+         description: 'Apache group'
+
+property :service_name, String,
+         required: true,
+         description: 'Apache service name'
+
 action :create do
   description 'Create and enable the Apache virtual host'
 
   directory new_resource.docroot do
-    owner 'www-data'
-    group 'www-data'
+    owner new_resource.apache_user
+    group new_resource.apache_group
     mode '0755'
     recursive true
   end
 
-  template "/etc/apache2/sites-available/#{new_resource.site_name}.conf" do
+  template "#{new_resource.sites_available}/#{new_resource.site_name}.conf" do
     source 'apache_vhost.conf.erb'
     cookbook 'vagrant_example'
     owner 'root'
@@ -49,24 +73,29 @@ action :create do
       server_aliases: new_resource.server_aliases,
       docroot: new_resource.docroot
     )
-    notifies :restart, 'service[apache2]', :delayed
+    notifies :restart, "service[#{new_resource.service_name}]", :delayed
   end
 
-  link "/etc/apache2/sites-enabled/#{new_resource.site_name}.conf" do
-    to "/etc/apache2/sites-available/#{new_resource.site_name}.conf"
-    notifies :restart, 'service[apache2]', :delayed
+  # Only create symlink for Debian-based systems (RHEL uses single directory)
+  if new_resource.sites_available != new_resource.sites_enabled
+    link "#{new_resource.sites_enabled}/#{new_resource.site_name}.conf" do
+      to "#{new_resource.sites_available}/#{new_resource.site_name}.conf"
+      notifies :restart, "service[#{new_resource.service_name}]", :delayed
+    end
   end
 end
 
 action :delete do
   description 'Remove the Apache virtual host'
 
-  link "/etc/apache2/sites-enabled/#{new_resource.site_name}.conf" do
-    action :delete
-    notifies :restart, 'service[apache2]', :delayed
+  if new_resource.sites_available != new_resource.sites_enabled
+    link "#{new_resource.sites_enabled}/#{new_resource.site_name}.conf" do
+      action :delete
+      notifies :restart, "service[#{new_resource.service_name}]", :delayed
+    end
   end
 
-  file "/etc/apache2/sites-available/#{new_resource.site_name}.conf" do
+  file "#{new_resource.sites_available}/#{new_resource.site_name}.conf" do
     action :delete
   end
 end
