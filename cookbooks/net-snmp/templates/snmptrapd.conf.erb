@@ -9,7 +9,9 @@ snmpTrapdAddr <%= @listen_address %>
 authCommunity log,execute,net <%= @community %>
 disableAuthorization no
 <% else -%>
-# Accept all traps (less secure)
+# WARNING: disableAuthorization yes allows unauthenticated traps from any source.
+# This is insecure and should only be used in trusted network environments.
+# Set auth_required to true for production deployments.
 disableAuthorization yes
 <% if @community -%>
 authCommunity log,execute,net <%= @community %>

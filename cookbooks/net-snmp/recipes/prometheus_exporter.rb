@@ -61,7 +61,8 @@ template '/etc/snmp_exporter/snmp.yml' do
   cookbook 'net-snmp'
   owner 'root'
   group exporter_group
-  mode '0644'
+  mode '0640'
+  sensitive true
   variables(
     modules: node['net_snmp']['prometheus']['modules']
   )

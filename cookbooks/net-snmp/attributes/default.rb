@@ -124,6 +124,9 @@ default['net_snmp']['access_rules'] = []
 
 # Security settings
 default['net_snmp']['disable_snmpv1'] = true
+# WARNING: SNMPv2c uses cleartext community strings and is insecure.
+# Set disable_snmpv2c to true and use SNMPv3 for production environments.
+# SNMPv2c should only be used for compatibility with legacy systems on trusted networks.
 default['net_snmp']['disable_snmpv2c'] = false # Set to true for maximum security
 
 # SELinux settings (RHEL/CentOS/Rocky/Alma)
@@ -240,7 +243,8 @@ default['net_snmp']['prometheus']['modules'] = {
     ],
     'version' => 2,
     'auth' => {
-      'community' => 'public',
+      # WARNING: Set a secure community string or use SNMPv3 for production
+      'community' => nil,
     },
     'metrics' => [
       {

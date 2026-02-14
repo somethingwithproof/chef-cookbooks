@@ -21,7 +21,15 @@ property :username, String,
 property :auth_protocol, String,
          equal_to: %w(MD5 SHA SHA-224 SHA-256 SHA-384 SHA-512),
          default: 'SHA-256',
-         description: 'Authentication protocol (SHA-256 recommended)'
+         description: 'Authentication protocol (SHA-256 recommended)',
+         callbacks: {
+           'MD5 is deprecated and should be avoided' => lambda { |protocol|
+             if protocol == 'MD5'
+               Chef::Log.warn('MD5 authentication protocol is deprecated and insecure. Use SHA-256 or SHA-512 instead.')
+             end
+             true
+           },
+         }
 
 property :auth_password, String,
          required: true,
@@ -85,10 +93,16 @@ action :create do
   # Create the user using net-snmp-create-v3-user or manual configuration
   execute "create_snmpv3_user_#{new_resource.username}" do
     command lazy {
-      cmd = "net-snmp-create-v3-user -ro -A '#{new_resource.auth_password}' -a #{auth_proto}"
-      cmd += " -X '#{priv_pass}' -x #{priv_proto}" if new_resource.security_level == 'authPriv'
-      cmd += " #{new_resource.username}"
-      cmd
+      if new_resource.security_level == 'authPriv'
+        ['bash', '-c', "net-snmp-create-v3-user -ro -A \"$AUTH_PASS\" -a #{auth_proto} -X \"$PRIV_PASS\" -x #{priv_proto} #{new_resource.username}"]
+      else
+        ['bash', '-c', "net-snmp-create-v3-user -ro -A \"$AUTH_PASS\" -a #{auth_proto} #{new_resource.username}"]
+      end
+    }
+    environment lazy {
+      env = { 'AUTH_PASS' => new_resource.auth_password }
+      env['PRIV_PASS'] = priv_pass if new_resource.security_level == 'authPriv'
+      env
     }
     sensitive true
     not_if { ::File.exist?(new_resource.user_file) && ::File.read(new_resource.user_file).include?("usmUser.*#{new_resource.username}") }

@@ -58,7 +58,7 @@ suites:
       net_snmp:
         v3_users:
           - username: testuser
-            auth_protocol: SHA
-            auth_password: testpass123456
-            priv_protocol: AES
-            priv_password: testpriv123456
+            auth_protocol: SHA-256
+            auth_password: <%= ENV['SNMP_TEST_AUTH_PASSWORD'] || 'CHANGE_ME_IN_KITCHEN_LOCAL_YML' %>
+            priv_protocol: AES-256
+            priv_password: <%= ENV['SNMP_TEST_PRIV_PASSWORD'] || 'CHANGE_ME_IN_KITCHEN_LOCAL_YML' %>

@@ -109,16 +109,15 @@ if node['net_snmp']['v3_users'] && !node['net_snmp']['v3_users'].empty?
 
     # Stop snmpd before creating users (required for net-snmp-create-v3-user)
     execute "create_snmpv3_user_#{username}" do
-      command <<~BASH
-        service snmpd stop || true
-        net-snmp-create-v3-user -ro \
-          -A '#{auth_password}' \
-          -a #{auth_protocol} \
-          -X '#{priv_password}' \
-          -x #{priv_protocol} \
-          #{username}
-        service snmpd start
-      BASH
+      command [
+        'bash',
+        '-c',
+        "service snmpd stop || true; net-snmp-create-v3-user -ro -A \"$AUTH_PASS\" -a #{auth_protocol} -X \"$PRIV_PASS\" -x #{priv_protocol} #{username}; service snmpd start",
+      ]
+      environment(
+        'AUTH_PASS' => auth_password,
+        'PRIV_PASS' => priv_password
+      )
       sensitive true
       not_if "grep -q 'usmUser.*#{username}' /var/lib/snmp/snmpd.conf 2>/dev/null"
     end
