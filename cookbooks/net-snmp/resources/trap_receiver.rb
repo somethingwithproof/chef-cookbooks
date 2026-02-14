@@ -2,7 +2,6 @@
 
 unified_mode true
 
-resource_name :snmp_trap_receiver
 provides :snmp_trap_receiver
 
 description 'Manages snmptrapd configuration for receiving SNMP traps'
