@@ -16,6 +16,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# DEPRECATION WARNING: tcp_wrappers is deprecated and removed from modern distributions
+Chef::Log.warn('DEPRECATION: The tcp_wrappers cookbook manages a deprecated technology. ' \
+               'tcp_wrappers has been removed from RHEL 8+, Fedora 36+, and Ubuntu 22.04+. ' \
+               'Migrate to firewalld, nftables, or iptables for access control.')
+
 # Chef 18+ recommends declaring resources with a single block of code
 # Install appropriate package using attribute
 if platform_family?('debian', 'rhel', 'amazon', 'fedora')
@@ -48,7 +53,7 @@ if node['authorization']['tcp_wrappers']['include_wrappers_d']
     source 'hosts.allow.erb'
     owner 'root'
     group 'root'
-    mode '0644'
+    mode '0644' # World-readable per standard UNIX convention for hosts.allow
     variables(
       daemon: 'ALL',
       hosts_allow: '127.0.0.1',
@@ -63,7 +68,7 @@ if node['authorization']['tcp_wrappers']['include_wrappers_d']
     source 'hosts.deny.erb'
     owner 'root'
     group 'root'
-    mode '0644'
+    mode '0644' # World-readable per standard UNIX convention for hosts.deny
     variables(
       daemon: 'ALL',
       hosts_allow: 'ALL',

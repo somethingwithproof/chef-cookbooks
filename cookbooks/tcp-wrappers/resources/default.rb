@@ -119,13 +119,6 @@ action :install do
   end
 end
 
-# Documentation for the remove action
-action_class do
-  action :remove do
-    describe_recipe 'Remove specified TCP wrappers configuration'
-  end
-end
-
 action :remove do
   target = node['authorization']['tcp_wrappers']['prefix'].to_s
   file_path = "#{target}/wrappers.d/#{tcp_wrappers_filename}"
