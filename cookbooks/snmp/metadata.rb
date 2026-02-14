@@ -4,7 +4,7 @@ maintainer_email 'thomasvincent@gmail.com'
 license 'Apache-2.0'
 description 'Installs/Configures snmp on redhat, centos, ubuntu, debian'
 version '5.0.0'
-chef_version '>= 18.0', '< 20.0'
+chef_version '>= 18.0'
 
 supports 'ubuntu', '>= 20.04'
 supports 'debian', '>= 11.0'

@@ -1,5 +1,7 @@
 unified_mode true
 
+provides :snmp_trapd
+
 property :trap_community, String,
          description: 'SNMP trap community string',
          default: 'public'

@@ -1,5 +1,7 @@
 unified_mode true
 
+provides :snmp_install
+
 property :community, String,
          description: 'SNMP community string',
          default: 'public'
