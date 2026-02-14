@@ -4,6 +4,28 @@
 
 This cookbook installs and configures the SNMP (Simple Network Management Protocol) service on supported platforms.
 
+## Security Notice
+
+**IMPORTANT**: This cookbook supports SNMPv1 and SNMPv2c, which use community strings (shared secrets) for authentication. These protocols have known security limitations:
+
+- Community strings are transmitted in plain text
+- SNMPv1/v2c provide no encryption of SNMP traffic
+- No per-user authentication or authorization
+
+**For production environments requiring strong security, we recommend using SNMPv3**, which provides:
+- User-based authentication (not community-based)
+- Message encryption
+- Message integrity verification
+
+This cookbook does not currently support SNMPv3. For SNMPv3 support, consider using the [chef-net-snmp-cookbook](https://supermarket.chef.io/cookbooks/chef-net-snmp) or configure SNMPv3 manually.
+
+**Security defaults in this cookbook** (as of v3.0.0):
+- Community strings default to empty (must be explicitly configured)
+- Agent binds to localhost only by default
+- Configuration files are mode 0600 (root-only readable)
+- SNMPv1 groups disabled by default (SNMPv2c only)
+- Authorization enabled by default for trap daemon
+
 ## Requirements
 
 - Chef Infra Client 18.0 or later
@@ -31,8 +53,8 @@ The `snmp_install` resource installs and configures the SNMP service.
 
 #### Properties
 
-- `community` - SNMP community string (default: 'public')
-- `node['snmp']['trap']['community']` - SNMP trap community string (default: 'public')
+- `community` - SNMP community string (default: empty string - **must be explicitly configured**)
+- `node['snmp']['trap']['community']` - SNMP trap community string (default: empty string - **must be explicitly configured**)
 - `trap_addresses` - Array of trap addresses (default: [])
 - `trap_port` - SNMP trap port (default: 162)
 - `groups` - Hash of SNMP groups (default: {})
@@ -57,7 +79,7 @@ The `snmp_trapd` resource installs and configures the SNMP trap daemon.
 
 #### Properties
 
-- `trap_community` - SNMP trap community string (default: 'public')
+- `trap_community` - SNMP trap community string (default: empty string - **must be explicitly configured**)
 - `trap_addresses` - Array of trap addresses (default: [])
 - `trap_port` - SNMP trap port (default: 162)
 - `trap_service` - SNMP trap service name (platform-dependent)

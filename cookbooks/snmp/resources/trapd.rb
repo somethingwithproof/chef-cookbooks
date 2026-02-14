@@ -3,8 +3,11 @@ unified_mode true
 provides :snmp_trapd
 
 property :trap_community, String,
-         description: 'SNMP trap community string',
-         default: 'public'
+         description: 'SNMP trap community string (required for security)',
+         default: lazy { node['snmp']['trap']['community'] },
+         callbacks: {
+           'cannot be empty - must explicitly configure trap community string' => ->(c) { !c.to_s.empty? },
+         }
 
 property :trap_addresses, Array,
          description: 'Array of trap addresses',
@@ -46,9 +49,10 @@ action :install do
   template '/etc/snmp/snmptrapd.conf' do
     source 'snmptrapd.conf.erb'
     cookbook 'snmp'
-    mode '0644'
+    mode '0600'
     owner 'root'
     group 'root'
+    sensitive true # Contains community strings (credentials)
     variables(
       trap_community: new_resource.trap_community,
       trap_addresses: new_resource.trap_addresses,

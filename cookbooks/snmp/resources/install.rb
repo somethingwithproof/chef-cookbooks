@@ -3,12 +3,18 @@ unified_mode true
 provides :snmp_install
 
 property :community, String,
-         description: 'SNMP community string',
-         default: 'public'
+         description: 'SNMP community string (required for security)',
+         default: lazy { node['snmp']['community'] },
+         callbacks: {
+           'cannot be empty - must explicitly configure community string' => ->(c) { !c.to_s.empty? },
+         }
 
 property :trap_community, String,
-         description: 'SNMP trap community string',
-         default: 'public'
+         description: 'SNMP trap community string (required for security)',
+         default: lazy { node['snmp']['trap']['community'] },
+         callbacks: {
+           'cannot be empty - must explicitly configure trap community string' => ->(c) { !c.to_s.empty? },
+         }
 
 property :trap_addresses, Array,
          description: 'Array of trap addresses',
@@ -89,6 +95,7 @@ action :install do
     mode '0644'
     owner 'root'
     group 'root'
+    sensitive false # This file contains no secrets
     only_if { platform_family?('debian') }
   end
 
@@ -104,6 +111,7 @@ action :install do
     mode '0600'
     owner 'root'
     group 'root'
+    sensitive true # Contains community strings (credentials)
     variables(
       community: new_resource.community,
       groups: new_resource.groups.keys.uniq,

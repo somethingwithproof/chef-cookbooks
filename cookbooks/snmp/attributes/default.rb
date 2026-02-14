@@ -17,19 +17,25 @@
 
 # SNMP Cookbook Default Attributes
 
+# Network binding configuration
+# SECURITY: Bind to localhost only by default - set to 'udp:161' to bind to all interfaces
+default['snmp']['agent_address'] = 'udp:127.0.0.1:161'
+
 # Default SNMP community and security names
-default['snmp']['community'] = 'public'
+# SECURITY: Default community string is empty - must be explicitly configured
+default['snmp']['community'] = ''
 default['snmp']['sec_name'] = { notConfigUser: %w(default) }
 default['snmp']['sec_name6'] = { notConfigUser: %w(default) }
 
 # Default SNMP groups
+# SECURITY: SNMPv2c only by default - v1 is deprecated and insecure
 default['snmp']['groups'] = {
-  v1: { notConfigGroup: %w(notConfigUser) },
   v2c: { notConfigGroup: %w(notConfigUser) },
 }
 
 # Default SNMP trap configurations
-default['snmp']['trap']['community'] = 'public'
+# SECURITY: Default community string is empty - must be explicitly configured
+default['snmp']['trap']['community'] = ''
 default['snmp']['trap']['addresses'] = []
 default['snmp']['trap']['port'] = 162
 
@@ -58,14 +64,17 @@ default['snmp']['load_average'] = {}
 
 # Default trapsink configuration
 default['snmp']['full_systemview'] = false
-default['snmp']['trapcommunity'] = 'public'
+# SECURITY: Default community string is empty - must be explicitly configured
+default['snmp']['trapcommunity'] = ''
 default['snmp']['trapsinks'] = []
 
 # Disman event configuration
 default['snmp']['disman_events'] = {
   'enable' => false,
   'user' => 'disman_events',
-  'password' => 'dismanEventsMIB',
+  # SECURITY: No default password - must be explicitly configured
+  'password' => '',
+  'auth_protocol' => 'SHA-256',
   'linkUpDownNotifications' => 'yes',
   'defaultMonitors' => 'yes',
   'monitors' => [],

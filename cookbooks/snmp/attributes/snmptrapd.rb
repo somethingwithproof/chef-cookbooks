@@ -19,7 +19,8 @@
 default['snmp']['snmptrapd']['trapd_run'] = 'no'
 default['snmp']['snmptrapd']['service_name'] = platform_family?('rhel') ? 'snmptrapd' : 'snmpd'
 default['snmp']['snmptrapd']['traphandle'] = 'default /usr/sbin/snmptthandler'
-default['snmp']['snmptrapd']['disableAuthorization'] = 'yes'
+# SECURITY: Enable authorization by default
+default['snmp']['snmptrapd']['disableAuthorization'] = 'no'
 default['snmp']['snmptrapd']['donotlogtraps'] = 'no'
 
 # Debian-specific SNMP daemon config

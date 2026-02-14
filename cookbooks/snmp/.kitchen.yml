@@ -50,6 +50,15 @@ suites:
   - name: default
     run_list:
       - recipe[snmp::default]
+    attributes:
+      snmp:
+        community: 'test_community'
+        trap:
+          community: 'test_trap'
   - name: trapd
     run_list:
       - recipe[snmp::snmptrapd]
+    attributes:
+      snmp:
+        trap:
+          community: 'test_trap'
