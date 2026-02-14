@@ -29,7 +29,7 @@ else
   raise "Unsupported platform family: #{node['platform_family']}"
 end
 
-# Update package cache (Debian-based only)
+# Update package cache (Debian/Ubuntu only)
 if platform_family?('debian')
   apt_update 'update' do
     frequency 86_400
