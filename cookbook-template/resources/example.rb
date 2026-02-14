@@ -93,12 +93,14 @@ action :create do
     owner node['cookbook_template']['config']['owner']
     group node['cookbook_template']['config']['group']
     mode node['cookbook_template']['config']['mode']
+    sensitive true
     variables(
       port: new_resource.port,
       enabled: new_resource.enabled,
       user: new_resource.user,
       group: new_resource.group,
-      service_name: new_resource.service_name
+      service_name: new_resource.service_name,
+      include_metadata: node['cookbook_template']['config']['include_metadata']
     )
     notifies :restart, "service[#{service_name}]", :delayed
     action :create

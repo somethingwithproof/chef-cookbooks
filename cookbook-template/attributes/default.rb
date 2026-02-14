@@ -32,7 +32,7 @@ default['cookbook_template']['config']['template'] = 'service.conf.erb'
 default['cookbook_template']['config']['cookbook'] = 'cookbook-template'
 default['cookbook_template']['config']['path'] = '/etc/example-service'
 default['cookbook_template']['config']['file'] = 'service.conf'
-default['cookbook_template']['config']['mode'] = '0644'
+default['cookbook_template']['config']['mode'] = '0640'
 default['cookbook_template']['config']['owner'] = 'root'
 default['cookbook_template']['config']['group'] = 'root'
 
@@ -41,3 +41,6 @@ default['cookbook_template']['logging']['level'] = 'info'
 default['cookbook_template']['logging']['file'] = '/var/log/example-service.log'
 default['cookbook_template']['logging']['max_size'] = '100MB'
 default['cookbook_template']['logging']['rotate_count'] = 10
+
+# Security configuration
+default['cookbook_template']['config']['include_metadata'] = false

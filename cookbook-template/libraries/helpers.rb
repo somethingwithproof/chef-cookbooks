@@ -71,8 +71,13 @@ module CookbookTemplate
     end
 
     # File system helpers
-    def safe_file_path(path)
-      ::File.expand_path(path).gsub('..', '')
+    def safe_file_path(path, base_directory = '/etc')
+      expanded = ::File.expand_path(path)
+      base = ::File.expand_path(base_directory)
+
+      raise ArgumentError, "Path traversal attempt detected: #{path}" unless expanded.start_with?(base)
+
+      expanded
     end
 
     def directory_exists?(path)
