@@ -8,6 +8,7 @@ property :bioc, [true, false], default: false, description: 'Whether to use Bioc
 property :timeout, Integer, default: 1800, description: 'Timeout for the installation process in seconds'
 
 action :install do
+  validate_package_name!(new_resource.package_name)
   r_exe = value_for_platform_family(
     %w(debian rhel fedora amazon suse) => '/usr/bin/Rscript',
     'freebsd' => '/usr/local/bin/Rscript',
@@ -43,6 +44,8 @@ action :install do
 end
 
 action :remove do
+  validate_package_name!(new_resource.package_name)
+
   r_exe = value_for_platform_family(
     %w(debian rhel fedora amazon suse) => '/usr/bin/Rscript',
     'freebsd' => '/usr/local/bin/Rscript',
@@ -80,6 +83,13 @@ action :remove do
 end
 
 action_class do
+  # Validate package name to prevent command injection
+  def validate_package_name!(package_name)
+    unless package_name =~ /^[a-zA-Z][a-zA-Z0-9._-]*$/
+      raise ArgumentError, "Invalid R package name: '#{package_name}'. Package names must start with a letter and contain only letters, numbers, dots, underscores, and hyphens."
+    end
+  end
+
   # Check if an R package is installed
   def package_installed?(package_name, version = nil, r_exe = '/usr/bin/Rscript')
     cmd = if version.nil?
