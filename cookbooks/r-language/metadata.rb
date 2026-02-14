@@ -6,7 +6,7 @@ description 'Installs/Configures R programming language'
 version '1.0.0'
 chef_version '>= 18.7'
 
-# Chef 19+ has built-in package management
+depends 'build-essential', '>= 8.0'
 
 # Current non-EOL platforms as of May 2025
 supports 'amazon', '>= 2.0'
@@ -15,10 +15,6 @@ supports 'ubuntu', '>= 18.04'
 supports 'redhat', '>= 7.0'
 supports 'rocky', '>= 8.0'
 supports 'oracle', '>= 7.0'
-supports 'suse', '>= 12.0'
-supports 'freebsd', '>= 13.0'
-supports 'mac_os_x', '>= 12.0'
-supports 'windows', '>= 10.0'
 
 source_url 'https://github.com/thomasvincent/chef-r-language-cookbook'
 issues_url 'https://github.com/thomasvincent/chef-r-language-cookbook/issues'

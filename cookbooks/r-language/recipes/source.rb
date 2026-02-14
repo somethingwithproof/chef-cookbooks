@@ -55,36 +55,69 @@ end
 # Set the R version and url
 r_version = node['r-language']['version'] || '4.3.1'
 r_url = node['r-language']['source_url'] || "https://cran.r-project.org/src/base/R-#{r_version.split('.').first}/R-#{r_version}.tar.gz"
-node['r-language']['source_checksum']
+r_checksum = node['r-language']['source_checksum']
 
-# Download and extract R source code
-source_dir = "/tmp/R-#{r_version}"
-bash 'extract_r_source' do
-  cwd '/tmp'
-  code <<-EOH
-    curl -sSL #{r_url} -o r-#{r_version}.tar.gz
-    tar -xzf r-#{r_version}.tar.gz
-  EOH
-  not_if { ::File.exist?('/usr/local/bin/R') }
+# Download R source tarball
+source_tarball = "#{Chef::Config[:file_cache_path]}/r-#{r_version}.tar.gz"
+source_dir = "#{Chef::Config[:file_cache_path]}/R-#{r_version}"
+
+remote_file source_tarball do
+  source r_url
+  checksum r_checksum if r_checksum
+  mode '0644'
+  action :create
+  not_if { r_installed_at_version?(r_version) }
 end
 
-# Configure and build R
-bash 'build_and_install_r' do
+# Extract R source code
+execute 'extract_r_source' do
+  command "tar -xzf #{source_tarball} -C #{Chef::Config[:file_cache_path]}"
+  creates source_dir
+  not_if { r_installed_at_version?(r_version) }
+end
+
+# Configure R
+execute 'configure_r' do
+  command "./configure #{node['r-language']['source']['configure_options'].join(' ')}"
   cwd source_dir
-  code <<-EOH
-    ./configure #{node['r-language']['source']['configure_options'].join(' ')}
-    make
-    make install
-  EOH
-  not_if { ::File.exist?('/usr/local/bin/R') }
+  creates "#{source_dir}/config.status"
+  not_if { r_installed_at_version?(r_version) }
+end
+
+# Build R
+execute 'build_r' do
+  command 'make'
+  cwd source_dir
+  creates "#{source_dir}/bin/R"
+  not_if { r_installed_at_version?(r_version) }
+end
+
+# Install R
+execute 'install_r' do
+  command 'make install'
+  cwd source_dir
+  creates '/usr/local/bin/R'
+  not_if { r_installed_at_version?(r_version) }
 end
 
 # Clean up source files
-file "/tmp/r-#{r_version}.tar.gz" do
+file source_tarball do
   action :delete
+  only_if { ::File.exist?('/usr/local/bin/R') }
 end
 
 directory source_dir do
   recursive true
   action :delete
+  only_if { ::File.exist?('/usr/local/bin/R') }
+end
+
+# Helper method to check if R is installed at the desired version
+def r_installed_at_version?(version)
+  return false unless ::File.exist?('/usr/local/bin/R')
+
+  cmd = shell_out('/usr/local/bin/R', '--version')
+  return false unless cmd.exitstatus.zero?
+
+  cmd.stdout.match?(/R version #{Regexp.escape(version)}/)
 end
