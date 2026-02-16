@@ -1,34 +1,33 @@
-# Dependabot configuration for Mantl Platform
-# Comprehensive dependency tracking across all ecosystems
-# - GitHub Actions: Grouped updates to reduce PR noise
-# - Python (pip): Weekly security and feature updates
-# - Docker: Base image updates for containers
 version: 2
 updates:
-  # =============================================
   # GitHub Actions
-  # =============================================
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "09:00"
-      timezone: "America/New_York"
     open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "github-actions"
-      - "automated"
     commit-message:
       prefix: "chore(deps)"
-      prefix-development: "chore(deps-dev)"
       include: "scope"
     groups:
       github-actions:
         patterns:
           - "*"
-        update-types:
-          - "minor"
-          - "patch"
 
+  # Ruby (bundler)
+  - package-ecosystem: "bundler"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "ruby"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
