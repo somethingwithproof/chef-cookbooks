@@ -15,7 +15,7 @@ group :development do
 end
 
 group :test do
-  gem 'kitchen-dokken', '~> 2.20'
+  gem 'kitchen-dokken', '~> 2.22'
   gem 'kitchen-inspec', '~> 3.0'
   gem 'test-kitchen', '>= 3.0'
   gem 'simplecov', '~> 0.22'
