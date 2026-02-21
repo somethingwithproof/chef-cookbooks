@@ -9,7 +9,7 @@ gem 'psych', '< 5'
 group :development do
   gem 'chefspec', '~> 9.3'
   gem 'cookstyle', '~> 8.1'
-  gem 'kitchen-dokken', '~> 2.20'
+  gem 'kitchen-dokken', '~> 2.22'
   gem 'kitchen-inspec'
   gem 'test-kitchen', '>= 3.0'
 end
