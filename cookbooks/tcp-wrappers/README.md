@@ -121,6 +121,11 @@ end
 - `node['authorization']['tcp_wrappers']['include_wrappers_d']` - whether to include wrappers.d directory (default: `true`)
 - `node['authorization']['tcp_wrappers']['package']` - package name, auto-detected based on platform
 
+## Recipes
+
+### default
+Main recipe that installs the TCP Wrappers package and creates the basic directory structure including /etc/hosts.allow, /etc/hosts.deny, and /etc/wrappers.d directory.
+
 ## Usage
 
 ### Basic Usage
@@ -234,6 +239,49 @@ docker run --rm -v $(pwd):/cookbook -w /cookbook ubuntu:22.04 \
   touch /etc/hosts.deny && \
   echo 'Directory structure created successfully.'"
 ```
+
+## Development
+
+This cookbook uses a comprehensive testing and linting workflow:
+
+```bash
+# Install dependencies
+bundle install
+
+# Run all tests
+make test-all
+
+# Run unit tests (ChefSpec)
+make test-unit
+
+# Run integration tests (Test Kitchen)
+make test-default
+
+# Run style checks (cookstyle)
+make lint
+
+# Clean up test artifacts
+make clean
+```
+
+## Contributing
+
+1. Fork the repository on GitHub
+2. Create a feature branch (`git checkout -b feature/my-new-feature`)
+3. Write tests for your changes
+4. Make your changes
+5. Run the test suite to ensure all tests pass
+6. Commit your changes (`git commit -am 'Add new feature'`)
+7. Push to the branch (`git push origin feature/my-new-feature`)
+8. Create a Pull Request
+
+Please ensure:
+- All tests pass before submitting PR
+- Code follows Cookstyle guidelines
+- New features include appropriate tests
+- Documentation is updated for any new attributes or recipes
+
+**Note:** This cookbook is deprecated. Consider contributing to firewalld or nftables cookbooks instead.
 
 ## License & Authors
 
