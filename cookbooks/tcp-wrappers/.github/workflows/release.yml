@@ -23,7 +23,7 @@ jobs:
     runs-on: [self-hosted, chef]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.2
         with:
           fetch-depth: 0
       
