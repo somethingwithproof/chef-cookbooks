@@ -39,7 +39,7 @@ jobs:
           bundler-cache: true
 
       - name: Setup Docker
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Install Chef
         uses: actionshub/chef-install@main
@@ -83,7 +83,7 @@ jobs:
           bundler-cache: true
 
       - name: Setup Docker
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Install Chef
         uses: actionshub/chef-install@main
