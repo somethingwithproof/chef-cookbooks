@@ -488,7 +488,7 @@ PLATFORMS
 DEPENDENCIES
   chef (~> 19.1)
   chefspec (~> 9.3)
-  cookstyle (~> 8.1)
+  cookstyle (~> 8.6)
   kitchen-dokken (~> 2.20)
   test-kitchen (~> 4.0)
 
