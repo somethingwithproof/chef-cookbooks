@@ -16,7 +16,7 @@ jobs:
     - name: Check out code
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
     - name: Install Chef Workstation
-      uses: actionshub/chef-install@7bb3b3d73e3495589eac4880759c8eacc8f488e3
+      uses: actionshub/chef-install@db5643e686bab4d7e39b3461f6b65809a27d8139
       with:
         channel: stable
         project: chef-workstation
@@ -32,7 +32,7 @@ jobs:
     - name: Check out code
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
     - name: Install Chef Workstation
-      uses: actionshub/chef-install@7bb3b3d73e3495589eac4880759c8eacc8f488e3
+      uses: actionshub/chef-install@db5643e686bab4d7e39b3461f6b65809a27d8139
       with:
         channel: stable
         project: chef-workstation
@@ -54,7 +54,7 @@ jobs:
   #     - name: Check out code
   #       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
   #     - name: Install Chef Workstation
-  #       uses: actionshub/chef-install@7bb3b3d73e3495589eac4880759c8eacc8f488e3
+  #       uses: actionshub/chef-install@db5643e686bab4d7e39b3461f6b65809a27d8139
   #       with:
   #         channel: stable
   #         project: chef-workstation
