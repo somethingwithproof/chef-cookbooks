@@ -8,3 +8,4 @@ group :development do
   gem 'kitchen-dokken', '~> 2.20'
   gem 'test-kitchen', '~> 4.0'
 end
+gem 'addressable', '>= 2.8.0'
