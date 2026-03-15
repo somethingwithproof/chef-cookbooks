@@ -7,3 +7,6 @@ gem 'test-kitchen', '~> 3.5'
 gem 'kitchen-dokken', '~> 2.18'  # Preferred over kitchen-docker which lacks maintenance
 gem 'kitchen-inspec', '~> 2.6'
 gem 'inspec', '~> 5.21'
+gem 'rack', '>= 2.2.22'
+gem 'rexml', '>= 3.4.2'
+gem 'faraday', '>= 1.10.5'
