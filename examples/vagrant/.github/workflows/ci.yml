@@ -36,7 +36,7 @@ jobs:
 
   unit-test:
     name: Unit Tests
-    runs-on: [self-hosted]
+    runs-on: [self-hosted, linux, x64]
     timeout-minutes: 15
     needs: lint
     steps:
