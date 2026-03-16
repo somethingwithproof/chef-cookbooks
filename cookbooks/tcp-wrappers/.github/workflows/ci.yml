@@ -38,7 +38,7 @@ jobs:
 
   unit-test:
     name: Unit Tests
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted]
     timeout-minutes: 15
     steps:
       - name: Check out code
@@ -53,7 +53,7 @@ jobs:
 
   integration-test:
     name: Integration Tests
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted]
     timeout-minutes: 45
     needs: [lint, unit-test]
     strategy:
