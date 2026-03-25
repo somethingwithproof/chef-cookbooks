@@ -410,7 +410,7 @@ GEM
     psych (5.3.1)
       date
       stringio
-    public_suffix (7.0.2)
+    public_suffix (7.0.5)
     racc (1.8.1)
     rack (3.2.5)
     rackup (2.3.1)
