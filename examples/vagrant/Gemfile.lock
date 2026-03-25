@@ -239,7 +239,7 @@ GEM
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
     jmespath (1.6.2)
-    json (2.19.1)
+    json (2.19.2)
     kitchen-dokken (2.22.2)
       docker-api (>= 1.33, < 3)
       kitchen-omnibus-chef (>= 1.0)
