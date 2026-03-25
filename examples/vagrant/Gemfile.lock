@@ -1,8 +1,8 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    addressable (2.7.0)
-      public_suffix (>= 2.0.2, < 5.0)
+    addressable (2.8.9)
+      public_suffix (>= 2.0.2, < 8.0)
     ast (2.4.3)
     aws-eventstream (1.4.0)
     aws-partitions (1.1223.0)
@@ -72,18 +72,20 @@ GEM
       unf_ext (~> 0.0.9.1)
       uri (~> 1.0.4)
       vault (~> 0.18.2)
-    chef-cli (3.0.10)
-      addressable (>= 2.3.5, < 2.8)
-      chef (>= 15.0)
+    chef-cli (6.1.27)
+      addressable (>= 2.3.5, < 2.9)
+      chef (>= 18.0, < 20.0)
+      chef-licensing (~> 1.0)
       cookbook-omnifetch (~> 0.5)
-      diff-lcs (~> 1.0)
+      diff-lcs (~> 1.6)
       ffi-yajl (>= 1.0, < 3.0)
-      license-acceptance (~> 1.0, >= 1.0.11)
-      minitar (~> 0.6)
+      license-acceptance (>= 1.0.11, < 3)
+      minitar (~> 1.0)
       mixlib-cli (>= 1.7, < 3.0)
       mixlib-shellout (>= 2.0, < 4.0)
-      paint (>= 1, < 3)
+      pastel (~> 0.7)
       solve (> 2.0, < 5.0)
+      syslog (~> 0.3)
     chef-config (19.1.164)
       addressable
       chef-utils (= 19.1.164)
@@ -267,7 +269,7 @@ GEM
       logger
       mime-types-data (~> 3.2025, >= 3.2025.0507)
     mime-types-data (3.2026.0303)
-    minitar (0.12.1)
+    minitar (1.1.0)
     mixlib-archive (1.3.3)
       mixlib-log
     mixlib-authentication (3.0.10)
@@ -319,7 +321,6 @@ GEM
       train-core
       wmi-lite (~> 1.0)
     ostruct (0.6.3)
-    paint (2.3.0)
     parallel (1.27.0)
     parser (3.3.10.2)
       ast (~> 2.4.1)
@@ -341,7 +342,7 @@ GEM
     psych (5.3.1)
       date
       stringio
-    public_suffix (4.0.7)
+    public_suffix (7.0.5)
     racc (1.8.1)
     rack (3.2.5)
     rackup (2.3.1)
@@ -486,6 +487,7 @@ PLATFORMS
   x86_64-darwin
 
 DEPENDENCIES
+  addressable (>= 2.8.0)
   chef (~> 19.1)
   chefspec (~> 9.3)
   cookstyle (~> 8.6)
