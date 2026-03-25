@@ -2,6 +2,7 @@
 
 unified_mode true
 
+resource_name :nginx_stream_upstream
 provides :nginx_stream_upstream
 
 description 'Manages nginx stream (TCP/UDP) upstream blocks'

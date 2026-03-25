@@ -2,6 +2,7 @@
 
 unified_mode true
 
+resource_name :nginx_upstream
 provides :nginx_upstream
 
 description 'Manages nginx upstream blocks for load balancing'

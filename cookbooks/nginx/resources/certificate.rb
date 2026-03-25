@@ -2,6 +2,7 @@
 
 unified_mode true
 
+resource_name :nginx_certificate
 provides :nginx_certificate
 
 description 'Manages SSL/TLS certificates for nginx, including Let\'s Encrypt automation'
