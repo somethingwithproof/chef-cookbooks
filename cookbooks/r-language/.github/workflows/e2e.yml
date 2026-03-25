@@ -30,7 +30,7 @@ jobs:
         scenario: ["default", "packages"]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.2
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -74,7 +74,7 @@ jobs:
         scenario: ["default", "source", "packages"]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.2
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -105,7 +105,7 @@ jobs:
     timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.2
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -134,7 +134,7 @@ jobs:
     timeout-minutes: 15  # Prevent hung jobs
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.2
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
