@@ -9,7 +9,7 @@ gem 'berkshelf', '>= 8.0'
 
 # Testing frameworks
 gem 'chefspec', '>= 9.3.8'
-gem 'inspec', '~> 6.0'
+gem 'inspec', '~> 7.0'
 gem 'test-kitchen', '~> 4.0'
 
 # Test Kitchen drivers
