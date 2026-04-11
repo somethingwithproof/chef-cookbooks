@@ -1,0 +1,75 @@
+# Cookstyle configuration for Chef 19+ best practices
+---
+inherit_from:
+  - https://raw.githubusercontent.com/chef/cookstyle/main/config/cookstyle.yml
+
+AllCops:
+  TargetRubyVersion: 3.2
+  Exclude:
+    - 'vendor/**/*'
+    - 'test/**/*'
+    - 'spec/fixtures/**/*'
+    - 'Guardfile'
+    - 'Fastfile'
+    - 'Deliverfile'
+    - '.delivery/**/*'
+    - '.github/**/*'
+
+# Chef-specific cops
+ChefDeprecations:
+  Enabled: true
+
+ChefEffortless:
+  Enabled: true
+
+ChefModernize:
+  Enabled: true
+
+ChefRedundantCode:
+  Enabled: true
+
+ChefStyle:
+  Enabled: true
+
+# Ruby style customizations for Chef cookbooks
+Style/Documentation:
+  Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+    - 'test/**/*'
+    - 'Rakefile'
+    - 'metadata.rb'
+
+# Chef cookbook specific
+ChefCorrectness/ChefApplicationFatal:
+  Enabled: true
+
+ChefCorrectness/BlockGuardWithOnlyString:
+  Enabled: true
+
+ChefStyle/AttributeKeys:
+  Enabled: true
+
+ChefStyle/FileMode:
+  Enabled: true
+
+ChefModernize/FoodcriticFile:
+  Enabled: true
+
+ChefModernize/RespondToInMetadata:
+  Enabled: true
+
+ChefRedundantCode/StringPropertyWithNilDefault:
+  Enabled: true
+
+# Modern Chef practices
+ChefModernize/UnnecessaryDependsChef14:
+  Enabled: true
+
+ChefModernize/PowershellInstallPackage:
+  Enabled: true
+
+ChefModernize/PowershellInstallWindowsFeature:
+  Enabled: true

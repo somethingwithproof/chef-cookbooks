@@ -1,0 +1,20 @@
+driver:
+  name: dokken
+provisioner:
+  name: dokken
+verifier:
+  name: inspec
+platforms:
+  - name: ubuntu-22.04
+    driver:
+      image: dokken/ubuntu-22.04
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - RUN /usr/bin/apt-get update
+suites:
+  - name: default
+    run_list:
+      - recipe[cookbook-template::default]
+    attributes:
+      chef_client:
+        chef_license: accept-no-persist

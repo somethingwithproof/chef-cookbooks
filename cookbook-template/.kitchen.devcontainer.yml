@@ -1,0 +1,71 @@
+---
+driver:
+  name: docker
+  privileged: true
+  use_sudo: false
+  build_context: .devcontainer
+  dockerfile: .devcontainer/Dockerfile
+  platform: linux/amd64
+  provision_command:
+    - apt-get update
+    - apt-get install -y systemd
+  run_command: /sbin/init
+  volume:
+    - /sys/fs/cgroup:/sys/fs/cgroup:rw
+  tmpfs:
+    - /tmp
+    - /run
+    - /run/lock
+
+provisioner:
+  name: chef_zero
+  chef_license: accept-no-persist
+  product_name: chef
+  install_strategy: skip  # Chef already installed in devcontainer
+  multiple_converge: 2
+  enforce_idempotency: true
+  deprecations_as_errors: true
+  log_level: info
+  retry_on_exit_code:
+    - 35 # Service restart might cause temporary failures
+  max_retries: 2
+  wait_for_retry: 30
+
+verifier:
+  name: inspec
+  inspec_tests:
+    - test/integration/default
+
+transport:
+  name: docker
+
+platforms:
+  - name: devcontainer-ubuntu-2204
+    driver:
+      image: chef-cookbook-devcontainer
+      platform: linux/amd64
+      run_command: /sbin/init
+      privileged: true
+      
+  - name: devcontainer-ubuntu-2404
+    driver:
+      image: chef-cookbook-devcontainer
+      platform: linux/amd64
+      run_command: /sbin/init
+      privileged: true
+
+  - name: devcontainer-debian-12
+    driver:
+      image: chef-cookbook-devcontainer
+      platform: linux/amd64
+      run_command: /sbin/init
+      privileged: true
+
+suites:
+  - name: default
+    run_list:
+      - recipe[<%= File.basename(Dir.pwd).gsub('-cookbook', '') %>::default]
+    verifier:
+      inspec_tests:
+        - test/integration/default
+    attributes:
