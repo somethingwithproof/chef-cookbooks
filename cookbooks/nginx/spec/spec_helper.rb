@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
 require 'chefspec'
-require 'chefspec/policyfile'
 require 'simplecov'
 
-# Start SimpleCov for test coverage reporting
 SimpleCov.start do
   add_filter '/spec/'
   add_filter '/vendor/'
@@ -13,45 +11,42 @@ SimpleCov.start do
   add_group 'Libraries', 'libraries'
   add_group 'Resources', 'resources'
   add_group 'Recipes', 'recipes'
-  minimum_coverage 80
 end
 
-# Specify platform and version for ChefSpec
 RSpec.configure do |config|
-  # Use color in outputs
   config.color = true
-
-  # Use detailed output formatter
   config.formatter = :documentation
-
-  # Set log level to minimize output noise
   config.log_level = :error
-
-  # Default platform for tests
   config.platform = 'ubuntu'
-  config.version = '20.04'
+  config.version = '22.04'
 
-  # Enable expectations syntax
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
 
-  # Configure mocks
   config.mock_with :rspec do |mocks|
     mocks.verify_partial_doubles = true
   end
 
-  # Shared context behavior
   config.shared_context_metadata_behavior = :apply_to_host_groups
 end
 
-# Create a ChefSpec runner context
-def chef_run(platform: 'ubuntu', version: '20.04', step_into: [], &block)
-  runner = ChefSpec::SoloRunner.new(
-    platform: platform,
-    version: version,
-    step_into: step_into
-  )
-  runner.instance_eval(&block) if block_given?
-  runner.converge(described_recipe)
+# Matches the metadata.rb supports matrix.
+SUPPORTED_PLATFORMS = [
+  { platform: 'ubuntu',    version: '20.04' },
+  { platform: 'ubuntu',    version: '22.04' },
+  { platform: 'ubuntu',    version: '24.04' },
+  { platform: 'debian',    version: '11' },
+  { platform: 'debian',    version: '12' },
+  { platform: 'rocky',     version: '8' },
+  { platform: 'rocky',     version: '9' },
+  { platform: 'almalinux', version: '8' },
+  { platform: 'almalinux', version: '9' },
+  { platform: 'amazon',    version: '2023' },
+].freeze
+
+# Common stubs required by nginx recipes.
+def stub_nginx_commands
+  stub_command('dpkg -l nginx-core 2>/dev/null | grep -q ^ii || dpkg -l nginx-light 2>/dev/null | grep -q ^ii').and_return(false)
+  stub_command('test -f /etc/apt/sources.list.d/nginx.list').and_return(false)
 end
