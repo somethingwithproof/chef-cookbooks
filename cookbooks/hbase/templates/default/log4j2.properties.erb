@@ -14,26 +14,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-status = INFO
+status = <%= @log_level %>
 name = HBaseLog4j2
 packages = org.apache.hadoop.hbase
 
-# Root logger
-rootLogger.level = INFO
+rootLogger.level = <%= @log_level %>
 rootLogger.appenderRef.console.ref = STDOUT
 rootLogger.appenderRef.file.ref = FILE
 
-# Console Appender
 appender.console.type = Console
 appender.console.name = STDOUT
 appender.console.layout.type = PatternLayout
 appender.console.layout.pattern = %d{ISO8601} %-5p [%t] %c{2}: %.1000m%n
 
-# File Appender
 appender.file.type = RollingFile
 appender.file.name = FILE
-appender.file.fileName = ${sys:hbase.log.dir}/hbase.log
-appender.file.filePattern = ${sys:hbase.log.dir}/hbase.log.%d{yyyy-MM-dd}
+appender.file.fileName = <%= @log_dir %>/hbase.log
+appender.file.filePattern = <%= @log_dir %>/hbase.log.%d{yyyy-MM-dd}
 appender.file.layout.type = PatternLayout
 appender.file.layout.pattern = %d{ISO8601} %-5p [%t] %c{2}: %.1000m%n
 appender.file.policies.type = Policies
@@ -43,6 +40,5 @@ appender.file.policies.time.modulate = true
 appender.file.strategy.type = DefaultRolloverStrategy
 appender.file.strategy.max = 30
 
-# Custom log levels
 logger.zookeeper.name = org.apache.zookeeper
 logger.zookeeper.level = WARN

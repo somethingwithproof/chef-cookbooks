@@ -6,17 +6,12 @@
 #
 # Licensed under the Apache License, Version 2.0
 
-# Setup HBase Backup Master service
-log 'hbase_backup_master_setup' do
-  message lazy { "Setting up HBase Backup Master on #{node['fqdn']}" }
-  level :info
-end
+# A backup master is an ordinary master daemon; the node simply gets listed
+# in the backup-masters file that the active master reads at startup.
+master_config = node['hbase']['service_mapping']['master']['config'] || {}
 
-# Create and start the master service in backup mode
-# Technically, the service is the same as master, but this node
-# will be listed in the backup-masters file
 hbase_service 'master' do
   restart_on_config_change true
-  service_config node['hbase']['service_mapping']['master']['config'] if node['hbase']['service_mapping']['master']['config']
+  service_config master_config
   action [:create, :enable, :start]
 end
