@@ -160,7 +160,7 @@ GEM
     connection_pool (3.0.2)
     cookbook-omnifetch (0.12.2)
       mixlib-archive (>= 0.4, < 2.0)
-    cookstyle (8.6.4)
+    cookstyle (8.6.10)
       rubocop (= 1.84.2)
     corefoundation (0.3.13)
       ffi (>= 1.15.0)
@@ -389,7 +389,7 @@ GEM
     os (1.1.4)
     ostruct (0.6.3)
     parallel (1.27.0)
-    parser (3.3.10.2)
+    parser (3.3.11.1)
       ast (~> 2.4.1)
       racc
     parslet (1.8.2)
@@ -590,7 +590,7 @@ DEPENDENCIES
   chef (~> 18.0)
   chef-cli (~> 5.0)
   chefspec (~> 9.3)
-  cookstyle (~> 8.1)
+  cookstyle (~> 8.6)
   kitchen-dokken (~> 2.22)
   kitchen-inspec
   psych (< 6)
