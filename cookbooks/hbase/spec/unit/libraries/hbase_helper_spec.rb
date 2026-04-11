@@ -160,4 +160,32 @@ describe HBase::Helper do
       expect(helper.java_options).to include('-Djava.security.auth.login.config=/etc/hbase/conf/jaas.conf')
     end
   end
+
+  describe '#config_to_xml_properties formatting' do
+    it 'produces a well-formed property block' do
+      xml = helper.config_to_xml_properties('foo.bar' => 'baz')
+      expect(xml).to eq(<<~XML.chomp)
+        <property>
+          <name>foo.bar</name>
+          <value>baz</value>
+        </property>
+      XML
+    end
+  end
+
+  describe '#nodes_with_role' do
+    it 'returns [] when search raises' do
+      def helper.search(*)
+        raise Chef::Exceptions::InvalidDataBagPath, 'no server'
+      end
+      expect(helper.nodes_with_role('master', 'prod')).to eq([])
+    end
+
+    it 'returns sorted hits when search succeeds' do
+      def helper.search(*)
+        [{ 'name' => 'z' }, { 'name' => 'a' }]
+      end
+      expect(helper.nodes_with_role('master', 'prod').map { |n| n['name'] }).to eq(%w(a z))
+    end
+  end
 end

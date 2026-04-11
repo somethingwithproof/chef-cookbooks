@@ -8,11 +8,6 @@ describe 'hbase::install' do
       runner.converge(described_recipe)
     end
 
-    before do
-      stub_command('test -L /opt/hbase/current').and_return(false)
-      stub_command('java -version').and_return(true)
-    end
-
     it 'converges successfully' do
       expect { chef_run }.to_not raise_error
     end
@@ -52,6 +47,14 @@ describe 'hbase::install' do
     # ark :install action manages the symlink at home_dir automatically
   end
 
+  context 'When the checksum is missing for a binary install' do
+    it 'raises at converge time' do
+      runner = ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04')
+      runner.node.override['hbase']['checksum'] = nil
+      expect { runner.converge(described_recipe) }.to raise_error(/checksum.*must be set/)
+    end
+  end
+
   context 'When using package installation method' do
     let(:chef_run) do
       runner = ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04')
@@ -62,6 +65,10 @@ describe 'hbase::install' do
 
     it 'installs hbase package' do
       expect(chef_run).to install_package('hbase')
+    end
+
+    it 'creates the install_dir as a directory (not a symlink)' do
+      expect(chef_run).to create_directory('/opt/hbase')
     end
   end
 end

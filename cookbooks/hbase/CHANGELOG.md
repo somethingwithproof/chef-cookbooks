@@ -2,6 +2,18 @@
 
 This file tracks the changes in the HBase cookbook over time.
 
+## 1.2.0 (2026-04-10)
+
+- Normalize the supported OS matrix to Ubuntu 20.04+, Debian 11+, RHEL/CentOS/Rocky/AlmaLinux/Oracle 8+, and Amazon Linux 2023+
+- Fix duplicate `action :run` and inverted `not_if` guard in the `java` recipe
+- Replace `Mixlib::ShellOut` with the built-in `shell_out` helper
+- Remove duplicate `/etc/security/limits.d/hbase.conf` declaration between `user` and `limits` recipes
+- Rewire `hbase-env.sh` template to read its values from resource variables instead of node attributes
+- Honor `log_dir`/`log_level` variables in `log4j2.properties`
+- Make the `hbase_service` custom resource use a `pid_dir` property rather than a hardcoded path and keep the systemd unit and `service` resource names in sync
+- Add ChefSpec coverage for `hbase::java`, `hbase::limits`, `hbase::thrift`, `hbase::rest`, and `hbase::backup_master`, plus platform-matrix smoke tests for `hbase::default`
+- Correct the default InSpec suite to match the ark-managed `/opt/hbase` symlink layout
+
 ## 1.1.0 (2024-05-09)
 
 - Enhanced Java compatibility for HBase
