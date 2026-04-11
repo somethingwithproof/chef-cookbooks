@@ -20,14 +20,6 @@ when 'rhel', 'fedora', 'amazon'
   package %w(certbot python3-certbot-nginx) do
     action :install
   end
-when 'freebsd'
-  package %w(py39-certbot py39-certbot-nginx) do
-    action :install
-  end
-when 'mac_os_x'
-  homebrew_package 'certbot' do
-    action :install
-  end
 end
 
 # Ensure webroot exists for ACME challenges
@@ -55,39 +47,23 @@ template "#{node['nginx']['conf_dir']}/conf.d/letsencrypt.conf" do
   notifies :reload, 'service[nginx]', :delayed
 end
 
-# Set up automatic renewal
-if systemd?
-  # Enable certbot timer if it exists
-  service 'certbot.timer' do
-    action [:enable, :start]
-    only_if { ::File.exist?('/lib/systemd/system/certbot.timer') }
-  end
+# Automatic renewal via systemd timer (certbot ships the unit)
+service 'certbot.timer' do
+  action %i(enable start)
+  only_if { ::File.exist?('/lib/systemd/system/certbot.timer') }
+end
 
-  # Create nginx reload hook for successful renewals
-  directory '/etc/letsencrypt/renewal-hooks/deploy' do
-    recursive true
-    mode '0755'
-  end
+directory '/etc/letsencrypt/renewal-hooks/deploy' do
+  recursive true
+  mode '0755'
+end
 
-  file '/etc/letsencrypt/renewal-hooks/deploy/01-nginx-reload' do
-    content <<~SCRIPT
-      #!/bin/bash
-      # Reload nginx after successful certificate renewal
-      /bin/systemctl reload nginx.service 2>/dev/null || /usr/sbin/service nginx reload 2>/dev/null || true
-    SCRIPT
-    mode '0755'
-  end
-else
-  # Create cron job for renewal on non-systemd systems
-  cron 'certbot_renew' do
-    minute '0'
-    hour '3'
-    day '*'
-    month '*'
-    weekday '*'
-    command '/usr/bin/certbot renew --quiet --deploy-hook "nginx -s reload"'
-    user 'root'
-  end
+file '/etc/letsencrypt/renewal-hooks/deploy/01-nginx-reload' do
+  content <<~SCRIPT
+    #!/bin/bash
+    /bin/systemctl reload nginx.service
+  SCRIPT
+  mode '0755'
 end
 
 # Request certificates for configured domains

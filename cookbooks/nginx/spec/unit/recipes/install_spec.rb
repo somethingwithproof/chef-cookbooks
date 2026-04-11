@@ -3,105 +3,81 @@
 require 'spec_helper'
 
 describe 'nginx::install' do
-  context 'on Ubuntu 22.04 with package install method' do
-    platform 'ubuntu', '22.04'
+  before { stub_nginx_commands }
 
-    before do
-      stub_command('test -f /etc/apt/sources.list.d/nginx.list').and_return(false)
-    end
-
-    before do
-      stub_command('dpkg -l nginx-core 2>/dev/null | grep -q ^ii || dpkg -l nginx-light 2>/dev/null | grep -q ^ii').and_return(false)
-    end
-
+  context 'debian family' do
     let(:chef_run) do
-      runner = ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04') do |node|
-        node.normal['nginx']['install_method'] = 'package'
-        node.normal['nginx']['package_name'] = 'nginx'
-      end
-      runner.converge(described_recipe)
+      ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04').converge(described_recipe)
     end
 
-    it 'installs nginx package' do
+    it 'runs apt update for nginx' do
+      expect(chef_run).to update_apt_update('nginx')
+    end
+
+    it 'runs the install-nginx execute block' do
       expect(chef_run).to run_execute('install-nginx')
     end
 
-    it 'updates apt cache' do
-      expect(chef_run).to update_apt_update('nginx')
+    it 'notifies the nginx service to reload' do
+      expect(chef_run.execute('install-nginx')).to notify('service[nginx]').to(:reload).delayed
     end
   end
 
-  context 'on CentOS 8 with package install method' do
-    platform 'centos', '8'
-
+  context 'rhel family' do
     let(:chef_run) do
-      runner = ChefSpec::SoloRunner.new(platform: 'centos', version: '8') do |node|
-        node.normal['nginx']['install_method'] = 'package'
-        node.normal['nginx']['package_name'] = 'nginx'
-      end
-      runner.converge(described_recipe)
+      ChefSpec::SoloRunner.new(platform: 'rocky', version: '9').converge(described_recipe)
     end
 
-    it 'installs nginx package' do
+    it 'creates the upstream yum repo' do
+      expect(chef_run).to create_yum_repository('nginx').with(gpgcheck: true)
+    end
+
+    it 'installs nginx' do
       expect(chef_run).to install_package('nginx')
     end
+  end
 
-    it 'creates the nginx yum repository' do
+  context 'amazon linux' do
+    let(:chef_run) do
+      ChefSpec::SoloRunner.new(platform: 'amazon', version: '2023').converge(described_recipe)
+    end
+
+    it 'creates the upstream yum repo' do
       expect(chef_run).to create_yum_repository('nginx')
     end
 
-    it 'includes yum-epel cookbook' do
-      expect(chef_run).to include_recipe('yum-epel::default')
+    it 'installs nginx' do
+      expect(chef_run).to install_package('nginx')
     end
   end
 
-  context 'on Ubuntu 22.04 with source install method' do
-    platform 'ubuntu', '22.04'
-
+  context 'source install without a checksum' do
     let(:chef_run) do
-      runner = ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04') do |node|
+      ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04') do |node|
         node.normal['nginx']['install_method'] = 'source'
-        node.normal['nginx']['version'] = '1.24.0'
-        node.normal['nginx']['source']['url'] = 'https://nginx.org/download/nginx-1.24.0.tar.gz'
-        node.normal['nginx']['source']['dependencies'] = %w(libpcre3-dev zlib1g-dev libssl-dev)
-        node.normal['nginx']['source']['configure_options'] = ['--with-http_ssl_module']
-        node.normal['nginx']['source']['prefix'] = '/usr/local/nginx'
-        node.normal['nginx']['user'] = 'nginx'
-        node.normal['nginx']['group'] = 'nginx'
-        node.normal['nginx']['log_dir'] = '/var/log/nginx'
-        node.normal['nginx']['conf_dir'] = '/etc/nginx'
-        node.normal['nginx']['binary'] = '/usr/sbin/nginx'
-        node.normal['nginx']['pid_file'] = '/var/run/nginx.pid'
-        node.normal['nginx']['error_log'] = '/var/log/nginx/error.log'
-        node.normal['nginx']['access_log'] = '/var/log/nginx/access.log'
-      end
-      runner.converge(described_recipe)
+        node.normal['nginx']['source']['checksum'] = nil
+      end.converge(described_recipe)
     end
 
-    before do
-      stub_command('/usr/sbin/nginx -v 2>&1').and_return('')
-      allow(File).to receive(:exist?).and_call_original
-      allow(File).to receive(:exist?).with('/usr/sbin/nginx').and_return(false)
+    it 'raises' do
+      expect { chef_run }.to raise_error(/checksum/)
+    end
+  end
+
+  context 'source install with checksum' do
+    let(:chef_run) do
+      ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04') do |node|
+        node.normal['nginx']['install_method'] = 'source'
+        node.normal['nginx']['source']['checksum'] = 'deadbeef' * 8
+      end.converge(described_recipe)
     end
 
-    it 'installs build essential' do
+    it 'installs build_essential' do
       expect(chef_run).to install_build_essential('install_build_tools')
     end
 
-    it 'creates nginx group' do
-      expect(chef_run).to create_group('nginx')
-    end
-
-    it 'creates nginx user' do
-      expect(chef_run).to create_user('nginx')
-    end
-
-    it 'creates log directory' do
-      expect(chef_run).to create_directory('/var/log/nginx')
-    end
-
-    it 'creates conf directory' do
-      expect(chef_run).to create_directory('/etc/nginx')
+    it 'creates the nginx system user' do
+      expect(chef_run).to create_user('www-data').with(system: true)
     end
   end
 end

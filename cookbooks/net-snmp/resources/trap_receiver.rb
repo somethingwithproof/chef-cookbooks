@@ -38,20 +38,14 @@ property :auth_required, [true, false],
          description: 'Require authentication for traps'
 
 property :config_file, String,
-         default: lazy {
-           case node['platform_family']
-           when 'freebsd'
-             '/usr/local/etc/snmp/snmptrapd.conf'
-           when 'mac_os_x'
-             '/opt/homebrew/etc/snmptrapd.conf'
-           else
-             '/etc/snmp/snmptrapd.conf'
-           end
-         },
+         default: '/etc/snmp/snmptrapd.conf',
          description: 'Path to snmptrapd.conf'
 
 action :create do
-  # Install snmptrapd if needed (usually part of net-snmp-utils)
+  NetSnmp::Security.validate_community_strings!(
+    [{ 'community' => new_resource.community }]
+  ) if new_resource.community
+
   case node['platform_family']
   when 'rhel', 'fedora', 'amazon'
     package 'net-snmp-utils' do
@@ -63,7 +57,6 @@ action :create do
     end
   end
 
-  # Create snmptrapd.conf
   template new_resource.config_file do
     source 'snmptrapd.conf.erb'
     cookbook 'net-snmp'
@@ -86,25 +79,14 @@ action :create do
 end
 
 action :enable do
-  case node['platform_family']
-  when 'debian', 'rhel', 'fedora', 'amazon'
-    service 'snmptrapd' do
-      action [:enable, :start]
-    end
-  when 'freebsd'
-    execute 'enable_snmptrapd' do
-      command 'sysrc snmptrapd_enable="YES"'
-      not_if 'sysrc -n snmptrapd_enable | grep -q YES'
-    end
-    service 'snmptrapd' do
-      action [:enable, :start]
-    end
+  service 'snmptrapd' do
+    action %i(enable start)
   end
 end
 
 action :disable do
   service 'snmptrapd' do
-    action [:stop, :disable]
+    action %i(stop disable)
   end
 end
 

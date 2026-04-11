@@ -14,58 +14,26 @@ default['net_snmp']['packages'] = case node['platform_family']
                                     %w(net-snmp net-snmp-utils)
                                   when 'debian'
                                     %w(snmp snmpd snmp-mibs-downloader)
-                                  when 'freebsd'
-                                    %w(net-snmp)
-                                  when 'mac_os_x'
-                                    %w(net-snmp)
                                   else
                                     %w(net-snmp)
                                   end
 
 # Service configuration
-default['net_snmp']['service_name'] = case node['platform_family']
-                                      when 'freebsd'
-                                        'snmpd'
-                                      when 'mac_os_x'
-                                        'net-snmp'
-                                      else
-                                        'snmpd'
-                                      end
+default['net_snmp']['service_name'] = 'snmpd'
 default['net_snmp']['service_actions'] = %i(enable start)
 
 # Configuration file paths
-default['net_snmp']['config_dir'] = case node['platform_family']
-                                    when 'freebsd'
-                                      '/usr/local/etc/snmp'
-                                    when 'mac_os_x'
-                                      '/opt/homebrew/etc'
-                                    else
-                                      '/etc/snmp'
-                                    end
-default['net_snmp']['config_file'] = case node['platform_family']
-                                     when 'freebsd'
-                                       '/usr/local/etc/snmp/snmpd.conf'
-                                     when 'mac_os_x'
-                                       '/opt/homebrew/etc/snmpd.conf'
-                                     else
-                                       '/etc/snmp/snmpd.conf'
-                                     end
-default['net_snmp']['config_include_dir'] = case node['platform_family']
-                                            when 'freebsd'
-                                              '/usr/local/etc/snmp/snmpd.conf.d'
-                                            when 'mac_os_x'
-                                              '/opt/homebrew/etc/snmpd.conf.d'
-                                            else
-                                              '/etc/snmp/snmpd.conf.d'
-                                            end
+default['net_snmp']['config_dir'] = '/etc/snmp'
+default['net_snmp']['config_file'] = '/etc/snmp/snmpd.conf'
+default['net_snmp']['config_include_dir'] = '/etc/snmp/snmpd.conf.d'
 
 # System information
 default['net_snmp']['sys_location'] = 'Unknown'
 default['net_snmp']['sys_contact'] = 'root@localhost'
 default['net_snmp']['sys_name'] = node['hostname']
 
-# Network configuration
-default['net_snmp']['listen_address'] = 'udp:161,udp6:[::1]:161'
+# Bind to loopback by default; override to expose the agent on a trusted interface.
+default['net_snmp']['listen_address'] = 'udp:127.0.0.1:161,udp6:[::1]:161'
 
 # SNMPv2c community strings (INSECURE - use SNMPv3 for production)
 # Example: [{ community: 'public', access: 'rocommunity', source: '127.0.0.1', view: 'systemview' }]
@@ -270,15 +238,7 @@ default['net_snmp']['prometheus']['modules'] = {
 # Enable MIB downloads
 default['net_snmp']['mibs']['enabled'] = true
 
-# MIB directories
-default['net_snmp']['mibs']['directories'] = case node['platform_family']
-                                             when 'freebsd'
-                                               ['/usr/local/share/snmp/mibs']
-                                             when 'mac_os_x'
-                                               ['/opt/homebrew/share/snmp/mibs']
-                                             else
-                                               ['/usr/share/snmp/mibs', '/var/lib/snmp/mibs']
-                                             end
+default['net_snmp']['mibs']['directories'] = ['/usr/share/snmp/mibs', '/var/lib/snmp/mibs']
 
 # Custom MIBs to install (URL or local path)
 # Example: [{ name: 'VENDOR-MIB', source: 'https://example.com/VENDOR-MIB.txt' }]

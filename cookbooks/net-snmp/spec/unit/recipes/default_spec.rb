@@ -3,49 +3,56 @@
 require 'spec_helper'
 
 describe 'net-snmp::default' do
-  context 'on ubuntu 22.04' do
+  SUPPORTED_PLATFORMS.each do |p|
+    context "on #{p[:platform]} #{p[:version]}" do
+      let(:chef_run) do
+        ChefSpec::SoloRunner.new(platform: p[:platform], version: p[:version]).converge(described_recipe)
+      end
+
+      it 'converges successfully' do
+        expect { chef_run }.not_to raise_error
+      end
+
+      it 'enables and starts snmpd' do
+        expect(chef_run).to enable_service('snmpd')
+        expect(chef_run).to start_service('snmpd')
+      end
+    end
+  end
+
+  context 'package installation on debian family' do
     let(:chef_run) do
       ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04').converge(described_recipe)
     end
 
-    it 'converges successfully' do
-      expect { chef_run }.to_not raise_error
-    end
-
-    it 'installs snmp package' do
-      expect(chef_run).to install_package('snmp')
-    end
-
-    it 'installs snmpd package' do
-      expect(chef_run).to install_package('snmpd')
-    end
-
-    it 'enables and starts snmpd service' do
-      expect(chef_run).to enable_service('snmpd')
-      expect(chef_run).to start_service('snmpd')
+    it 'installs snmp, snmpd, snmp-mibs-downloader' do
+      expect(chef_run).to install_package(%w(snmp snmpd snmp-mibs-downloader))
     end
   end
 
-  context 'on centos 8' do
+  context 'package installation on rhel family' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new(platform: 'centos', version: '8').converge(described_recipe)
+      ChefSpec::SoloRunner.new(platform: 'rocky', version: '9').converge(described_recipe)
     end
 
-    it 'installs net-snmp package for client utilities' do
-      expect(chef_run).to install_package('net-snmp')
-    end
-
-    it 'installs net-snmp-utils package' do
-      expect(chef_run).to install_package('net-snmp-utils')
-    end
-
-    it 'enables and starts snmpd service' do
-      expect(chef_run).to enable_service('snmpd')
-      expect(chef_run).to start_service('snmpd')
+    it 'installs net-snmp and net-snmp-utils' do
+      expect(chef_run).to install_package(%w(net-snmp net-snmp-utils))
     end
   end
 
-  context 'with SNMPv3 users configured on ubuntu 22.04' do
+  context 'with a banned community string' do
+    let(:chef_run) do
+      ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04') do |node|
+        node.normal['net_snmp']['community_strings'] = [{ 'community' => 'public', 'source' => '10.0.0.0/8' }]
+      end.converge(described_recipe)
+    end
+
+    it 'refuses to converge' do
+      expect { chef_run }.to raise_error(NetSnmp::Security::InsecureCommunityError)
+    end
+  end
+
+  context 'with SNMPv3 users configured' do
     before do
       stub_command("grep -q 'usmUser.*testuser' /var/lib/snmp/snmpd.conf 2>/dev/null").and_return(false)
     end
@@ -64,37 +71,33 @@ describe 'net-snmp::default' do
       end.converge(described_recipe)
     end
 
-    it 'converges successfully' do
-      expect { chef_run }.to_not raise_error
-    end
-
     it 'creates snmpd.conf.d directory' do
       expect(chef_run).to create_directory('/etc/snmp/snmpd.conf.d')
     end
 
-    it 'creates snmpd.conf template' do
-      expect(chef_run).to create_template('/etc/snmp/snmpd.conf')
+    it 'renders snmpd.conf with mode 0600' do
+      expect(chef_run).to create_template('/etc/snmp/snmpd.conf').with(mode: '0600', sensitive: true)
     end
 
-    it 'restarts snmpd service when config changes' do
+    it 'notifies snmpd to restart on config change' do
       template = chef_run.template('/etc/snmp/snmpd.conf')
       expect(template).to notify('service[snmpd]').to(:restart).delayed
     end
 
-    it 'creates SNMPv3 user' do
+    it 'creates the SNMPv3 user execute resource' do
       expect(chef_run).to run_execute('create_snmpv3_user_testuser')
     end
   end
 
-  context 'without SNMPv3 users on ubuntu 22.04' do
+  context 'without SNMPv3 users configured' do
     let(:chef_run) do
       ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04') do |node|
         node.normal['net_snmp']['v3_users'] = []
       end.converge(described_recipe)
     end
 
-    it 'does not create snmpd.conf template when no v3 users' do
-      expect(chef_run).to_not create_template('/etc/snmp/snmpd.conf')
+    it 'does not render snmpd.conf' do
+      expect(chef_run).not_to create_template('/etc/snmp/snmpd.conf')
     end
   end
 end

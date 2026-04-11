@@ -74,18 +74,15 @@ end
 
 # Configure virtual hosts from attributes
 node['nginx']['sites'].each do |site_name, site_data|
-  # Determine file name and path
   site_config = "#{site_name}.conf"
   site_available_path = platform_family?('debian') ? "#{node['nginx']['sites_available_dir']}/#{site_config}" : "#{node['nginx']['sites_dir']}/#{site_config}"
   site_enabled_path = "#{node['nginx']['sites_dir']}/#{site_config}"
+  site_root = site_data['root'] || "/var/www/#{site_name}"
 
-  # Set SSL default values
-  if site_data['ssl_enabled'] && (site_data['ssl_cert'].nil? || site_data['ssl_key'].nil?)
-    site_data['ssl_cert'] = node['nginx']['ssl']['certificate']
-    site_data['ssl_key'] = node['nginx']['ssl']['certificate_key']
-  end
+  # Resolve SSL material without mutating the node attribute hash.
+  ssl_cert = site_data['ssl_cert'] || (site_data['ssl_enabled'] ? node['nginx']['ssl']['certificate'] : nil)
+  ssl_key = site_data['ssl_key'] || (site_data['ssl_enabled'] ? node['nginx']['ssl']['certificate_key'] : nil)
 
-  # Create the site configuration
   template site_available_path do
     source 'site.conf.erb'
     owner 'root'
@@ -95,12 +92,12 @@ node['nginx']['sites'].each do |site_name, site_data|
       site_name: site_name,
       port: site_data['port'] || 80,
       server_name: site_data['domain'] || site_name,
-      root: site_data['root'] || "/var/www/#{site_name}",
+      root: site_root,
       access_log: site_data['access_log'] || "#{node['nginx']['log_dir']}/#{site_name}.access.log",
       error_log: site_data['error_log'] || "#{node['nginx']['log_dir']}/#{site_name}.error.log",
       ssl_enabled: site_data['ssl_enabled'] || false,
-      ssl_cert: site_data['ssl_cert'],
-      ssl_key: site_data['ssl_key'],
+      ssl_cert: ssl_cert,
+      ssl_key: ssl_key,
       ssl_protocols: site_data['ssl_protocols'] || node['nginx']['ssl']['protocols'],
       ssl_ciphers: site_data['ssl_ciphers'] || node['nginx']['ssl']['ciphers'],
       hsts_enabled: site_data['hsts_enabled'] || node['nginx']['ssl']['hsts'],
@@ -113,17 +110,14 @@ node['nginx']['sites'].each do |site_name, site_data|
     notifies :reload, 'service[nginx]', :delayed
   end
 
-  # Create document root directory if it doesn't exist
-  directory site_data['root'] || "/var/www/#{site_name}" do
+  directory site_root do
     owner node['nginx']['user']
     group node['nginx']['group']
     mode '0755'
     recursive true
     action :create
-    not_if { ::File.directory?(site_data['root'] || "/var/www/#{site_name}") }
   end
 
-  # Enable the site for Debian-based distributions
   next unless platform_family?('debian')
 
   link site_enabled_path do
