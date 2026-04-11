@@ -10,6 +10,7 @@ describe 'hbase_service' do
     'install_dir' => '/opt/hbase',
     'conf_dir' => '/etc/hbase/conf',
     'log_dir' => '/var/log/hbase',
+    'pid_dir' => '/var/run/hbase',
     'java_home' => '/usr/lib/jvm/java-11-openjdk',
     'java_opts' => '-Xmx1024m',
     'limits' => {
