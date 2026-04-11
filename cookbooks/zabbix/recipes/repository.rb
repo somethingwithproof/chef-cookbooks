@@ -1,0 +1,104 @@
+# frozen_string_literal: true
+
+#
+# Cookbook:: zabbix
+# Recipe:: repository
+#
+# Copyright:: 2023, Thomas Vincent
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Configure repositories for Zabbix packages
+case node['platform_family']
+when 'rhel', 'amazon', 'fedora'
+  include_recipe 'yum-epel'
+
+  # Create a Zabbix repository
+  yum_repository 'zabbix' do
+    description "Zabbix Official Repository - #{node['kernel']['machine']}"
+    baseurl node['zabbix']['repository_uri']
+    gpgkey node['zabbix']['repository_key']
+    enabled true
+    gpgcheck true
+    make_cache true
+    metadata_expire '1h'
+    action :create
+  end
+
+  # Create a Zabbix non-supported repository
+  # Note: Zabbix 6.x+ uses a unified repo; the non-supported repo is disabled
+  # by default to avoid makecache failures on missing upstream repos.
+  yum_repository 'zabbix-non-supported' do
+    description "Zabbix Official Repository non-supported - #{node['kernel']['machine']}"
+    baseurl node['zabbix']['repository_uri'].gsub('$basearch', 'non-supported')
+    gpgkey node['zabbix']['repository_key']
+    enabled false
+    gpgcheck true
+    make_cache false
+    metadata_expire '1h'
+    action :create
+  end
+
+  # Install common dependencies
+  # Use --allowerasing to handle curl-minimal conflict on minimal images
+  execute 'install-zabbix-rhel-deps' do
+    command 'dnf install -y --allowerasing curl libcurl-devel net-snmp net-snmp-devel'
+    action :run
+    not_if 'rpm -q net-snmp-devel'
+  end
+
+when 'debian'
+  apt_update 'update' do
+    action :update
+  end
+
+  # Install apt-transport-https for HTTPS repo
+  package %w(apt-transport-https ca-certificates gnupg curl) do
+    action :install
+  end
+
+  # Create a Zabbix main repository
+  apt_repository 'zabbix' do
+    uri "https://repo.zabbix.com/zabbix/#{node['zabbix']['version']}/#{node['platform']}/"
+    components ['main']
+    key node['zabbix']['repository_key']
+    cache_rebuild true
+    action :add
+  end
+
+  # Zabbix 6.x+ uses unified repos; skip non-supported repo entirely
+  # as it causes apt-get update failures on modern versions
+
+  # Update apt cache
+  apt_update 'update' do
+    action :update
+    ignore_failure true
+  end
+
+  # Install common dependencies
+  package %w(curl libcurl4 libcurl4-openssl-dev snmp libsnmp-dev) do
+    action :install
+  end
+end
+
+# Create and populate repository cache for faster operations
+execute 'zabbix-repo-cache-refresh' do
+  case node['platform_family']
+  when 'rhel', 'amazon', 'fedora'
+    command 'yum makecache -y'
+  when 'debian'
+    command 'apt-get update -qq'
+  end
+  action :run
+  ignore_failure true
+end

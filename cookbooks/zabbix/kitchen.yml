@@ -1,0 +1,200 @@
+---
+driver:
+  name: dokken
+  privileged: true
+  chef_version: "18"
+  chef_license: accept-no-persist
+
+transport:
+  name: dokken
+
+provisioner:
+  name: dokken
+  chef_license: accept
+  product_name: cinc
+  enforce_idempotency: true
+  multiple_converge: 2
+  deprecations_as_errors: true
+  log_level: info
+  retry_on_exit_code:
+    - 35 # Service restart might cause temporary failures
+  max_retries: 2
+  wait_for_retry: 120
+
+verifier:
+  name: inspec
+  chef_license: accept-no-persist
+  product_name: cinc
+  env_vars:
+    CHEF_LICENSE: accept-no-persist
+  sudo: true
+  reporter:
+    - cli
+    - junit:test/reports/%{platform}_%{suite}.xml
+
+platforms:
+  - name: ubuntu-2004
+    driver:
+      image: dokken/ubuntu-20.04
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - RUN /usr/bin/apt-get update
+        - RUN apt-get install -y lsb-release curl gnupg2 systemd
+
+  - name: ubuntu-2204
+    driver:
+      image: dokken/ubuntu-22.04
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - RUN /usr/bin/apt-get update
+        - RUN apt-get install -y lsb-release curl gnupg2 systemd ca-certificates
+
+  - name: ubuntu-2404
+    driver:
+      image: dokken/ubuntu-24.04
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - RUN /usr/bin/apt-get update
+        - RUN apt-get install -y lsb-release curl gnupg2 systemd ca-certificates
+
+  - name: debian-11
+    driver:
+      image: dokken/debian-11
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - RUN /usr/bin/apt-get update
+        - RUN apt-get install -y lsb-release curl gnupg2 ca-certificates
+        
+  - name: debian-12
+    driver:
+      image: dokken/debian-12
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - RUN /usr/bin/apt-get update
+        - RUN apt-get install -y lsb-release curl gnupg2 ca-certificates
+
+  - name: rockylinux-8
+    driver:
+      image: dokken/rockylinux-8
+      pid_one_command: /usr/lib/systemd/systemd
+      intermediate_instructions:
+        - RUN yum -y install initscripts systemd-sysv which lsof
+        
+  - name: rockylinux-9
+    driver:
+      image: dokken/rockylinux-9
+      pid_one_command: /usr/lib/systemd/systemd
+      intermediate_instructions:
+        - RUN yum -y install initscripts systemd-sysv which lsof
+
+  - name: almalinux-8
+    driver:
+      image: dokken/almalinux-8
+      pid_one_command: /usr/lib/systemd/systemd
+      intermediate_instructions:
+        - RUN yum -y install initscripts systemd-sysv which lsof
+
+  - name: almalinux-9
+    driver:
+      image: dokken/almalinux-9
+      pid_one_command: /usr/lib/systemd/systemd
+      intermediate_instructions:
+        - RUN yum -y install initscripts systemd-sysv which lsof
+
+  - name: amazonlinux-2
+    driver:
+      image: dokken/amazonlinux-2
+      pid_one_command: /usr/lib/systemd/systemd
+      intermediate_instructions:
+        - RUN yum -y install systemd-sysv initscripts shadow-utils
+        
+  - name: amazonlinux-2023
+    driver:
+      image: dokken/amazonlinux-2023
+      pid_one_command: /usr/lib/systemd/systemd
+      intermediate_instructions:
+        - RUN yum -y install systemd-sysv initscripts shadow-utils
+
+suites:
+  - name: agent
+    provisioner:
+      policyfile: test/policyfiles/agent.rb
+    verifier:
+      inspec_tests:
+        - test/integration/agent
+    attributes:
+      zabbix:
+        agent:
+          enabled: true
+          servers: ['127.0.0.1']
+          servers_active: ['127.0.0.1']
+        server:
+          enabled: false
+        web:
+          enabled: false
+        java_gateway:
+          enabled: false
+
+  - name: server-postgresql
+    provisioner:
+      policyfile: test/policyfiles/server.rb
+    verifier:
+      inspec_tests:
+        - test/integration/server
+    attributes:
+      zabbix:
+        agent:
+          enabled: true
+          servers: ['127.0.0.1']
+          servers_active: ['127.0.0.1']
+        server:
+          enabled: true
+          database:
+            type: postgresql
+        web:
+          enabled: true
+          server: apache
+        java_gateway:
+          enabled: false
+    includes:
+      - ubuntu-2004
+      - ubuntu-2204
+      - ubuntu-2404
+      - debian-11
+      - debian-12
+      - rockylinux-8
+      - rockylinux-9
+      - almalinux-9
+      - amazonlinux-2023
+
+  - name: server-mysql
+    provisioner:
+      policyfile: test/policyfiles/server.rb
+    verifier:
+      inspec_tests:
+        - test/integration/server
+    attributes:
+      zabbix:
+        agent:
+          enabled: true
+          servers: ['127.0.0.1']
+          servers_active: ['127.0.0.1']
+        server:
+          enabled: true
+          database:
+            type: mysql
+        web:
+          enabled: true
+          server: nginx
+        java_gateway:
+          enabled: false
+    includes:
+      - ubuntu-2004
+      - ubuntu-2204
+      - ubuntu-2404
+      - debian-11
+      - debian-12
+      - rockylinux-8
+      - rockylinux-9
+      - almalinux-9
+      - amazonlinux-2023
