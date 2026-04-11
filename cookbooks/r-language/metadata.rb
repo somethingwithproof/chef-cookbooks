@@ -9,12 +9,15 @@ chef_version '>= 18.0'
 depends 'build-essential', '>= 8.0'
 
 # Current non-EOL platforms as of May 2025
-supports 'amazon', '>= 2.0'
-supports 'debian', '>= 10.0'
-supports 'ubuntu', '>= 18.04'
-supports 'redhat', '>= 7.0'
-supports 'rocky', '>= 8.0'
-supports 'oracle', '>= 7.0'
 
 source_url 'https://github.com/somethingwithproof/chef-cookbooks/tree/main/cookbooks/r-language'
 issues_url 'https://github.com/somethingwithproof/chef-cookbooks/issues'
+
+supports 'ubuntu', '>= 20.04'
+supports 'debian', '>= 11.0'
+supports 'redhat', '>= 8.0'
+supports 'centos', '>= 8.0'
+supports 'rocky', '>= 8.0'
+supports 'almalinux', '>= 8.0'
+supports 'oracle', '>= 8.0'
+supports 'amazon', '>= 2023.0'
