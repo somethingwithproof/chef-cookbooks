@@ -1,0 +1,23 @@
+# This file configures Cookstyle for this project
+
+AllCops:
+  Exclude:
+    - 'vendor/**/*'
+    - 'tmp/**/*'
+    - '.git/**/*'
+    - 'bin/**/*'
+
+ChefStyle/FileMode:
+  Enabled: true
+
+ChefModernize/FoodcriticComments:
+  Enabled: true
+
+ChefStyle/CopyrightCommentFormat:
+  Enabled: true
+
+ChefCorrectness/MetadataMalformedDepends:
+  Enabled: true
+
+ChefEffortless/ChefInstanceVar:
+  Enabled: true

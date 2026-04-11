@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: [self-hosted, chef]
+    steps:
+    - name: Check out code
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+    - name: Install Chef Workstation
+      uses: actionshub/chef-install@715f6ec56df078a1c7f23df9d1038136c9797b1b
+      with:
+        channel: stable
+        project: chef-workstation
+    - name: Run Cookstyle
+      run: cookstyle .
+      env:
+        CHEF_LICENSE: accept-no-persist
+
+  unit:
+    needs: lint
+    runs-on: [self-hosted, chef]
+    steps:
+    - name: Check out code
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+    - name: Install Chef Workstation
+      uses: actionshub/chef-install@715f6ec56df078a1c7f23df9d1038136c9797b1b
+      with:
+        channel: stable
+        project: chef-workstation
+    - name: Unit Tests
+      if: always()
+      run: chef exec rspec
+      env:
+        CHEF_LICENSE: accept-no-persist
+
+  # TODO: Re-enable integration tests after fixing kitchen-dokken configuration
+  # integration:
+  #   needs: [lint, unit]
+  #   runs-on: [self-hosted, chef]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: ['ubuntu-22.04', 'centos-stream-9', 'almalinux-9', 'debian-11']
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+  #     - name: Install Chef Workstation
+  #       uses: actionshub/chef-install@715f6ec56df078a1c7f23df9d1038136c9797b1b
+  #       with:
+  #         channel: stable
+  #         project: chef-workstation
+  #     - name: Install kitchen-dokken
+  #       run: chef gem install kitchen-dokken
+  #     - name: Kitchen Test
+  #       run: KITCHEN_LOCAL_YAML=.kitchen.yml kitchen test ${{ matrix.os }}
+  #       env:
+  #         CHEF_LICENSE: accept-no-persist

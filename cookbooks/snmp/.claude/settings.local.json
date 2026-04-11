@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(chmod:*)",
+      "Bash(bundle exec rake:*)",
+      "Bash(bundle install)",
+      "Bash(mkdir:*)",
+      "Bash(gem install:*)",
+      "Bash(rm:*)",
+      "Bash(git add:*)",
+      "Bash(bundle exec:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(brew install:*)",
+      "Bash(grep:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)"
+    ],
+    "deny": []
+  }
+}
