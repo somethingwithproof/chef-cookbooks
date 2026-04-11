@@ -1,0 +1,30 @@
+# WARNING: Development-only configuration
+# This vhost is configured for local development use only.
+# Production deployments should:
+# - Enable HTTPS/TLS with valid certificates
+# - Restrict access controls appropriately
+# - Review security header configuration
+<VirtualHost *:<%= @port %>>
+  ServerName <%= @server_name %>
+<% @server_aliases.each do |server_alias| %>
+  ServerAlias <%= server_alias %>
+<% end %>
+
+  DocumentRoot <%= @docroot %>
+
+  # Security headers
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+
+  <Directory <%= @docroot %>>
+    # Use SymLinksIfOwnerMatch instead of FollowSymLinks for security
+    Options SymLinksIfOwnerMatch
+    # Disable .htaccess overrides - define all configuration here
+    AllowOverride None
+    # Development only - restrict access in production
+    Require all granted
+  </Directory>
+
+  ErrorLog ${APACHE_LOG_DIR}/<%= @server_name %>-error.log
+  CustomLog ${APACHE_LOG_DIR}/<%= @server_name %>-access.log combined
+</VirtualHost>

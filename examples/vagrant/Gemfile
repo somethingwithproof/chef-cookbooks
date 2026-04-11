@@ -1,0 +1,11 @@
+source 'https://rubygems.org'
+
+gem 'chef', '~> 19.2'
+
+group :development do
+  gem 'chefspec', '~> 9.3'
+  gem 'cookstyle', '~> 8.6'
+  gem 'kitchen-dokken', '~> 2.20'
+  gem 'test-kitchen', '~> 4.0'
+end
+gem 'addressable', '>= 2.8.0'
