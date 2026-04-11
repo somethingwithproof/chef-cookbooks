@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  test:
+    build: .
+    volumes:
+      - .:/opt/chef-r-language-cookbook
+    environment:
+      - CHEF_LICENSE=accept-silent
+    command: bundle exec rspec
+
+  lint:
+    build: .
+    volumes:
+      - .:/opt/chef-r-language-cookbook
+    environment:
+      - CHEF_LICENSE=accept-silent
+    command: bundle exec cookstyle
+
+  kitchen:
+    image: chef/chefdk:latest
+    volumes:
+      - .:/opt/chef-r-language-cookbook
+      - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: /opt/chef-r-language-cookbook
+    environment:
+      - CHEF_LICENSE=accept-silent
+      - KITCHEN_YAML=kitchen.docker.yml
+    command: kitchen test

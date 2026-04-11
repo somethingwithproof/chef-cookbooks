@@ -1,0 +1,71 @@
+#!/usr/bin/env Rscript
+
+# Set CRAN mirror
+options(repos = c(CRAN = '<%= @repo %>'))
+
+# Setup error handling
+log_errors <- function(e) {
+  message("ERROR: ", e$message)
+  quit(status = 1)
+}
+
+tryCatch({
+  <% if @bioc %>
+  # Check if BiocManager is installed
+  if (!requireNamespace("BiocManager", quietly = TRUE)) {
+    install.packages("BiocManager", quiet = TRUE)
+  }
+  
+  # Install using BiocManager
+  if (!require('<%= @package_name %>', character.only = TRUE, quietly = TRUE)) {
+    BiocManager::install('<%= @package_name %>'<% if @version %>, version = '<%= @version %>'<% end %>, update = FALSE)
+    if (!require('<%= @package_name %>', character.only = TRUE, quietly = TRUE)) {
+      stop('Failed to install package: <%= @package_name %>')
+    }
+    message('Successfully installed Bioconductor package: <%= @package_name %><% if @version %> version <%= @version %><% end %>')
+  } else {
+    <% if @version %>
+    # Check version when specified
+    current_version <- as.character(packageVersion('<%= @package_name %>'))
+    if (current_version != '<%= @version %>') {
+      message('Updating from version ', current_version, ' to <%= @version %>')
+      BiocManager::install('<%= @package_name %>', version = '<%= @version %>', update = FALSE)
+      if (as.character(packageVersion('<%= @package_name %>')) != '<%= @version %>') {
+        stop('Failed to install correct version of package: <%= @package_name %>')
+      }
+      message('Successfully updated package: <%= @package_name %> to version <%= @version %>')
+    } else {
+      message('Package already installed with correct version: <%= @package_name %> <%= @version %>')
+    }
+    <% else %>
+    message('Package already installed: <%= @package_name %>')
+    <% end %>
+  }
+  <% else %>
+  # Regular CRAN installation
+  if (!require('<%= @package_name %>', character.only = TRUE, quietly = TRUE)) {
+    install.packages('<%= @package_name %>'<% if @version %>, version = '<%= @version %>'<% end %>, quiet = TRUE, dependencies = TRUE)
+    if (!require('<%= @package_name %>', character.only = TRUE, quietly = TRUE)) {
+      stop('Failed to install package: <%= @package_name %>')
+    }
+    message('Successfully installed package: <%= @package_name %><% if @version %> version <%= @version %><% end %>')
+  } else {
+    <% if @version %>
+    # Check version when specified
+    current_version <- as.character(packageVersion('<%= @package_name %>'))
+    if (current_version != '<%= @version %>') {
+      message('Updating from version ', current_version, ' to <%= @version %>')
+      install.packages('<%= @package_name %>', version = '<%= @version %>', quiet = TRUE, dependencies = TRUE)
+      if (as.character(packageVersion('<%= @package_name %>')) != '<%= @version %>') {
+        stop('Failed to install correct version of package: <%= @package_name %>')
+      }
+      message('Successfully updated package: <%= @package_name %> to version <%= @version %>')
+    } else {
+      message('Package already installed with correct version: <%= @package_name %> <%= @version %>')
+    }
+    <% else %>
+    message('Package already installed: <%= @package_name %>')
+    <% end %>
+  }
+  <% end %>
+}, error = log_errors)

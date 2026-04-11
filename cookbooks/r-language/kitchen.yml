@@ -1,0 +1,84 @@
+---
+driver:
+  name: docker
+  use_sudo: false
+  privileged: true
+  env_format: modern
+
+provisioner:
+  name: policyfile_zero
+  policyfile_path: Policyfile.rb
+  chef_license: accept
+  chef_omnibus_version: 18.7.10
+  deprecations_as_errors: true
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: ubuntu-22.04
+    driver:
+      image: ubuntu:22.04
+      platform: ubuntu
+  - name: ubuntu-24.04
+    driver:
+      image: ubuntu:24.04
+      platform: ubuntu
+  - name: debian-12
+    driver:
+      image: debian:12
+      platform: debian
+  - name: centos-9
+    driver:
+      image: quay.io/centos/centos:stream9
+      platform: centos
+      provision_command:
+        - yum remove -y curl-minimal
+        - yum install -y sudo openssh-server openssh-clients which curl
+  - name: rockylinux-9
+    driver:
+      image: rockylinux:9
+      platform: rockylinux
+      provision_command:
+        - yum install -y sudo openssh-server openssh-clients which curl || true
+
+suites:
+  - name: default
+    run_list:
+      - recipe[r-language::default]
+    attributes:
+      r-language:
+        install_method: package
+        install_dev: true
+        packages: []
+    verifier:
+      inspec_tests:
+        - test/integration/default
+        - test/integration/package
+
+  - name: source
+    run_list:
+      - recipe[r-language::default]
+    attributes:
+      r-language:
+        install_method: source
+        version: "4.3.1"
+    verifier:
+      inspec_tests:
+        - test/integration/default
+        - test/integration/source
+
+  - name: packages
+    run_list:
+      - recipe[r-language::default]
+    attributes:
+      r-language:
+        install_method: package
+        packages:
+          - dplyr
+          - ggplot2
+    verifier:
+      inspec_tests:
+        - test/integration/default
+        - test/integration/package
+        - test/integration/packages

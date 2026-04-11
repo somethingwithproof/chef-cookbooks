@@ -1,0 +1,143 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, feature/*]
+    tags:
+      - v*
+  pull_request:
+    branches: [main, master]
+  schedule:
+    - cron: "0 1 * * *"
+
+# Cancel previous runs on the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+
+
+# Minimal permissions by default
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Cookstyle
+    runs-on: [self-hosted, chef]
+    timeout-minutes: 15  # Prevent hung jobs
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6.0.2
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.1"
+          bundler-cache: true
+      - name: Run Cookstyle
+        run: bundle exec cookstyle
+
+  unit:
+    name: Unit Tests
+    needs: lint
+    runs-on: [self-hosted, chef]
+    timeout-minutes: 15  # Prevent hung jobs
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6.0.2
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.1"
+          bundler-cache: true
+      - name: Run unit tests
+        run: bundle exec rspec
+
+  integration:
+    name: Integration Tests
+    needs: unit
+    runs-on: [self-hosted, chef]
+    timeout-minutes: 15  # Prevent hung jobs
+    strategy:
+      matrix:
+        os:
+          [
+            "ubuntu-2204",
+            "ubuntu-2404",
+            "debian-12",
+            "centos-9",
+            "rockylinux-9",
+          ]
+        suite: ["default", "source", "packages"]
+      fail-fast: false
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6.0.2
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.1"
+          bundler-cache: true
+
+      - name: Setup Docker
+        uses: docker/setup-buildx-action@v4
+
+      - name: Install Chef
+        uses: actionshub/chef-install@main
+        with:
+          channel: stable
+          version: latest
+
+      - name: Test Kitchen
+        run: |
+          export CHEF_LICENSE=accept-no-persist
+          echo "Testing ${{ matrix.suite }}-${{ matrix.os }}"
+          bundle exec kitchen test ${{ matrix.suite }}-${{ matrix.os }} --destroy=always
+        env:
+          CHEF_LICENSE: accept-no-persist
+          KITCHEN_YAML: kitchen.yml
+
+      - name: Upload Kitchen Logs
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: kitchen-logs-${{ matrix.suite }}-${{ matrix.os }}
+          path: |
+            .kitchen/logs/
+            .kitchen/cache/
+          retention-days: 7
+
+  release:
+    name: Supermarket Release
+    runs-on: [self-hosted, chef]
+    timeout-minutes: 15  # Prevent hung jobs
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [integration]
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6.0.2
+      - name: Install Chef Workstation
+        uses: actionshub/chef-install@main
+        with:
+          channel: stable
+          version: 18
+      - name: Get the version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+      - name: Create Changelog
+        run: |
+          git log $(git describe --tags --abbrev=0 HEAD^)..HEAD --oneline > CHANGELOG.md
+      - name: Publish to Supermarket
+        run: |
+          mkdir -p ~/.chef
+          echo "${{ secrets.CHEF_KEY }}" > ~/.chef/key.pem
+          cat > ~/.chef/credentials <<EOF
+          [default]
+          client_name = '${{ secrets.CHEF_USERNAME }}'
+          client_key = '~/.chef/key.pem'
+          chef_server_url = 'https://api.chef.io/organizations/${{ secrets.CHEF_ORG }}'
+          EOF
+          knife supermarket share r-language -m "Release v${{ env.VERSION }}" --cookbook-path .
+        env:
+          CHEF_LICENSE: accept-no-persist

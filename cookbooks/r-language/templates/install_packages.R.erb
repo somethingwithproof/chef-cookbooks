@@ -1,0 +1,60 @@
+#!/usr/bin/env Rscript
+options(repos=c(CRAN='<%= @cran_mirror %>'))
+
+# Function to safely install packages and handle errors
+install_package <- function(package) {
+  tryCatch({
+    if (!require(package, character.only = TRUE, quietly = TRUE)) {
+      message(paste("Installing package:", package))
+      install.packages(package, quiet = TRUE, dependencies = TRUE)
+      if (!require(package, character.only = TRUE, quietly = TRUE)) {
+        stop(paste("Failed to install package:", package))
+      } else {
+        message(paste("Successfully installed package:", package))
+      }
+    } else {
+      message(paste("Package already installed:", package))
+    }
+    return(TRUE)
+  }, error = function(e) {
+    message(paste("Error installing package", package, ":", e$message))
+    return(FALSE)
+  })
+}
+
+# Ensure 'parallel' package is available
+library(parallel)
+
+# Setup logging
+log_file <- file("install_packages.log", "w")
+
+# Add repository if it doesn't exist
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+  install.packages("BiocManager", quiet = TRUE)
+}
+
+# List of packages to install
+packages <- c(<%= @packages.map { |pkg| "\"#{pkg}\"" }.join(', ') %>)
+
+# Install packages in parallel (with a maximum of 2 cores)
+num_cores <- min(2, detectCores())
+if (length(packages) > 0) {
+  results <- mclapply(packages, install_package, mc.cores = num_cores)
+  failures <- packages[!unlist(results)]
+  
+  if (length(failures) > 0) {
+    message("Failed to install the following packages:")
+    for (pkg in failures) {
+      message(paste("  *", pkg))
+    }
+    # Exit with non-zero status to indicate failure
+    quit(status = 1)
+  } else {
+    message("Successfully installed all packages")
+  }
+} else {
+  message("No packages to install")
+}
+
+# Close log file
+close(log_file)
