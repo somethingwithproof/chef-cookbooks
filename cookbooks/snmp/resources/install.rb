@@ -2,27 +2,28 @@ unified_mode true
 
 provides :snmp_install
 
-# SECURITY: Refuse the well-known default community strings 'public' and 'private'.
-# These are scanned for by every commodity SNMP discovery tool on the public internet
-# and are the most common cause of SNMP information disclosure (CVE-class).
-WEAK_COMMUNITIES = %w(public private).freeze
-COMMUNITY_VALIDATOR = lambda do |c|
+# SECURITY: Refuse the well-known default community strings 'public' and
+# 'private'. These are scanned for by every commodity SNMP discovery tool on
+# the public internet and are the most common cause of SNMP information
+# disclosure. The validator is a lambda local to the property so the file can
+# be reloaded without Ruby constant-redefined warnings.
+strong_community = lambda do |c|
   s = c.to_s
-  !s.empty? && !WEAK_COMMUNITIES.include?(s.downcase)
+  !s.empty? && !%w(public private).include?(s.downcase)
 end
 
 property :community, String,
          description: 'SNMP community string (required, must not be empty or "public"/"private")',
          default: lazy { node['snmp']['community'] },
          callbacks: {
-           'must be explicitly configured and must not be the well-known defaults "public" or "private"' => COMMUNITY_VALIDATOR,
+           'must be explicitly configured and must not be the well-known defaults "public" or "private"' => strong_community,
          }
 
 property :trap_community, String,
          description: 'SNMP trap community string (required, must not be empty or "public"/"private")',
          default: lazy { node['snmp']['trap']['community'] },
          callbacks: {
-           'must be explicitly configured and must not be the well-known defaults "public" or "private"' => COMMUNITY_VALIDATOR,
+           'must be explicitly configured and must not be the well-known defaults "public" or "private"' => strong_community,
          }
 
 property :trap_addresses, Array,
@@ -41,12 +42,12 @@ property :groups, Hash,
          default: {}
 
 property :sec_name, Hash,
-         description: 'Hash of security names',
-         default: { notConfigUser: %w(default) }
+         description: 'Hash of security names. Source must be an explicit network or "localhost".',
+         default: lazy { node['snmp']['sec_name'] }
 
 property :sec_name6, Hash,
-         description: 'Hash of IPv6 security names',
-         default: { notConfigUser: %w(default) }
+         description: 'Hash of IPv6 security names. Source must be an explicit network or "::1".',
+         default: lazy { node['snmp']['sec_name6'] }
 
 default_action :install
 
