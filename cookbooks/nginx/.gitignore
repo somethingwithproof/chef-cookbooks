@@ -1,0 +1,19 @@
+.vagrant
+/cookbooks
+
+# Bundler
+bin/*
+.bundle/*
+
+.kitchen/
+.kitchen.local.yml
+.coverage/
+coverage/
+Berksfile.lock
+Gemfile.lock
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
