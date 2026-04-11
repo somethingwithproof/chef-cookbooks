@@ -24,8 +24,11 @@ default['snmp']['agent_address'] = 'udp:127.0.0.1:161'
 # Default SNMP community and security names
 # SECURITY: Default community string is empty - must be explicitly configured
 default['snmp']['community'] = ''
-default['snmp']['sec_name'] = { notConfigUser: %w(default) }
-default['snmp']['sec_name6'] = { notConfigUser: %w(default) }
+# SECURITY: com2sec source defaults to 'localhost'. Using 'default' (or '0.0.0.0/0')
+# is the all-hosts wildcard and is forbidden by this cookbook -- override per node
+# with the explicit network you intend to monitor from (e.g. '10.0.0.0/8').
+default['snmp']['sec_name'] = { notConfigUser: %w(localhost) }
+default['snmp']['sec_name6'] = { notConfigUser: %w(::1) }
 
 # Default SNMP groups
 # SECURITY: SNMPv2c only by default - v1 is deprecated and insecure

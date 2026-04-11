@@ -3,7 +3,7 @@ maintainer 'Thomas Vincent'
 maintainer_email 'thomasvincent@gmail.com'
 license 'Apache-2.0'
 description 'Installs/Configures snmp on redhat, centos, ubuntu, debian'
-version '5.0.0'
+version '5.1.0'
 chef_version '>= 18.0'
 
 source_url 'https://github.com/somethingwithproof/chef-cookbooks/tree/main/cookbooks/snmp'

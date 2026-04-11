@@ -2,11 +2,17 @@ unified_mode true
 
 provides :snmp_trapd
 
+# SECURITY: Refuse the well-known default community strings 'public' and 'private'.
+WEAK_TRAP_COMMUNITIES = %w(public private).freeze
+
 property :trap_community, String,
-         description: 'SNMP trap community string (required for security)',
+         description: 'SNMP trap community string (required, must not be empty or "public"/"private")',
          default: lazy { node['snmp']['trap']['community'] },
          callbacks: {
-           'cannot be empty - must explicitly configure trap community string' => ->(c) { !c.to_s.empty? },
+           'must be explicitly configured and must not be the well-known defaults "public" or "private"' => lambda { |c|
+             s = c.to_s
+             !s.empty? && !WEAK_TRAP_COMMUNITIES.include?(s.downcase)
+           },
          }
 
 property :trap_addresses, Array,

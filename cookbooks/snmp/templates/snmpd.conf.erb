@@ -3,7 +3,11 @@
 ###############################################################################
 #
 # snmpd.conf:
-#   An example configuration file for configuring the ucd-snmp snmpd agent.
+#   Access control uses the com2sec/group/access model. We deliberately do NOT
+#   emit unscoped `rocommunity`/`rwcommunity` lines: every grant in this file
+#   is bound to a specific source (see the com2sec entries below). The only
+#   `rocommunity` line below is gated on a Dell HP-cmaX shared object and is
+#   scoped to 127.0.0.1.
 #
 ###############################################################################
 #
@@ -172,6 +176,9 @@ extend <%= name %> <%= cmd %>
 <% end %>
 
 <% if node['snmp']['disman_events']['enable'] %>
+<% if node['snmp']['disman_events']['password'].to_s.empty? %>
+<% raise "snmp: disman_events.enable=true requires node['snmp']['disman_events']['password'] (SNMPv3 auth password)" %>
+<% end %>
 ###############################################################################
 # DisMan Event MIB
 #

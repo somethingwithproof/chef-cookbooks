@@ -2,6 +2,27 @@
 
 This file is used to list changes made in each version of the snmp cookbook.
 
+## 5.1.0
+
+### Security
+- snmp_install / snmp_trapd now reject the well-known community strings
+  `public` and `private` in addition to the empty string. Existing nodes
+  that rely on either default will fail to converge until an explicit
+  string is set.
+- Default `com2sec` source changed from `default` (any host) to `localhost`.
+  Wildcard sources (`default`, `0.0.0.0/0`, `::/0`) are rejected at converge
+  time. Override `node['snmp']['sec_name']` with the explicit network the
+  node should accept polls from.
+- snmpd.conf template now raises if `disman_events.enable=true` without a
+  configured SNMPv3 password.
+- snmpd.conf template documents that no unscoped `rocommunity` line is
+  emitted; the only `rocommunity` entry is gated on the Dell HP-cmaX shared
+  object and bound to 127.0.0.1.
+
+### Bug Fixes
+- `snmp::snmptrapd` recipe now reads `node['snmp']['snmptrapd']['service_name']`
+  to match the attribute file (previously read a non-existent `service` key).
+
 ## 5.0.0 (2025-05-16)
 
 ### Breaking Changes

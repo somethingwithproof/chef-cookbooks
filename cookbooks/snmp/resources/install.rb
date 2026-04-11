@@ -2,18 +2,27 @@ unified_mode true
 
 provides :snmp_install
 
+# SECURITY: Refuse the well-known default community strings 'public' and 'private'.
+# These are scanned for by every commodity SNMP discovery tool on the public internet
+# and are the most common cause of SNMP information disclosure (CVE-class).
+WEAK_COMMUNITIES = %w(public private).freeze
+COMMUNITY_VALIDATOR = lambda do |c|
+  s = c.to_s
+  !s.empty? && !WEAK_COMMUNITIES.include?(s.downcase)
+end
+
 property :community, String,
-         description: 'SNMP community string (required for security)',
+         description: 'SNMP community string (required, must not be empty or "public"/"private")',
          default: lazy { node['snmp']['community'] },
          callbacks: {
-           'cannot be empty - must explicitly configure community string' => ->(c) { !c.to_s.empty? },
+           'must be explicitly configured and must not be the well-known defaults "public" or "private"' => COMMUNITY_VALIDATOR,
          }
 
 property :trap_community, String,
-         description: 'SNMP trap community string (required for security)',
+         description: 'SNMP trap community string (required, must not be empty or "public"/"private")',
          default: lazy { node['snmp']['trap']['community'] },
          callbacks: {
-           'cannot be empty - must explicitly configure trap community string' => ->(c) { !c.to_s.empty? },
+           'must be explicitly configured and must not be the well-known defaults "public" or "private"' => COMMUNITY_VALIDATOR,
          }
 
 property :trap_addresses, Array,
@@ -84,6 +93,19 @@ end
 
 action :install do
   config = platform_config
+
+  # SECURITY: Reject all-hosts wildcards in the com2sec source list. The
+  # net-snmp keywords 'default' and '0.0.0.0/0' grant access from any host;
+  # the cookbook requires an explicit network or 'localhost'.
+  forbidden_sources = %w(default 0.0.0.0/0 ::/0).freeze
+  [new_resource.sec_name, new_resource.sec_name6].each do |group|
+    group.each_value do |sources|
+      bad = Array(sources).map(&:to_s).map(&:downcase) & forbidden_sources
+      next if bad.empty?
+      raise "snmp_install: refusing wildcard source(s) #{bad.inspect} in com2sec; " \
+            'set node[\'snmp\'][\'sec_name\'] to an explicit network (e.g. "10.0.0.0/8") or "localhost"'
+    end
+  end
 
   # Install SNMP package
   package config[:package]

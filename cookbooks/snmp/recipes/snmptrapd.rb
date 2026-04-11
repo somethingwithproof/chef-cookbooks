@@ -20,5 +20,5 @@ snmp_trapd 'default' do
   trap_community node['snmp']['trap']['community']
   trap_addresses node['snmp']['trap']['addresses']
   trap_port node['snmp']['trap']['port']
-  trap_service node['snmp']['snmptrapd']['service']
+  trap_service node['snmp']['snmptrapd']['service_name']
 end
