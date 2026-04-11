@@ -1,0 +1,34 @@
+---
+name: PR Assignment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# Cancel previous runs on the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  auto-assign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto-assign PR to creator
+        uses: thomaseizinger/assign-pr-creator-action@v1.0.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Add reviewer
+        uses: hkusu/review-assign-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          assignees: thomasvincent
+          reviewers: thomasvincent

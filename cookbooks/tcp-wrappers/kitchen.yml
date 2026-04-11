@@ -1,0 +1,70 @@
+---
+driver:
+  name: dokken
+  privileged: true
+  chef_version: "18"
+  chef_license: accept-no-persist
+
+transport:
+  name: dokken
+
+provisioner:
+  name: dokken
+  chef_license: accept-no-persist
+  enforce_idempotency: true
+  multiple_converge: 2
+  deprecations_as_errors: true
+  policyfile: Policyfile.rb
+
+verifier:
+  name: inspec
+  sudo: true
+
+platforms:
+  - name: ubuntu-22.04
+    driver:
+      image: dokken/ubuntu-22.04
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - RUN /usr/bin/apt-get update
+        - RUN apt-get install -y apt-transport-https lsb-release procps net-tools
+
+  - name: debian-11
+    driver:
+      image: dokken/debian-11
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - RUN /usr/bin/apt-get update
+        - RUN apt-get install -y apt-transport-https lsb-release procps net-tools
+
+
+suites:
+  - name: default
+    run_list:
+      - recipe[tcp_wrappers::default]
+    verifier:
+      inspec_tests:
+        - test/integration/default
+    attributes:
+      tcp_wrappers:
+        hosts: ['localhost']
+
+  - name: create
+    run_list:
+      - recipe[test::create]
+    verifier:
+      inspec_tests:
+        - test/integration/create
+    attributes:
+      tcp_wrappers:
+        hosts: ['localhost']
+
+  - name: remove
+    run_list:
+      - recipe[test::remove]
+    verifier:
+      inspec_tests:
+        - test/integration/remove
+    attributes:
+      tcp_wrappers:
+        hosts: ['localhost']

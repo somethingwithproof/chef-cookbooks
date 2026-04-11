@@ -1,0 +1,8 @@
+name: default
+title: TCP Wrappers Cookbook Tests
+maintainer: Thomas Vincent
+license: Apache-2.0
+summary: InSpec profile for testing the TCP Wrappers cookbook
+version: 0.1.0
+supports:
+  - os-family: linux

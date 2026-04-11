@@ -1,0 +1,80 @@
+#
+# Cookbook:: tcp_wrappers
+# Recipe:: default
+#
+# Copyright:: 2017-2025, Thomas Vincent
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# DEPRECATION WARNING: tcp_wrappers is deprecated and removed from modern distributions
+Chef::Log.warn('DEPRECATION: The tcp_wrappers cookbook manages a deprecated technology. ' \
+               'tcp_wrappers has been removed from RHEL 8+, Fedora 36+, and Ubuntu 22.04+. ' \
+               'Migrate to firewalld, nftables, or iptables for access control.')
+
+# Chef 18+ recommends declaring resources with a single block of code
+# Install appropriate package using attribute
+if platform_family?('debian', 'rhel', 'amazon', 'fedora')
+  # tcp_wrappers package was removed in RHEL 8+/9+ / Fedora 36+
+  if platform_family?('rhel', 'fedora') && node['platform_version'].to_i >= 8
+    log 'tcp_wrappers_unavailable' do
+      message "tcp_wrappers package is not available on #{node['platform']} #{node['platform_version']}. " \
+              'Use firewalld or nftables instead.'
+      level :warn
+    end
+  else
+    package node['authorization']['tcp_wrappers']['package'] do
+      action :install
+    end
+  end
+end
+
+# Create wrappers.d directory with proper ownership and permissions
+wrappers_dir = "#{node['authorization']['tcp_wrappers']['prefix']}/wrappers.d"
+directory wrappers_dir do
+  owner 'root'
+  group 'root'
+  mode '0755'
+  recursive true
+end
+
+# Configure hosts.allow file if wrappers_d integration is enabled
+if node['authorization']['tcp_wrappers']['include_wrappers_d']
+  template '/etc/hosts.allow' do
+    source 'hosts.allow.erb'
+    owner 'root'
+    group 'root'
+    mode '0644' # World-readable per standard UNIX convention for hosts.allow
+    variables(
+      daemon: 'ALL',
+      hosts_allow: '127.0.0.1',
+      commands: []
+    )
+    action :create_if_missing
+    sensitive true
+  end
+
+  # Configure hosts.deny file if wrappers_d integration is enabled
+  template '/etc/hosts.deny' do
+    source 'hosts.deny.erb'
+    owner 'root'
+    group 'root'
+    mode '0644' # World-readable per standard UNIX convention for hosts.deny
+    variables(
+      daemon: 'ALL',
+      hosts_allow: 'ALL',
+      commands: []
+    )
+    action :create_if_missing
+    sensitive true
+  end
+end

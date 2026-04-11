@@ -1,0 +1,86 @@
+---
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Cancel previous runs on the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Minimal permissions by default
+permissions:
+  contents: read
+
+env:
+  CHEF_LICENSE: accept-no-persist
+
+jobs:
+  lint:
+    name: Cookstyle Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@09a7688d3b55cf0e976497ff046b70949eeaccfd
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+      - name: Run Cookstyle
+        run: bundle exec cookstyle
+
+  unit-test:
+    name: Unit Tests
+    runs-on: [self-hosted, linux, x64]
+    timeout-minutes: 15
+    steps:
+      - name: Check out code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@09a7688d3b55cf0e976497ff046b70949eeaccfd
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+      - name: Run ChefSpec tests
+        run: bundle exec rspec
+
+  integration-test:
+    name: Integration Tests
+    runs-on: [self-hosted, linux, x64]
+    timeout-minutes: 45
+    needs: [lint, unit-test]
+    strategy:
+      matrix:
+        os: ['ubuntu-2204', 'debian-11']
+        suite: ['default', 'create', 'remove']
+      fail-fast: false
+    steps:
+      - name: Check out code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@09a7688d3b55cf0e976497ff046b70949eeaccfd
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
+      - name: Install Policyfile dependencies
+        run: bundle exec chef-cli install Policyfile.rb
+      - name: Run Test Kitchen
+        run: bundle exec kitchen test ${{ matrix.suite }}-${{ matrix.os }}
+        env:
+          CHEF_LICENSE: accept-no-persist
+          KITCHEN_YAML: kitchen.yml
+      - name: Upload kitchen logs on failure
+        if: failure()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+        with:
+          name: kitchen-logs-${{ matrix.suite }}-${{ matrix.os }}
+          path: .kitchen/logs/

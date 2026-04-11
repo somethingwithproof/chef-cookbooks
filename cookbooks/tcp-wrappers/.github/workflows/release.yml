@@ -1,0 +1,57 @@
+---
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Cancel previous runs on the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+
+
+# Minimal permissions by default
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: [self-hosted, chef]
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+      
+      - name: Install dependencies
+        run: bundle install
+      
+      - name: Run tests
+        run: |
+          bundle exec cookstyle --chef-version 19.0
+          bundle exec rspec
+      
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          body: |
+            Release ${{ github.ref_name }}
+            
+            See [CHANGELOG.md](https://github.com/thomasvincent/chef-tcp-wrappers/blob/main/CHANGELOG.md) for details.
