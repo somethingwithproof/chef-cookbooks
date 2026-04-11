@@ -112,7 +112,9 @@ directory source_dir do
   only_if { ::File.exist?('/usr/local/bin/R') }
 end
 
-# Helper method to check if R is installed at the desired version
+# Helper method to check if R is installed at the desired version. Uses the
+# array form of shell_out so the version string is never interpolated into a
+# shell command line.
 def r_installed_at_version?(version)
   return false unless ::File.exist?('/usr/local/bin/R')
 

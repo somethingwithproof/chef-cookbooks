@@ -3,7 +3,7 @@ maintainer 'Thomas Vincent'
 maintainer_email 'thomasvincent@github.com'
 license 'MIT'
 description 'Installs/Configures R programming language'
-version '1.0.0'
+version '1.1.0'
 chef_version '>= 18.0'
 
 depends 'build-essential', '>= 8.0'

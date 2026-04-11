@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0]
+
+### Changed
+- All `execute` resources and `shell_out` calls now use the array form so the
+  package name, version, and cache path are passed as discrete argv elements
+  instead of being interpolated into a shell command line. Affects
+  `recipes/packages.rb`, `resources/r_package.rb`, and `libraries/helpers.rb`.
+- The `r_package` resource now rejects non-https `repo` values via a property
+  callback. The `recipes/packages.rb` recipe rejects non-https
+  `node['r-language']['cran_mirror']` at converge time.
+
+### Added
+- Optional `Renviron.site` management. Set
+  `node['r-language']['manage_renviron'] = true` and populate
+  `node['r-language']['renviron_vars']` to render the file with mode 0644
+  root:root at `node['r-language']['renviron_path']`.
+
+### Fixed
+- `spec/unit/recipes/source_spec.rb` referenced `run_bash` for resources that
+  are actually `execute`; updated to match the recipe.
+
 ## [1.0.0] - 2025-06-22
 
 ### Changed

@@ -27,19 +27,15 @@ describe 'r-language::source' do
     end
 
     it 'executes extract_r_source' do
-      expect(chef_run).to run_bash('extract_r_source')
+      expect(chef_run).to run_execute('extract_r_source')
     end
 
-    it 'executes build_and_install_r' do
-      expect(chef_run).to run_bash('build_and_install_r')
+    it 'executes build_r' do
+      expect(chef_run).to run_execute('build_r')
     end
 
-    it 'deletes the source tarball' do
-      expect(chef_run).to delete_file('/tmp/r-4.3.1.tar.gz')
-    end
-
-    it 'deletes the source directory' do
-      expect(chef_run).to delete_directory('/tmp/R-4.3.1').with(recursive: true)
+    it 'executes install_r' do
+      expect(chef_run).to run_execute('install_r')
     end
   end
 
@@ -79,11 +75,15 @@ describe 'r-language::source' do
     end
 
     it 'does not extract R source' do
-      expect(chef_run).not_to run_bash('extract_r_source')
+      expect(chef_run).not_to run_execute('extract_r_source')
     end
 
-    it 'does not build and install R' do
-      expect(chef_run).not_to run_bash('build_and_install_r')
+    it 'does not build R' do
+      expect(chef_run).not_to run_execute('build_r')
+    end
+
+    it 'does not install R' do
+      expect(chef_run).not_to run_execute('install_r')
     end
   end
 end
