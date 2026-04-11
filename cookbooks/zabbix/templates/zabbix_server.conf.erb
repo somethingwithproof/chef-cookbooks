@@ -81,9 +81,12 @@ DBName=<%= @db_name %>
 DBUser=<%= @db_user %>
 
 ### Option: DBPassword
-#	Database password.
-#	Comment this line if no password is used.
+#	Database password. Sourced from a Chef vault / encrypted data bag at
+#	converge time. The cookbook refuses to render this template when the
+#	password is unset, so a missing value is a hard failure rather than an
+#	empty DBPassword= line.
 #
+<% raise 'zabbix_server: database password is required (set node["zabbix"]["server"]["database"]["password"] from a Chef vault)' if @db_password.nil? || @db_password.to_s.empty? %>
 DBPassword=<%= @db_password %>
 
 ### Option: DBSocket

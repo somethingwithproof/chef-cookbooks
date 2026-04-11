@@ -30,8 +30,17 @@ db_user = node['zabbix']['server']['database']['user']
 db_password = node['zabbix']['server']['database']['password']
 db_host = node['zabbix']['server']['database']['host']
 
-# Validate that database password is set
-raise 'Database password must be explicitly set via node["zabbix"]["server"]["database"]["password"]. Do not use the default value.' if db_password.nil? || db_password.empty?
+# Fail closed: refuse to create the DB user with no password. This must be
+# supplied from a Chef vault, encrypted data bag, or wrapper cookbook. See
+# README "Secrets handling".
+raise 'zabbix::database: node["zabbix"]["server"]["database"]["password"] is required (use Chef vault).' if db_password.nil? || db_password.to_s.empty?
+
+# Identifiers (db_name, db_user) are interpolated into SQL DDL where parameter
+# binding is not available. Constrain them to a strict charset so we never
+# accept anything that could close the identifier or inject SQL.
+[['name', db_name], ['user', db_user]].each do |label, value|
+  raise "zabbix::database: invalid #{label} #{value.inspect}; expected [A-Za-z0-9_]+" unless value.to_s.match?(/\A[A-Za-z0-9_]+\z/)
+end
 
 case db_type
 when 'postgresql'
@@ -58,26 +67,33 @@ when 'postgresql'
     action [:enable, :start]
   end
 
-  # Configure pg_hba.conf to allow password authentication for the zabbix user
+  # Allow the zabbix role to authenticate against pg_hba.conf. We prepend
+  # explicit local + host (loopback only) entries using scram-sha-256, the
+  # PostgreSQL 14+ default. md5 is brittle and FIPS-incompatible.
   execute 'configure_pg_hba' do
     command <<-BASH
       PG_HBA=$(find /etc/postgresql /var/lib/pgsql -name pg_hba.conf 2>/dev/null | head -1)
-      if [ -n "$PG_HBA" ]; then
-        if ! grep -q "#{db_user}" "$PG_HBA"; then
-          sed -i "1i host    #{db_name}    #{db_user}    127.0.0.1/32    md5" "$PG_HBA"
-          sed -i "1i local   #{db_name}    #{db_user}                    md5" "$PG_HBA"
-        fi
+      if [ -n "$PG_HBA" ] && ! grep -q "^[^#]*#{db_user}" "$PG_HBA"; then
+        sed -i "1i host    #{db_name}    #{db_user}    127.0.0.1/32    scram-sha-256" "$PG_HBA"
+        sed -i "1i local   #{db_name}    #{db_user}                    scram-sha-256" "$PG_HBA"
       fi
     BASH
     notifies :reload, 'service[postgresql]', :immediately
   end
 
-  # Create Zabbix database user
-  execute 'create_zabbix_pg_user' do
-    command "psql -c \"CREATE ROLE #{db_user} WITH LOGIN PASSWORD '#{db_password}';\""
+  # Create Zabbix database user. The DDL is fed to psql over stdin so the
+  # password never lands in argv (and therefore not in /proc/<pid>/cmdline,
+  # the audit log, or shell history). Embedded single quotes are escaped by
+  # SQL string-doubling.
+  bash 'create_zabbix_pg_user' do
     user 'postgres'
-    not_if "psql -tAc \"SELECT 1 FROM pg_roles WHERE rolname='#{db_user}'\" | grep -q 1", user: 'postgres'
     sensitive true
+    code <<~SQL
+      psql -v ON_ERROR_STOP=1 -X -q <<'__SQL__'
+      CREATE ROLE #{db_user} WITH LOGIN PASSWORD '#{db_password.gsub("'", "''")}';
+      __SQL__
+    SQL
+    not_if "psql -tAc \"SELECT 1 FROM pg_roles WHERE rolname='#{db_user}'\" | grep -q 1", user: 'postgres'
   end
 
   # Create Zabbix database
@@ -151,17 +167,21 @@ when 'mysql'
     sensitive true
   end
 
-  # Create Zabbix database user and grant privileges
-  execute 'create_zabbix_mysql_user' do
-    command <<-BASH
-      mysql -e "CREATE USER IF NOT EXISTS '#{db_user}'@'localhost' IDENTIFIED BY '#{db_password}';"
-      mysql -e "CREATE USER IF NOT EXISTS '#{db_user}'@'%' IDENTIFIED BY '#{db_password}';"
-      mysql -e "GRANT ALL PRIVILEGES ON #{db_name}.* TO '#{db_user}'@'localhost';"
-      mysql -e "GRANT ALL PRIVILEGES ON #{db_name}.* TO '#{db_user}'@'%';"
-      mysql -e "SET GLOBAL log_bin_trust_function_creators = 1;"
-      mysql -e "FLUSH PRIVILEGES;"
-    BASH
+  # Create Zabbix database user and grant privileges. SQL is piped over stdin
+  # so the user password never appears in argv. Embedded single quotes are
+  # escaped by SQL string-doubling.
+  bash 'create_zabbix_mysql_user' do
     sensitive true
+    code <<~SQL
+      mysql <<'__SQL__'
+      CREATE USER IF NOT EXISTS '#{db_user}'@'localhost' IDENTIFIED BY '#{db_password.gsub("'", "''")}';
+      CREATE USER IF NOT EXISTS '#{db_user}'@'%' IDENTIFIED BY '#{db_password.gsub("'", "''")}';
+      GRANT ALL PRIVILEGES ON #{db_name}.* TO '#{db_user}'@'localhost';
+      GRANT ALL PRIVILEGES ON #{db_name}.* TO '#{db_user}'@'%';
+      SET GLOBAL log_bin_trust_function_creators = 1;
+      FLUSH PRIVILEGES;
+      __SQL__
+    SQL
   end
 
   # Import Zabbix schema

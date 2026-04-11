@@ -3,6 +3,39 @@
 require 'spec_helper'
 
 describe 'zabbix::database' do
+  context 'when no database password is provided' do
+    platform 'ubuntu', '22.04'
+
+    let(:chef_run) do
+      runner = ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04') do |node|
+        node.normal['zabbix']['server']['database']['type'] = 'postgresql'
+        node.normal['zabbix']['server']['database']['password'] = nil
+      end
+      runner.converge(described_recipe)
+    end
+
+    it 'fails closed' do
+      expect { chef_run }.to raise_error(/database.*password.*required/i)
+    end
+  end
+
+  context 'when the database name contains an injection attempt' do
+    platform 'ubuntu', '22.04'
+
+    let(:chef_run) do
+      runner = ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04') do |node|
+        node.normal['zabbix']['server']['database']['type'] = 'postgresql'
+        node.normal['zabbix']['server']['database']['name'] = "zabbix; DROP TABLE users; --"
+        node.normal['zabbix']['server']['database']['password'] = 'safepw'
+      end
+      runner.converge(described_recipe)
+    end
+
+    it 'rejects the unsafe identifier' do
+      expect { chef_run }.to raise_error(/invalid name/i)
+    end
+  end
+
   context 'on Ubuntu 22.04 with postgresql' do
     platform 'ubuntu', '22.04'
 
@@ -33,8 +66,8 @@ describe 'zabbix::database' do
       expect(chef_run).to start_service('postgresql')
     end
 
-    it 'creates the zabbix database user' do
-      expect(chef_run).to run_execute('create_zabbix_pg_user')
+    it 'creates the zabbix database user via stdin (no password in argv)' do
+      expect(chef_run).to run_bash('create_zabbix_pg_user')
     end
 
     it 'creates the zabbix database' do
@@ -79,8 +112,8 @@ describe 'zabbix::database' do
       expect(chef_run).to run_execute('create_zabbix_mysql_database')
     end
 
-    it 'creates the zabbix mysql user' do
-      expect(chef_run).to run_execute('create_zabbix_mysql_user')
+    it 'creates the zabbix mysql user via stdin (no password in argv)' do
+      expect(chef_run).to run_bash('create_zabbix_mysql_user')
     end
 
     it 'logs database setup completion' do

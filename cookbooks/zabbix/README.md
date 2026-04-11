@@ -62,6 +62,57 @@ See `attributes/default.rb` for default values.
 - `node['zabbix']['web']['server']` - Web server ('nginx' or 'apache')
 - `node['zabbix']['web']['fqdn']` - Web frontend FQDN
 
+## Secrets handling
+
+This cookbook never ships a default for the Zabbix database password and will
+fail closed if one is not supplied at converge time. Resolve the secret in a
+wrapper cookbook and assign it to
+`node['zabbix']['server']['database']['password']` (or pass it directly to the
+`zabbix_server` resource via the `database_password` property).
+
+### Chef vault example
+
+```ruby
+# In your wrapper cookbook recipe, before include_recipe 'zabbix::server':
+chef_gem 'chef-vault'
+require 'chef-vault'
+
+zabbix_secrets = ChefVault::Item.load('zabbix', 'database')
+node.run_state['zabbix_db_password'] = zabbix_secrets['password']
+node.override['zabbix']['server']['database']['password'] = zabbix_secrets['password']
+
+include_recipe 'zabbix::server'
+```
+
+Create the vault item with:
+
+```bash
+knife vault create zabbix database \
+  '{"password": "REPLACE_ME"}' \
+  --search 'role:zabbix-server' \
+  --admins admin1
+```
+
+### Encrypted data bag example
+
+```ruby
+secret = Chef::EncryptedDataBagItem.load_secret('/etc/chef/encrypted_data_bag_secret')
+zabbix_secrets = Chef::EncryptedDataBagItem.load('zabbix', 'database', secret)
+node.override['zabbix']['server']['database']['password'] = zabbix_secrets['password']
+```
+
+### What is protected
+
+- `zabbix_server.conf` is rendered with `mode 0640 root:zabbix` and the template raises if `database_password` is empty.
+- `zabbix_agentd.conf` is rendered with `mode 0640 root:zabbix` so the TLS PSK identity is not world-readable.
+- If `tls_psk_file` is set, the cookbook clamps it to `0640 root:zabbix`. Stage the key bytes themselves with a separate `file` resource using `sensitive true`.
+- Database DDL that includes the password is piped to `psql`/`mysql` over stdin. The password is never placed in `argv` or in shell history.
+
+## Network exposure
+
+- The Zabbix agent listens on TCP 10050 and the server on TCP 10051. Restrict these to your monitoring network with host firewall rules; the cookbook does not open them.
+- The Java gateway defaults to binding to `127.0.0.1`. Override `node['zabbix']['java_gateway']['listen_ip']` only when the gateway must be reachable from a different host.
+
 ## Resources
 
 ### zabbix_agent
