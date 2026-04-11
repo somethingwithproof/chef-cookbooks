@@ -1,5 +1,4 @@
 require 'chefspec'
-require 'chefspec/policyfile'
 require 'simplecov'
 
 SimpleCov.start do
@@ -9,30 +8,26 @@ SimpleCov.start do
   add_group 'Libraries', 'libraries'
   add_group 'Resources', 'resources'
   add_group 'Recipes', 'recipes'
+  enable_coverage :branch
 end
 
+Chef::Config[:chef_license] = 'accept-silent'
+
 RSpec.configure do |config|
-  # Specify the Chef license
-  Chef::Config[:chef_license] = 'accept-silent'
-
-  # Specify the operating system to mock Ohai data for
   config.platform = 'ubuntu'
-  config.version = '20.04'
-
-  # Specify the Chef log level (default: :warn)
+  config.version = '22.04'
   config.log_level = :error
 
-  # Enable expect syntax
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
 
-  # Enable shared contexts and shared examples
   config.shared_context_metadata_behavior = :apply_to_host_groups
-
-  # Use colored output
   config.color = true
-
-  # Use detailed output for failures
   config.formatter = :documentation
+
+  config.before(:each) do
+    stub_command('test -L /opt/hbase/current').and_return(false)
+    stub_command('java -version').and_return(true)
+  end
 end
