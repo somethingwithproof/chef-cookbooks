@@ -5,6 +5,13 @@
 > This cookbook is deprecated. TCP Wrappers is considered legacy technology and is no longer
 > actively maintained in many modern Linux distributions. We recommend migrating to firewalld
 > or nftables for access control.
+>
+> On RHEL 8+, AlmaLinux 9, Rocky 9, and Oracle Linux 9 the `tcp_wrappers` package
+> is no longer shipped and `libwrap` has been dropped from most upstream services
+> (notably `sshd`). On those platforms this cookbook will skip package installation
+> and only manage `/etc/hosts.allow`/`/etc/hosts.deny` for the few services that
+> still link `libwrap` from third-party builds. Treat hosts.allow/deny as
+> documentation only on these distributions.
 
 [![Build Status](https://github.com/thomasvincent/chef-tcp-wrappers/actions/workflows/ci.yml/badge.svg)](https://github.com/thomasvincent/chef-tcp-wrappers/actions/workflows/ci.yml) [![Chef cookbook](https://img.shields.io/badge/Cookbook%20Version-0.5.0-blue.svg)](https://github.com/thomasvincent/chef-tcp-wrappers)
 

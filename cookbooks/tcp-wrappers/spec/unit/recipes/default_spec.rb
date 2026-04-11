@@ -68,4 +68,30 @@ describe 'tcp_wrappers::default' do
       expect(chef_run).not_to create_template_if_missing('/etc/hosts.allow')
     end
   end
+
+  context 'file permissions and default-deny posture' do
+    let(:chef_run) do
+      ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04').converge(described_recipe)
+    end
+
+    it 'writes hosts.allow with mode 0644 root:root' do
+      expect(chef_run).to create_template_if_missing('/etc/hosts.allow').with(
+        owner: 'root',
+        group: 'root',
+        mode: '0644'
+      )
+    end
+
+    it 'writes hosts.deny with mode 0644 root:root' do
+      expect(chef_run).to create_template_if_missing('/etc/hosts.deny').with(
+        owner: 'root',
+        group: 'root',
+        mode: '0644'
+      )
+    end
+
+    it 'renders hosts.deny with the default-deny ALL : ALL pattern' do
+      expect(chef_run).to render_file('/etc/hosts.deny').with_content(/^ALL\s*:\s*ALL/)
+    end
+  end
 end
