@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'chef', '~> 19.1'
+gem 'chef', '~> 19.2'
 
 group :development do
   gem 'chefspec', '~> 9.3'
