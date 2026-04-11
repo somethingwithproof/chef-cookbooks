@@ -16,49 +16,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Reject insecure defaults before doing anything else.
+NetSnmp::Security.validate_community_strings!(node['net_snmp']['community_strings'])
+NetSnmp::Security.validate_community_strings!(
+  [{ 'community' => node['net_snmp']['trapd']['community'] }]
+) if node['net_snmp']['trapd']['community']
+
 # Install Net-SNMP based on platform
 case node['platform_family']
 when 'rhel', 'fedora', 'amazon'
-  package 'net-snmp' do
-    action :install
-  end
-
-  package 'net-snmp-utils' do
+  package %w(net-snmp net-snmp-utils) do
     action :install
   end
 when 'debian'
-  package 'snmp' do
+  package %w(snmp snmpd snmp-mibs-downloader) do
     action :install
-  end
-
-  package 'snmpd' do
-    action :install
-  end
-
-  package 'snmp-mibs-downloader' do
-    action :install
-  end
-when 'freebsd'
-  # Bootstrap pkg if needed
-  execute 'bootstrap_pkg' do
-    command 'pkg bootstrap -y'
-    not_if 'pkg -N'
-  end
-
-  package 'net-snmp' do
-    action :install
-  end
-
-  # Enable snmpd in rc.conf
-  execute 'enable_snmpd_freebsd' do
-    command 'sysrc snmpd_enable="YES"'
-    not_if 'sysrc -n snmpd_enable | grep -q YES'
-  end
-when 'mac_os_x'
-  # macOS uses Homebrew for net-snmp
-  homebrew_package 'net-snmp' do
-    action :install
-    only_if { ::File.exist?('/opt/homebrew/bin/brew') || ::File.exist?('/usr/local/bin/brew') }
   end
 end
 
@@ -124,25 +96,7 @@ if node['net_snmp']['v3_users'] && !node['net_snmp']['v3_users'].empty?
   end
 end
 
-# Service name based on platform
-service_name = node['net_snmp']['service_name']
-
 # Start and enable SNMP service
-case node['platform_family']
-when 'freebsd'
-  service service_name do
-    action [:enable, :start]
-    provider Chef::Provider::Service::Freebsd
-  end
-when 'mac_os_x'
-  # macOS uses Homebrew services for net-snmp
-  execute 'start_snmpd_macos' do
-    command 'brew services start net-snmp'
-    not_if 'brew services list | grep net-snmp | grep started'
-    only_if { ::File.exist?('/opt/homebrew/bin/brew') || ::File.exist?('/usr/local/bin/brew') }
-  end
-else
-  service service_name do
-    action [:enable, :start]
-  end
+service node['net_snmp']['service_name'] do
+  action %i(enable start)
 end

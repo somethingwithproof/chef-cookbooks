@@ -49,7 +49,9 @@
 <% end -%>
 <% if config['auth'] -%>
   auth:
-    community: <%= config['auth']['community'] || 'public' %>
+<% if config['auth']['community'] -%>
+    community: <%= config['auth']['community'] %>
+<% end -%>
 <% if config['auth']['security_level'] -%>
     security_level: <%= config['auth']['security_level'] %>
     username: <%= config['auth']['username'] %>

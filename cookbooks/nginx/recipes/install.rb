@@ -25,7 +25,6 @@ end
 
 case node['platform_family']
 when 'debian'
-  # Use OS-provided nginx packages (available on all modern Debian/Ubuntu)
   apt_update 'nginx' do
     action :update
   end
@@ -42,29 +41,12 @@ when 'rhel', 'amazon'
   end
 
   include_recipe 'yum-epel::default' if platform_family?('rhel')
-
-when 'freebsd'
-  # FreeBSD uses pkg for package management
-  # Ensure pkg is bootstrapped
-  execute 'bootstrap_pkg' do
-    command 'pkg bootstrap -y'
-    not_if 'pkg -N'
-  end
-
-when 'mac_os_x'
-  # macOS uses Homebrew for nginx installation
-  unless ::File.exist?('/opt/homebrew/bin/brew') || ::File.exist?('/usr/local/bin/brew')
-    log 'homebrew_required' do
-      message 'Homebrew is required for nginx installation on macOS. Please install: https://brew.sh'
-      level :error
-    end
-  end
 end
 
 # Install nginx package based on platform
 case node['platform_family']
 when 'debian'
-  # Use execute to handle nginx virtual package on Debian/Ubuntu
+  # nginx is a virtual package on Debian/Ubuntu; dpkg -l verifies either concrete package
   execute 'install-nginx' do
     command "DEBIAN_FRONTEND=noninteractive apt-get install -y #{node['nginx']['package_name']}"
     not_if 'dpkg -l nginx-core 2>/dev/null | grep -q ^ii || dpkg -l nginx-light 2>/dev/null | grep -q ^ii'
@@ -72,25 +54,12 @@ when 'debian'
     only_if { node['nginx']['install_method'] == 'package' }
   end
 
-when 'rhel', 'amazon', 'suse'
+when 'rhel', 'amazon'
   package node['nginx']['package_name'] do
     action :install
     version node['nginx']['version'] if node['nginx']['version']
     notifies :reload, 'service[nginx]', :delayed
     only_if { node['nginx']['install_method'] == 'package' }
-  end
-
-when 'freebsd'
-  package 'nginx' do
-    action :install
-    only_if { node['nginx']['install_method'] == 'package' }
-  end
-
-when 'mac_os_x'
-  homebrew_package 'nginx' do
-    action :install
-    only_if { node['nginx']['install_method'] == 'package' }
-    only_if { ::File.exist?('/opt/homebrew/bin/brew') || ::File.exist?('/usr/local/bin/brew') }
   end
 end
 

@@ -45,14 +45,15 @@ directory '/etc/snmp_exporter' do
   action :create
 end
 
-# Download and install snmp_exporter
+# Require an operator-provided checksum before pulling a remote binary.
+raise 'node["net_snmp"]["prometheus"]["checksum"] must be set for reproducible exporter installs' if node['net_snmp']['prometheus']['checksum'].nil?
+
 ark 'snmp_exporter' do
   url "https://github.com/prometheus/snmp_exporter/releases/download/v#{exporter_version}/snmp_exporter-#{exporter_version}.linux-amd64.tar.gz"
   version exporter_version
-  checksum node['net_snmp']['prometheus']['checksum'] if node['net_snmp']['prometheus']['checksum']
+  checksum node['net_snmp']['prometheus']['checksum']
   has_binaries ['snmp_exporter']
   action :install
-  only_if { platform_family?('debian', 'rhel', 'fedora', 'amazon') }
 end
 
 # Generate snmp.yml configuration
@@ -105,14 +106,12 @@ systemd_unit 'snmp_exporter.service' do
     [Install]
     WantedBy=multi-user.target
   UNIT
-  action [:create, :enable]
+  action %i(create enable)
   notifies :restart, 'service[snmp_exporter]', :delayed
-  only_if { systemd? }
 end
 
 service 'snmp_exporter' do
-  action [:enable, :start]
-  only_if { systemd? }
+  action %i(enable start)
 end
 
 # Add Prometheus scrape config example

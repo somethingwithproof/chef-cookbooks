@@ -48,32 +48,6 @@ when 'debian'
   default['nginx']['log_dir'] = '/var/log/nginx'
   default['nginx']['error_log'] = '/var/log/nginx/error.log'
   default['nginx']['access_log'] = '/var/log/nginx/access.log'
-when 'freebsd'
-  default['nginx']['package_name'] = 'nginx'
-  default['nginx']['service_name'] = 'nginx'
-  default['nginx']['conf_dir'] = '/usr/local/etc/nginx'
-  default['nginx']['sites_dir'] = '/usr/local/etc/nginx/sites-enabled'
-  default['nginx']['sites_available_dir'] = '/usr/local/etc/nginx/sites-available'
-  default['nginx']['user'] = 'www'
-  default['nginx']['group'] = 'www'
-  default['nginx']['binary'] = '/usr/local/sbin/nginx'
-  default['nginx']['pid_file'] = '/var/run/nginx.pid'
-  default['nginx']['log_dir'] = '/var/log/nginx'
-  default['nginx']['error_log'] = '/var/log/nginx/error.log'
-  default['nginx']['access_log'] = '/var/log/nginx/access.log'
-when 'mac_os_x'
-  default['nginx']['package_name'] = 'nginx'
-  default['nginx']['service_name'] = 'nginx'
-  default['nginx']['conf_dir'] = '/opt/homebrew/etc/nginx'
-  default['nginx']['sites_dir'] = '/opt/homebrew/etc/nginx/servers'
-  default['nginx']['sites_available_dir'] = '/opt/homebrew/etc/nginx/servers'
-  default['nginx']['user'] = '_www'
-  default['nginx']['group'] = '_www'
-  default['nginx']['binary'] = '/opt/homebrew/bin/nginx'
-  default['nginx']['pid_file'] = '/opt/homebrew/var/run/nginx.pid'
-  default['nginx']['log_dir'] = '/opt/homebrew/var/log/nginx'
-  default['nginx']['error_log'] = '/opt/homebrew/var/log/nginx/error.log'
-  default['nginx']['access_log'] = '/opt/homebrew/var/log/nginx/access.log'
 end
 
 # Source installation attributes
@@ -123,21 +97,6 @@ default['nginx']['source']['dependencies'] = case node['platform_family']
                                                  libperl-dev
                                                  libgeoip-dev
                                                  libgoogle-perftools-dev
-                                               )
-                                             when 'freebsd'
-                                               %w(
-                                                 pcre
-                                                 libxml2
-                                                 libxslt
-                                                 libgd
-                                                 perl5
-                                               )
-                                             when 'mac_os_x'
-                                               %w(
-                                                 pcre
-                                                 openssl
-                                                 libxml2
-                                                 libxslt
                                                )
                                              else
                                                []
@@ -241,23 +200,13 @@ default['nginx']['sites'] = {}
 # OS-specific tuning
 case node['platform_family']
 when 'rhel', 'fedora', 'amazon'
-  # SELinux configurations
   default['nginx']['selinux']['enabled'] = true
   default['nginx']['selinux']['ports'] = [80, 443]
   default['nginx']['selinux']['http_context'] = 'httpd_sys_content_t'
   default['nginx']['selinux']['allow_http_connections'] = true
 when 'debian'
-  # AppArmor configurations
   default['nginx']['apparmor']['enabled'] = true
   default['nginx']['apparmor']['profile'] = '/etc/apparmor.d/usr.sbin.nginx'
-when 'freebsd'
-  # FreeBSD-specific settings
-  default['nginx']['rc_conf']['nginx_enable'] = 'YES'
-  default['nginx']['logrotate']['postrotate'] = '/usr/sbin/service nginx reload > /dev/null 2>&1 || true'
-when 'mac_os_x'
-  # macOS-specific settings (using Homebrew services)
-  default['nginx']['logrotate']['enabled'] = false # macOS uses newsyslog
-  default['nginx']['use_homebrew_service'] = true
 end
 
 # Firewall configuration

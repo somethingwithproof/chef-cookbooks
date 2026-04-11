@@ -107,34 +107,13 @@ action_class do
   def install_certbot
     case node['platform_family']
     when 'debian'
-      package 'certbot' do
-        action :install
-      end
-
-      package 'python3-certbot-nginx' do
+      package %w(certbot python3-certbot-nginx) do
         action :install
       end
     when 'rhel', 'fedora', 'amazon'
-      # EPEL is required for certbot on RHEL
       include_recipe 'yum-epel::default' if platform_family?('rhel')
 
-      package 'certbot' do
-        action :install
-      end
-
-      package 'python3-certbot-nginx' do
-        action :install
-      end
-    when 'freebsd'
-      package 'py39-certbot' do
-        action :install
-      end
-
-      package 'py39-certbot-nginx' do
-        action :install
-      end
-    when 'mac_os_x'
-      homebrew_package 'certbot' do
+      package %w(certbot python3-certbot-nginx) do
         action :install
       end
     end
@@ -165,28 +144,22 @@ action_class do
   end
 
   def setup_renewal_timer
-    # Create systemd timer for automatic renewal
-    if systemd?
-      # Certbot typically installs its own timer, but we'll ensure it's enabled
-      service 'certbot.timer' do
-        action [:enable, :start]
-        only_if { ::File.exist?('/lib/systemd/system/certbot.timer') }
-      end
+    service 'certbot.timer' do
+      action %i(enable start)
+      only_if { ::File.exist?('/lib/systemd/system/certbot.timer') }
+    end
 
-      # Create a custom renewal hook for nginx
-      directory '/etc/letsencrypt/renewal-hooks/deploy' do
-        recursive true
-        mode '0755'
-      end
+    directory '/etc/letsencrypt/renewal-hooks/deploy' do
+      recursive true
+      mode '0755'
+    end
 
-      file '/etc/letsencrypt/renewal-hooks/deploy/nginx-reload.sh' do
-        content <<~SCRIPT
-          #!/bin/bash
-          # Reload nginx after certificate renewal
-          systemctl reload nginx || service nginx reload
-        SCRIPT
-        mode '0755'
-      end
+    file '/etc/letsencrypt/renewal-hooks/deploy/nginx-reload.sh' do
+      content <<~SCRIPT
+        #!/bin/bash
+        /bin/systemctl reload nginx
+      SCRIPT
+      mode '0755'
     end
   end
 
@@ -222,6 +195,8 @@ action_class do
     end
 
     file new_resource.key_path do
+      owner 'root'
+      group 'root'
       mode '0600'
     end
   end
