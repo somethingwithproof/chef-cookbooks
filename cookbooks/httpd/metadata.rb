@@ -2,13 +2,13 @@
 
 name 'httpd'
 maintainer 'Thomas Vincent'
-maintainer_email 'thomasvincent@example.com'
+maintainer_email 'thomasvincent@gmail.com'
 license 'Apache-2.0'
 description 'Installs and configures Apache HTTP Server with advanced features'
 version '1.1.0'
 chef_version '>= 18.0'
-source_url 'https://github.com/thomasvincent/chef-httpd-cookbook'
-issues_url 'https://github.com/thomasvincent/chef-httpd-cookbook/issues'
+source_url 'https://github.com/somethingwithproof/chef-cookbooks/tree/main/cookbooks/httpd'
+issues_url 'https://github.com/somethingwithproof/chef-cookbooks/issues'
 
 # Supported platforms as of January 2026
 # Linux - Docker/Dokken testable

@@ -1,0 +1,52 @@
+# Standard chefignore for Chef Infra Client 18+
+# Paths listed here are excluded from cookbook uploads.
+
+# VCS and editors
+.git*
+.svn
+.hg*
+.bzr*
+.DS_Store
+*~
+*.bak
+*.orig
+*.rej
+*.swp
+*.tmp
+
+# IDE and OS
+.idea/
+.vscode/
+.ruby-version
+.tool-versions
+Thumbs.db
+
+# Test and CI
+.kitchen/
+.kitchen.local.yml
+test/
+spec/
+features/
+examples/
+vendor/
+coverage/
+.rspec_status
+.rubocop.yml
+.yamllint
+.cookstyle.yml
+
+# Build and deps
+Berksfile
+Berksfile.lock
+Gemfile
+Gemfile.lock
+Rakefile
+Policyfile.rb
+Policyfile.lock.json
+metadata.json
+
+# Docs
+CHANGELOG.md
+CONTRIBUTING.md
+TESTING.md
+README.md

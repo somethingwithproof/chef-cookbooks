@@ -1,0 +1,43 @@
+---
+driver:
+  name: dokken
+  privileged: true
+  chef_license: accept-no-persist
+
+transport:
+  name: dokken
+
+provisioner:
+  name: dokken
+  deprecations_as_errors: true
+  chef_license: accept-no-persist
+  slow_resource_report: true
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: ubuntu-22.04
+    driver:
+      image: dokken/ubuntu-22.04
+      pid_one_command: /bin/systemd
+  - name: ubuntu-24.04
+    driver:
+      image: dokken/ubuntu-24.04
+      pid_one_command: /bin/systemd
+  - name: debian-12
+    driver:
+      image: dokken/debian-12
+      pid_one_command: /bin/systemd
+  - name: almalinux-9
+    driver:
+      image: dokken/almalinux-9
+      pid_one_command: /usr/lib/systemd/systemd
+  - name: rockylinux-9
+    driver:
+      image: dokken/rockylinux-9
+      pid_one_command: /usr/lib/systemd/systemd
+
+# Suites are defined per-cookbook in cookbooks/<name>/kitchen.yml.
+# See the Rakefile for the top-level test runner.
+suites: []

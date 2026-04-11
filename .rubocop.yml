@@ -1,0 +1,14 @@
+# Cookstyle is the Chef-maintained Cookstyle wrapper around RuboCop.
+# It pins cop enablement to Chef 18 standards. Do not override below.
+inherit_gem:
+  cookstyle:
+    - config/default.yml
+
+AllCops:
+  TargetRubyVersion: 3.1
+  NewCops: enable
+  Exclude:
+    - 'vendor/**/*'
+    - 'tmp/**/*'
+    - '**/test/integration/**/*_spec.rb'
+    - '**/test/integration/**/*_test.rb'

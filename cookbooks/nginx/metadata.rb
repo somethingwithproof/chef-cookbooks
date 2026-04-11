@@ -2,13 +2,13 @@
 
 name 'nginx'
 maintainer 'Thomas Vincent'
-maintainer_email 'thomasvincent@example.com'
+maintainer_email 'thomasvincent@gmail.com'
 license 'Apache-2.0'
 description 'Installs and configures Nginx with comprehensive functionality'
 version '1.0.0'
 chef_version '>= 18.0'
-source_url 'https://github.com/thomasvincent/chef-nginx-cookbook'
-issues_url 'https://github.com/thomasvincent/chef-nginx-cookbook/issues'
+source_url 'https://github.com/somethingwithproof/chef-cookbooks/tree/main/cookbooks/nginx'
+issues_url 'https://github.com/somethingwithproof/chef-cookbooks/issues'
 
 # Supported platforms as of January 2026
 # Linux - Docker/Dokken testable

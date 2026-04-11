@@ -20,6 +20,6 @@ supports 'redhat', '>= 9.0'
 supports 'rocky', '>= 9.0'
 supports 'amazon', '>= 2023.0'
 
-source_url 'https://github.com/thomasvincent/chef-tcp-wrappers'
-issues_url 'https://github.com/thomasvincent/chef-tcp-wrappers/issues'
+source_url 'https://github.com/somethingwithproof/chef-cookbooks/tree/main/cookbooks/tcp-wrappers'
+issues_url 'https://github.com/somethingwithproof/chef-cookbooks/issues'
 chef_version '>= 18.0'

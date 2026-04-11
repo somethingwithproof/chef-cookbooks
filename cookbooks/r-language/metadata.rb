@@ -4,7 +4,7 @@ maintainer_email 'thomasvincent@github.com'
 license 'MIT'
 description 'Installs/Configures R programming language'
 version '1.0.0'
-chef_version '>= 18.7'
+chef_version '>= 18.0'
 
 depends 'build-essential', '>= 8.0'
 
@@ -16,5 +16,5 @@ supports 'redhat', '>= 7.0'
 supports 'rocky', '>= 8.0'
 supports 'oracle', '>= 7.0'
 
-source_url 'https://github.com/thomasvincent/chef-r-language-cookbook'
-issues_url 'https://github.com/thomasvincent/chef-r-language-cookbook/issues'
+source_url 'https://github.com/somethingwithproof/chef-cookbooks/tree/main/cookbooks/r-language'
+issues_url 'https://github.com/somethingwithproof/chef-cookbooks/issues'

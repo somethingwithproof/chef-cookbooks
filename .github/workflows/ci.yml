@@ -1,0 +1,91 @@
+---
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Cookstyle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: ruby/setup-ruby@a2bbe5b1a236842c1cb7dd11e8e3b51e0a616acc  # v1.202.0
+        with:
+          ruby-version: '3.1'
+          bundler-cache: true
+      - name: Run cookstyle
+        run: bundle exec cookstyle cookbooks/
+
+  changed-cookbooks:
+    name: Detect changed cookbooks
+    runs-on: ubuntu-latest
+    outputs:
+      cookbooks: ${{ steps.detect.outputs.cookbooks }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 0
+      - id: detect
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+          else
+            base="${{ github.event.before }}"
+          fi
+          changed=$(git diff --name-only "$base" HEAD -- cookbooks/ | cut -d/ -f2 | sort -u | jq -R . | jq -sc .)
+          [ "$changed" = "null" ] || [ -z "$changed" ] && changed="[]"
+          echo "cookbooks=$changed" >> "$GITHUB_OUTPUT"
+
+  chefspec:
+    name: ChefSpec (${{ matrix.cookbook }})
+    needs: changed-cookbooks
+    if: needs.changed-cookbooks.outputs.cookbooks != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cookbook: ${{ fromJson(needs.changed-cookbooks.outputs.cookbooks) }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: ruby/setup-ruby@a2bbe5b1a236842c1cb7dd11e8e3b51e0a616acc  # v1.202.0
+        with:
+          ruby-version: '3.1'
+          bundler-cache: true
+      - name: Run ChefSpec for ${{ matrix.cookbook }}
+        run: bundle exec rake cookbook:${{ matrix.cookbook }}:spec
+        if: hashFiles(format('cookbooks/{0}/spec/**/*.rb', matrix.cookbook)) != ''
+
+  kitchen:
+    name: Test Kitchen (${{ matrix.cookbook }} / ${{ matrix.platform }})
+    needs: changed-cookbooks
+    if: needs.changed-cookbooks.outputs.cookbooks != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cookbook: ${{ fromJson(needs.changed-cookbooks.outputs.cookbooks) }}
+        platform:
+          - ubuntu-24.04
+          - almalinux-9
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: ruby/setup-ruby@a2bbe5b1a236842c1cb7dd11e8e3b51e0a616acc  # v1.202.0
+        with:
+          ruby-version: '3.1'
+          bundler-cache: true
+      - name: Run test-kitchen for ${{ matrix.cookbook }} on ${{ matrix.platform }}
+        run: |
+          cd cookbooks/${{ matrix.cookbook }}
+          if [ ! -f kitchen.yml ]; then echo "no kitchen.yml, skipping"; exit 0; fi
+          bundle exec kitchen test "${{ matrix.platform }}"

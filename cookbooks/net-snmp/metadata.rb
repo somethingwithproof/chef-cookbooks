@@ -24,5 +24,5 @@ supports 'freebsd', '>= 14.0'
 supports 'mac_os_x', '>= 13.0'
 
 # Source code
-source_url 'https://github.com/thomasvincent/chef-net-snmp-cookbook'
-issues_url 'https://github.com/thomasvincent/chef-net-snmp-cookbook/issues'
+source_url 'https://github.com/somethingwithproof/chef-cookbooks/tree/main/cookbooks/net-snmp'
+issues_url 'https://github.com/somethingwithproof/chef-cookbooks/issues'

@@ -7,8 +7,8 @@ license 'Apache-2.0'
 description 'Installs and configures Zabbix'
 version '1.0.0'
 chef_version '>= 18.0'
-source_url 'https://github.com/thomasvincent/chef-zabbix-cookbook'
-issues_url 'https://github.com/thomasvincent/chef-zabbix-cookbook/issues'
+source_url 'https://github.com/somethingwithproof/chef-cookbooks/tree/main/cookbooks/zabbix'
+issues_url 'https://github.com/somethingwithproof/chef-cookbooks/issues'
 
 # Supported platforms - tested with Docker/Dokken
 supports 'ubuntu', '>= 22.04'

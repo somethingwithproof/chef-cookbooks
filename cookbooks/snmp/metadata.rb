@@ -15,5 +15,5 @@ supports 'fedora', '>= 34'
 supports 'amazon', '>= 2'
 supports 'suse', '>= 15'
 
-source_url 'https://github.com/thomasvincent/chef-snmp-cookbook'
-issues_url 'https://github.com/thomasvincent/chef-snmp-cookbook/issues'
+source_url 'https://github.com/somethingwithproof/chef-cookbooks/tree/main/cookbooks/snmp'
+issues_url 'https://github.com/somethingwithproof/chef-cookbooks/issues'
