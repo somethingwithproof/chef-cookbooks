@@ -58,11 +58,20 @@ end
 if node['nginx']['ssl']['enabled'] && node['nginx']['ssl']['dhparam'].nil?
   dhparam_file = "#{node['nginx']['conf_dir']}/dhparam.pem"
 
-  # Generate Diffie-Hellman parameters
   execute 'generate-dhparam' do
     command "openssl dhparam -out #{dhparam_file} 2048"
-    not_if { ::File.exist?(dhparam_file) }
+    creates dhparam_file
+    umask '0077'
     notifies :reload, 'service[nginx]', :delayed
+  end
+
+  # Tighten perms on the generated DH file; create action without content
+  # leaves existing content intact.
+  file dhparam_file do
+    owner 'root'
+    group node['root_group']
+    mode '0600'
+    only_if { ::File.exist?(dhparam_file) }
   end
 
   # Set the dhparam attribute
