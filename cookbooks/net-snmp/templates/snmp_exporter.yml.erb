@@ -1,0 +1,69 @@
+# Prometheus SNMP Exporter Configuration
+# Managed by Chef - DO NOT EDIT MANUALLY
+#
+# This is a simplified configuration. For production, use the generator:
+# https://github.com/prometheus/snmp_exporter/tree/main/generator
+
+<% @modules.each do |name, config| -%>
+<%= name %>:
+  walk:
+<% (config['walk'] || []).each do |oid| -%>
+    - <%= oid %>
+<% end -%>
+<% if config['get'] -%>
+  get:
+<% config['get'].each do |oid| -%>
+    - <%= oid %>
+<% end -%>
+<% end -%>
+  metrics:
+<% (config['metrics'] || []).each do |metric| -%>
+    - name: <%= metric['name'] %>
+      oid: <%= metric['oid'] %>
+      type: <%= metric['type'] || 'gauge' %>
+<% if metric['help'] -%>
+      help: "<%= metric['help'] %>"
+<% end -%>
+<% if metric['indexes'] -%>
+      indexes:
+<% metric['indexes'].each do |idx| -%>
+        - labelname: <%= idx['labelname'] %>
+          type: <%= idx['type'] || 'gauge' %>
+<% end -%>
+<% end -%>
+<% if metric['lookups'] -%>
+      lookups:
+<% metric['lookups'].each do |lookup| -%>
+        - labels:
+<% lookup['labels'].each do |label| -%>
+            - <%= label %>
+<% end -%>
+          labelname: <%= lookup['labelname'] %>
+          oid: <%= lookup['oid'] %>
+          type: <%= lookup['type'] || 'DisplayString' %>
+<% end -%>
+<% end -%>
+<% end -%>
+<% if config['version'] -%>
+  version: <%= config['version'] %>
+<% end -%>
+<% if config['auth'] -%>
+  auth:
+    community: <%= config['auth']['community'] || 'public' %>
+<% if config['auth']['security_level'] -%>
+    security_level: <%= config['auth']['security_level'] %>
+    username: <%= config['auth']['username'] %>
+<% if config['auth']['password'] -%>
+    password: <%= config['auth']['password'] %>
+<% end -%>
+<% if config['auth']['auth_protocol'] -%>
+    auth_protocol: <%= config['auth']['auth_protocol'] %>
+<% end -%>
+<% if config['auth']['priv_protocol'] -%>
+    priv_protocol: <%= config['auth']['priv_protocol'] %>
+    priv_password: <%= config['auth']['priv_password'] %>
+<% end -%>
+<% end -%>
+<% end -%>
+
+<% end -%>
