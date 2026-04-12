@@ -98,9 +98,11 @@ default['zabbix']['server']['database']['host'] = '127.0.0.1'
 default['zabbix']['server']['database']['port'] = 5432
 default['zabbix']['server']['database']['name'] = 'zabbix'
 default['zabbix']['server']['database']['user'] = 'zabbix'
-# SECURITY: Database password must be set explicitly via node attributes or environment.
-# Setting a hardcoded default password is a security risk.
-default['zabbix']['server']['database']['password'] = ''
+# SECURITY: No default. Must be supplied via Chef vault, encrypted data bag, or
+# a wrapper cookbook that sets node.run_state['zabbix']['db_password']. The
+# database recipe and the zabbix_server resource raise if this is unset. See
+# README "Secrets handling" for the recommended vault layout.
+default['zabbix']['server']['database']['password'] = nil
 default['zabbix']['server']['database']['schema'] = nil
 default['zabbix']['server']['database']['socket'] = nil
 default['zabbix']['server']['database']['encryption'] = 0
@@ -131,7 +133,9 @@ default['zabbix']['web']['timezone'] = 'UTC'
 # Java gateway specific attributes
 default['zabbix']['java_gateway']['enabled'] = false
 default['zabbix']['java_gateway']['install_method'] = 'package'
-default['zabbix']['java_gateway']['listen_ip'] = '0.0.0.0'
+# Bind to loopback by default. Override per-node if the gateway must be
+# reachable from a separate Zabbix server host.
+default['zabbix']['java_gateway']['listen_ip'] = '127.0.0.1'
 default['zabbix']['java_gateway']['listen_port'] = 10052
 default['zabbix']['java_gateway']['pid_file'] = '/var/run/zabbix/zabbix_java.pid'
 default['zabbix']['java_gateway']['start_pollers'] = 5

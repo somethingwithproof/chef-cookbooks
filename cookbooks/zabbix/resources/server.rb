@@ -38,10 +38,10 @@ property :database_user, String,
          default: lazy { node['zabbix']['server']['database']['user'] },
          description: 'Database username for Zabbix server'
 
-property :database_password, String,
+property :database_password, [String, NilClass],
          default: lazy { node['zabbix']['server']['database']['password'] },
          sensitive: true,
-         description: 'Database password for Zabbix server'
+         description: 'Database password for Zabbix server (must come from a Chef vault, encrypted data bag, or wrapper cookbook)'
 
 property :database_socket, [String, NilClass],
          default: lazy { node['zabbix']['server']['database']['socket'] },
@@ -146,6 +146,18 @@ property :service_auto_start, [true, false],
          description: 'Auto-start the server service'
 
 action_class do
+  # Fail closed: refuse to proceed if no DB password was provided. This avoids
+  # rendering an empty DBPassword= into zabbix_server.conf or shipping a
+  # well-known default.
+  def require_database_password!
+    pw = new_resource.database_password
+    return unless pw.nil? || pw.to_s.empty?
+
+    raise "zabbix_server[#{new_resource.name}]: database_password must be set " \
+          'via Chef vault, encrypted data bag, or a wrapper cookbook. ' \
+          'See cookbooks/zabbix/README.md "Secrets handling".'
+  end
+
   def create_directories
     # Create directories
     %w(
@@ -331,6 +343,8 @@ action_class do
 end
 
 action :install do
+  require_database_password!
+
   # Ensure user and group exist
   group node['zabbix']['group'] do
     system true
@@ -368,6 +382,8 @@ action :install do
 end
 
 action :configure do
+  require_database_password!
+
   # Only configure without installation
   configure_server
 

@@ -54,13 +54,13 @@ property :listen_port, [Integer, String],
 property :enable_remote_commands, [Integer, String, TrueClass, FalseClass],
          default: lazy { node['zabbix']['agent']['enable_remote_commands'] },
          coerce: proc { |v|
-           if v.is_a?(TrueClass)
-             1
-           else
-             v.is_a?(FalseClass) ? 0 : v
+           case v
+           when true then 1
+           when false then 0
+           else v
            end
          },
-         description: 'Enable remote commands (0,1)'
+         description: 'Enable remote commands (0,1). Renders AllowKey/DenyKey for system.run[*] in zabbix_agentd.conf.'
 
 property :tls_connect, [String, NilClass],
          default: lazy { node['zabbix']['agent']['tls_connect'] },
@@ -229,11 +229,12 @@ action_class do
   end
 
   def configure_agent
-    # Create agent configuration from template
+    # zabbix_agentd.conf carries the TLS PSK identity. Owned root:zabbix so the
+    # agent process (running as zabbix) can read it but other users cannot.
     template node['zabbix']['agent']['config_file'] do
       source 'zabbix_agentd.conf.erb'
       owner 'root'
-      group 'root'
+      group node['zabbix']['group']
       mode '0640'
       sensitive true
       variables(
@@ -256,6 +257,20 @@ action_class do
         tls_ca_file: new_resource.tls_ca_file
       )
       notifies :restart, "service[#{new_resource.service_name}]", :delayed
+    end
+
+    # If a TLS PSK file path is configured we own its permissions even when the
+    # caller drops the key bytes there themselves. Zabbix refuses to start when
+    # this file is world-readable, so this is both correctness and a hard
+    # security boundary against on-host privilege escalation.
+    if new_resource.tls_psk_file && !new_resource.tls_psk_file.to_s.empty?
+      file new_resource.tls_psk_file do
+        owner 'root'
+        group node['zabbix']['group']
+        mode '0640'
+        sensitive true
+        only_if { ::File.exist?(new_resource.tls_psk_file) }
+      end
     end
   end
 
