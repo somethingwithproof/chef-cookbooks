@@ -46,7 +46,7 @@ describe 'hbase::java' do
 
   context 'on Amazon Linux 2023' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new(platform: 'amazon', version: '2023').converge(described_recipe)
+      ChefSpec::SoloRunner.new(platform: 'amazon', version: '2').converge(described_recipe)
     end
 
     it 'installs the amazon openjdk-devel package' do

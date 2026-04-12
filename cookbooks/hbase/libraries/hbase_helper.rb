@@ -26,7 +26,7 @@ module HBase
     end
 
     def hbase_principal
-      return nil unless node['hbase']['security']['authentication'] == 'kerberos'
+      return unless node['hbase']['security']['authentication'] == 'kerberos'
       principal = node['hbase']['security']['kerberos']['principal']
       "#{principal}@#{node['hbase']['security']['kerberos']['realm']}"
     end

@@ -4,9 +4,9 @@ require 'spec_helper'
 
 describe 'snmp_config resource' do
   it 'resource file loads without error' do
-    expect {
+    expect do
       load File.expand_path('../../../../resources/config.rb', __dir__)
-    }.not_to raise_error
+    end.not_to raise_error
   end
 
   it 'registers the resource DSL name' do

@@ -66,7 +66,7 @@ action :create do
           "HBASE_LOG_DIR=#{new_resource.log_dir}",
         ],
         ExecStart: "#{new_resource.install_dir}/bin/hbase-daemon.sh start #{new_resource.service_name}",
-        ExecStop:  "#{new_resource.install_dir}/bin/hbase-daemon.sh stop #{new_resource.service_name}",
+        ExecStop: "#{new_resource.install_dir}/bin/hbase-daemon.sh stop #{new_resource.service_name}",
         Restart: 'on-failure',
         RestartSec: 10,
         TimeoutStartSec: 120,

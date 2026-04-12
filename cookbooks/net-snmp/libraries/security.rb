@@ -18,11 +18,10 @@ module NetSnmp
         community = extract_community(entry)
         next if community.nil? || community.empty?
 
-        if BANNED_COMMUNITIES.include?(community.downcase)
-          raise InsecureCommunityError,
-                "SNMP community string #{community.inspect} is a well-known default and is refused. " \
-                'Set a unique string or use SNMPv3.'
-        end
+        next unless BANNED_COMMUNITIES.include?(community.downcase)
+        raise InsecureCommunityError,
+              "SNMP community string #{community.inspect} is a well-known default and is refused. " \
+              'Set a unique string or use SNMPv3.'
       end
     end
 

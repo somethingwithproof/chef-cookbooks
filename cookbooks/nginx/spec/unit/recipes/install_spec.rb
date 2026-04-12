@@ -39,7 +39,7 @@ describe 'nginx::install' do
 
   context 'amazon linux' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new(platform: 'amazon', version: '2023').converge(described_recipe)
+      ChefSpec::SoloRunner.new(platform: 'amazon', version: '2').converge(described_recipe)
     end
 
     it 'creates the upstream yum repo' do

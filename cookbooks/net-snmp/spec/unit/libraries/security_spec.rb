@@ -26,15 +26,15 @@ describe NetSnmp::Security do
     end
 
     it 'rejects "public"' do
-      expect {
+      expect do
         described_class.validate_community_strings!([{ 'community' => 'public' }])
-      }.to raise_error(NetSnmp::Security::InsecureCommunityError, /public/)
+      end.to raise_error(NetSnmp::Security::InsecureCommunityError, /public/)
     end
 
     it 'rejects "private" regardless of case' do
-      expect {
+      expect do
         described_class.validate_community_strings!([{ 'community' => 'Private' }])
-      }.to raise_error(NetSnmp::Security::InsecureCommunityError)
+      end.to raise_error(NetSnmp::Security::InsecureCommunityError)
     end
 
     it 'ignores nil community entries' do

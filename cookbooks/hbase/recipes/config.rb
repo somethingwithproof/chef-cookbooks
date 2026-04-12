@@ -102,8 +102,7 @@ if node['hbase']['metrics']['enabled']
         variables(
           user: node['hbase']['user']
         )
-        action :create
-        not_if { ::File.exist?(node['hbase']['metrics']['jmx']['password_file']) }
+        action :create_if_missing
       end
     end
 

@@ -25,7 +25,7 @@ describe 'zabbix::database' do
     let(:chef_run) do
       runner = ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '22.04') do |node|
         node.normal['zabbix']['server']['database']['type'] = 'postgresql'
-        node.normal['zabbix']['server']['database']['name'] = "zabbix; DROP TABLE users; --"
+        node.normal['zabbix']['server']['database']['name'] = 'zabbix; DROP TABLE users; --'
         node.normal['zabbix']['server']['database']['password'] = 'safepw'
       end
       runner.converge(described_recipe)

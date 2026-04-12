@@ -21,8 +21,8 @@ describe 'snmp_trap_receiver resource' do
   end
 
   it 'rejects banned community strings through the shared validator' do
-    expect {
+    expect do
       NetSnmp::Security.validate_community_strings!([{ 'community' => 'public' }])
-    }.to raise_error(NetSnmp::Security::InsecureCommunityError)
+    end.to raise_error(NetSnmp::Security::InsecureCommunityError)
   end
 end

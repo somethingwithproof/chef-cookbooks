@@ -11,15 +11,15 @@
 if node['hbase']['security']['authentication'] == 'kerberos'
   krb = node['hbase']['security']['kerberos']
   node.default['hbase']['config'].merge!(
-    'hbase.security.authentication'          => 'kerberos',
-    'hbase.security.authorization'           => node['hbase']['security']['authorization'],
-    'hbase.master.kerberos.principal'        => krb['server_principal'],
-    'hbase.regionserver.kerberos.principal'  => krb['regionserver_principal'],
-    'hbase.master.keytab.file'               => krb['keytab'],
-    'hbase.regionserver.keytab.file'         => krb['keytab'],
-    'hbase.rpc.protection'                   => 'privacy',
-    'hbase.coprocessor.master.classes'       => 'org.apache.hadoop.hbase.security.access.AccessController',
-    'hbase.coprocessor.region.classes'       => 'org.apache.hadoop.hbase.security.token.TokenProvider,org.apache.hadoop.hbase.security.access.AccessController'
+    'hbase.security.authentication' => 'kerberos',
+    'hbase.security.authorization' => node['hbase']['security']['authorization'],
+    'hbase.master.kerberos.principal' => krb['server_principal'],
+    'hbase.regionserver.kerberos.principal' => krb['regionserver_principal'],
+    'hbase.master.keytab.file' => krb['keytab'],
+    'hbase.regionserver.keytab.file' => krb['keytab'],
+    'hbase.rpc.protection' => 'privacy',
+    'hbase.coprocessor.master.classes' => 'org.apache.hadoop.hbase.security.access.AccessController',
+    'hbase.coprocessor.region.classes' => 'org.apache.hadoop.hbase.security.token.TokenProvider,org.apache.hadoop.hbase.security.access.AccessController'
   )
 end
 

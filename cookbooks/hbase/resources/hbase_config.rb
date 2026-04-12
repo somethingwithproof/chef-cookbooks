@@ -9,14 +9,14 @@ property :mode,             String, default: '0644'
 property :variables,        Hash,   default: {}
 property :config_type,      String, equal_to: %w(xml properties env script), default: 'xml'
 property :template_source,  String
-property :restart_services, Array,  default: []
+property :restart_services, Array, default: []
 property :use_helpers,      [true, false], default: false
 
 TEMPLATE_FOR_TYPE = {
-  'xml'        => 'hbase-site.xml.erb',
+  'xml' => 'hbase-site.xml.erb',
   'properties' => 'log4j2.properties.erb',
-  'env'        => 'hbase-env.sh.erb',
-  'script'     => 'generic-script.erb',
+  'env' => 'hbase-env.sh.erb',
+  'script' => 'generic-script.erb',
 }.freeze
 
 action_class do

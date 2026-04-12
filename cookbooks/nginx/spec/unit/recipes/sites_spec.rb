@@ -41,14 +41,14 @@ describe 'nginx::sites' do
         node.normal['nginx']['sites'] = {
           'example' => {
             'domain' => 'example.com',
-            'port'   => 8080,
-            'root'   => '/srv/www/example',
+            'port' => 8080,
+            'root' => '/srv/www/example',
           },
           'secure' => {
-            'domain'      => 'secure.example.com',
+            'domain' => 'secure.example.com',
             'ssl_enabled' => true,
-            'ssl_cert'    => '/etc/ssl/certs/secure.crt',
-            'ssl_key'     => '/etc/ssl/private/secure.key',
+            'ssl_cert' => '/etc/ssl/certs/secure.crt',
+            'ssl_key' => '/etc/ssl/private/secure.key',
           },
         }
       end.converge(described_recipe)
