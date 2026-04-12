@@ -4,8 +4,15 @@ default['r-language']['install_method'] = 'package' # 'package' or 'source'
 default['r-language']['source_url'] = nil # Will be set automatically based on version if nil
 default['r-language']['source_checksum'] = nil
 
-# CRAN mirror URL
+# CRAN mirror URL (must be https; the resource will refuse anything else)
 default['r-language']['cran_mirror'] = 'https://cloud.r-project.org'
+
+# Renviron.site management. When manage_renviron is true, the package
+# recipe will write the file at renviron_path with mode 0644 root:root.
+# Each key in renviron_vars becomes a `KEY=value` line.
+default['r-language']['manage_renviron'] = false
+default['r-language']['renviron_path'] = '/usr/lib/R/etc/Renviron.site'
+default['r-language']['renviron_vars'] = {}
 
 # Package options
 default['r-language']['install_dev'] = true # Install r-base-dev package

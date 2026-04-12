@@ -89,3 +89,17 @@ when 'rhel', 'fedora', 'amazon'
 else
   Chef::Log.warn("Unsupported platform family: #{platform_family}")
 end
+
+# Optionally manage Renviron.site. The file is world-readable per upstream
+# convention; do not write secrets through this attribute.
+if node['r-language']['manage_renviron']
+  template node['r-language']['renviron_path'] do
+    cookbook 'r-language'
+    source 'Renviron.site.erb'
+    owner 'root'
+    group 'root'
+    mode '0644'
+    variables(vars: node['r-language']['renviron_vars'].to_hash)
+    action :create
+  end
+end

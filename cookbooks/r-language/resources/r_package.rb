@@ -3,7 +3,12 @@ provides :r_package
 
 property :package_name, String, name_property: true, description: 'Name of the R package to install'
 property :version, String, description: 'Specific version to install (optional)'
-property :repo, String, default: 'https://cloud.r-project.org', description: 'Repository URL to use'
+property :repo, String,
+         default: 'https://cloud.r-project.org',
+         description: 'Repository URL to use (must be https)',
+         callbacks: {
+           'repository URL must use https' => ->(u) { u.to_s.start_with?('https://') },
+         }
 property :bioc, [true, false], default: false, description: 'Whether to use Bioconductor for installation'
 property :timeout, Integer, default: 1800, description: 'Timeout for the installation process in seconds'
 
@@ -36,7 +41,7 @@ action :install do
   end
 
   execute "install_r_package_#{new_resource.package_name}" do
-    command "#{r_exe} #{r_package_script}"
+    command [r_exe, r_package_script]
     timeout new_resource.timeout
     action :run
     not_if { package_installed?(new_resource.package_name, new_resource.version, r_exe) }
@@ -75,7 +80,7 @@ action :remove do
   end
 
   execute "remove_r_package_#{new_resource.package_name}" do
-    command "#{r_exe} #{r_package_script}"
+    command [r_exe, r_package_script]
     timeout new_resource.timeout
     action :run
     only_if { package_installed?(new_resource.package_name, nil, r_exe) }
@@ -90,15 +95,18 @@ action_class do
     end
   end
 
-  # Check if an R package is installed
+  # Check if an R package is installed.  Uses the array form of shell_out so
+  # the package name (already validated against ^[a-zA-Z][a-zA-Z0-9._-]*$) and
+  # version are passed as a single argv element rather than spliced into a
+  # shell command line.
   def package_installed?(package_name, version = nil, r_exe = '/usr/bin/Rscript')
-    cmd = if version.nil?
-            "#{r_exe} -e \"exit(!require('#{package_name}', quietly = TRUE))\""
-          else
-            "#{r_exe} -e \"exit(!require('#{package_name}', quietly = TRUE) || packageVersion('#{package_name}') != '#{version}')\""
-          end
+    expr = if version.nil?
+             "exit(!require('#{package_name}', quietly = TRUE))"
+           else
+             "exit(!require('#{package_name}', quietly = TRUE) || packageVersion('#{package_name}') != '#{version}')"
+           end
 
-    shell_out(cmd).exitstatus.zero?
+    shell_out(r_exe, '-e', expr).exitstatus.zero?
   end
 
   # For Windows compatibility

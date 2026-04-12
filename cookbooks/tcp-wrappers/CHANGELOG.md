@@ -2,6 +2,16 @@
 
 This file is used to list changes made in each version of the tcp_wrappers cookbook.
 
+## 0.5.1
+
+- README clarified: on RHEL 8+, AlmaLinux 9, Rocky 9, and Oracle 9 the
+  `tcp_wrappers` package has been dropped and `libwrap` is no longer linked
+  by most upstream services. Treat hosts.allow/deny as documentation only
+  on those distributions.
+- Added ChefSpec coverage for the file mode/ownership of `/etc/hosts.allow`
+  and `/etc/hosts.deny` and for the default-deny `ALL : ALL` rendering of
+  hosts.deny.
+
 ## 0.4.0 (UNRELEASED)
 
 - Complete modernization for Chef 18+

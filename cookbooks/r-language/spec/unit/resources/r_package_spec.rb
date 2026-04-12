@@ -31,9 +31,9 @@ describe 'r_package' do
       )
     end
 
-    it 'runs Rscript to install the package' do
+    it 'runs Rscript to install the package using array-form command' do
       expect(chef_run).to run_execute('install_r_package_dplyr').with(
-        command: "/usr/bin/Rscript #{Chef::Config[:file_cache_path]}/install_dplyr.R"
+        command: ['/usr/bin/Rscript', "#{Chef::Config[:file_cache_path]}/install_dplyr.R"]
       )
     end
   end
@@ -127,10 +127,23 @@ describe 'r_package' do
       )
     end
 
-    it 'runs Rscript to remove the package' do
+    it 'runs Rscript to remove the package using array-form command' do
       expect(chef_run).to run_execute('remove_r_package_dplyr').with(
-        command: "/usr/bin/Rscript #{Chef::Config[:file_cache_path]}/remove_dplyr.R"
+        command: ['/usr/bin/Rscript', "#{Chef::Config[:file_cache_path]}/remove_dplyr.R"]
       )
+    end
+  end
+
+  context 'install action with an http (non-https) repo' do
+    recipe do
+      r_package 'dplyr' do
+        repo 'http://cran.example.com'
+        action :install
+      end
+    end
+
+    it 'refuses to converge' do
+      expect { chef_run }.to raise_error(Chef::Exceptions::ValidationFailed, /https/)
     end
   end
 end

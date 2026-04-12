@@ -26,9 +26,9 @@ describe 'r-language::packages' do
       )
     end
 
-    it 'executes the R script to install packages' do
+    it 'executes the R script to install packages using array-form command' do
       expect(chef_run).to run_execute('install_r_packages').with(
-        command: "/usr/bin/Rscript #{Chef::Config[:file_cache_path]}/install_r_packages.R"
+        command: ['/usr/bin/Rscript', "#{Chef::Config[:file_cache_path]}/install_r_packages.R"]
       )
     end
   end
@@ -72,6 +72,23 @@ describe 'r-language::packages' do
           packages: ['dplyr'],
         }
       )
+    end
+  end
+
+  context 'with an http (non-https) CRAN mirror' do
+    let(:chef_run) do
+      ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '20.04') do |node|
+        node.normal['r-language']['packages'] = ['dplyr']
+        node.normal['r-language']['cran_mirror'] = 'http://cran.example.com'
+      end
+    end
+
+    before(:each) do
+      stub_commands
+    end
+
+    it 'refuses to converge' do
+      expect { chef_run.converge(described_recipe) }.to raise_error(/must use https/)
     end
   end
 end

@@ -64,22 +64,25 @@ module RLanguage
       )
     end
 
-    # Check if R is installed
+    # Check if R is installed. Uses array-form shell_out where possible; the
+    # debian dpkg-query path still needs a shell pipeline so we keep that one
+    # as a string but mark it explicitly.
     def r_installed?
       if node['r-language']['install_method'] == 'source'
         ::File.exist?('/usr/local/bin/R')
       else
         case node['platform_family']
         when 'debian'
-          shell_out('dpkg-query -W -f=\'${Status}\' r-base 2>/dev/null | grep -q "^install ok installed"').exitstatus.zero?
+          status = shell_out('dpkg-query', '-W', '-f=${Status}', 'r-base').stdout.to_s
+          status.include?('install ok installed')
         when 'rhel', 'fedora', 'amazon'
-          shell_out('rpm -q R').exitstatus.zero?
+          shell_out('rpm', '-q', 'R').exitstatus.zero?
         when 'suse'
-          shell_out('rpm -q R-base').exitstatus.zero?
+          shell_out('rpm', '-q', 'R-base').exitstatus.zero?
         when 'freebsd'
-          shell_out('pkg info -e R').exitstatus.zero?
+          shell_out('pkg', 'info', '-e', 'R').exitstatus.zero?
         when 'mac_os_x'
-          shell_out('brew list --formula r 2>/dev/null').exitstatus.zero? || ::File.exist?('/usr/local/bin/R')
+          shell_out('brew', 'list', '--formula', 'r').exitstatus.zero? || ::File.exist?('/usr/local/bin/R')
         when 'windows'
           ::File.exist?('C:/Program Files/R') || ::File.exist?('C:/Program Files (x86)/R')
         else
@@ -88,17 +91,13 @@ module RLanguage
       end
     end
 
-    # Get the installed R version
+    # Get the installed R version using array-form shell_out and a Ruby
+    # regex match instead of a head/grep pipeline.
     def r_version
       r_exec = r_executable
-
-      cmd = if node['platform_family'] == 'windows'
-              shell_out("\"#{r_exec}\" --version")
-            else
-              shell_out("#{r_exec} --version | head -n 1 | grep -o '[0-9]\\+\\.[0-9]\\+\\.[0-9]\\+'")
-            end
-
-      cmd.stdout.strip
+      cmd = shell_out(r_exec, '--version')
+      m = cmd.stdout.match(/(\d+\.\d+\.\d+)/)
+      m ? m[1] : ''
     end
 
     # Get R package installation prefix based on platform

@@ -9,7 +9,7 @@ maintainer 'Thomas Vincent'
 maintainer_email 'thomasvincent@gmail.com'
 license 'Apache-2.0'
 description 'DEPRECATED: Installs tcp_wrappers and configures /etc/hosts.deny, and hosts.allow. Use firewalld instead.'
-version '0.5.0'
+version '0.5.1'
 
 deprecated true
 

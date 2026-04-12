@@ -1,0 +1,5 @@
+# Managed by Chef -- local edits will be overwritten.
+# See ?Startup in R for the precedence rules of Renviron files.
+<% @vars.sort.each do |k, v| -%>
+<%= k %>=<%= v %>
+<% end -%>
