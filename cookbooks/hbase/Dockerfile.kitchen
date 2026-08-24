@@ -17,8 +17,13 @@ RUN set -eux; \
     apt-get install -y --no-install-recommends ca-certificates gnupg; \
     install -m 0755 -d /etc/apt/keyrings; \
     curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc; \
-    gpg --show-keys --with-colons /etc/apt/keyrings/docker.asc \
-        | grep -q '^fpr:::::::::9DC858229FC7DD38854AE2D88D81803C0EBFCD88:'; \
+    keys="$(gpg --show-keys --with-colons /etc/apt/keyrings/docker.asc)"; \
+    # apt trusts every key in the file, so require exactly one primary key and
+    # require it to be Docker's; a keyring carrying an extra key is rejected.
+    test "$(printf '%s\n' "$keys" | grep -c '^pub:')" -eq 1; \
+    printf '%s\n' "$keys" \
+        | awk -F: '/^pub:/{p=1;next} /^fpr:/{if(p){print $10; exit}}' \
+        | grep -qx '9DC858229FC7DD38854AE2D88D81803C0EBFCD88'; \
     chmod a+r /etc/apt/keyrings/docker.asc; \
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
 https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
