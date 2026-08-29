@@ -5,7 +5,7 @@ source 'https://rubygems.org'
 group :development do
   gem 'chef',           '~> 18.0'
   gem 'chef-cli',       '~> 6.1'
-  gem 'cookstyle',      '~> 8.0'
+  gem 'cookstyle',      '~> 9.0'
   gem 'chefspec',       '~> 9.3'
   gem 'berkshelf',      '~> 8.0'
   gem 'rake',           '~> 13.2'
